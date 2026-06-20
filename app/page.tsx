@@ -743,6 +743,84 @@ function Footer() {
   )
 }
 
+/* ──────────────────────────────────────────────────────────
+   Mobile apps — App Store-style screenshots
+   ────────────────────────────────────────────────────────── */
+function MobileApp() {
+  const screens = [
+    {
+      src: "/app-club.png",
+      alt: "Sideline Pro mobile app — club dashboard with season snapshot, top-of-grade teams and next game",
+    },
+    {
+      src: "/app-lineup.png",
+      alt: "Sideline Pro mobile app — coach lineup builder with court positions and bench",
+    },
+    {
+      src: "/app-player.png",
+      alt: "Sideline Pro mobile app — player profile with season stats and upcoming fixtures",
+    },
+  ]
+  return (
+    <section id="mobile-apps" className={`relative overflow-hidden ${pageBg} py-24`}>
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(ellipse 55% 55% at 50% 0%, rgba(224,168,46,0.10), transparent 60%)" }}
+        aria-hidden
+      />
+      <div className="relative mx-auto max-w-7xl px-6">
+        <div className="mb-14 text-center">
+          <div className={`mb-5 inline-flex items-center gap-2 rounded-full border ${hairline} bg-white/[0.04] px-4 py-1.5`}>
+            <Smartphone className="h-3.5 w-3.5 text-[#E0A82E]" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#E0A82E]">
+              Mobile apps
+            </span>
+          </div>
+          <h2 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
+            Your club.{" "}
+            <span
+              style={{
+                background: goldGrad,
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              In your pocket.
+            </span>
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-zinc-400">
+            Native iOS &amp; Android apps for players, parents, coaches and officials — everything they
+            need to stay on top of the season, the team and the game day.
+          </p>
+        </div>
+
+        <div className="grid items-end gap-8 sm:grid-cols-3 sm:gap-6 lg:gap-10">
+          {screens.map((s, i) => (
+            <div key={s.src} className={`relative ${i === 1 ? "sm:-mt-8 lg:-mt-12" : ""}`}>
+              <Image
+                src={s.src}
+                alt={s.alt}
+                width={853}
+                height={1844}
+                className="mx-auto h-auto w-full max-w-[260px] sm:max-w-none"
+                sizes="(max-width: 640px) 80vw, 33vw"
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-14 flex flex-col items-center gap-4">
+          <p className="text-sm text-zinc-400">Native iOS &amp; Android apps — available on launch</p>
+          <a href="#contact" className={`${goldBtn} px-7 py-3.5 text-sm`}>
+            Book a Demo <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function Home() {
   return (
     <div className={`min-h-screen ${pageBg}`}>
@@ -760,6 +838,7 @@ export default function Home() {
             />
           </div>
         </section>
+        <MobileApp />
         <Contact />
       </main>
       <Footer />
