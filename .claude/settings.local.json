@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(vercel --version)",
+      "Bash(npm i *)",
+      "Bash(pnpm add *)",
+      "Bash(npm --version)",
+      "Read(//usr/local/bin/**)",
+      "Bash(sudo npm *)",
+      "Bash(npx vercel *)",
+      "Bash(identify /Users/justincaruana/Documents/Sideline_Pro/public/sideline-pro-logo.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /Users/justincaruana/Documents/Sideline_Pro/public/sideline-pro-logo.png)",
+      "Bash(sips -c 260 1010 /Users/justincaruana/Documents/Sideline_Pro/public/sideline-pro-logo.png)",
+      "Bash(npx --yes vercel@latest whoami)",
+      "Bash(echo \"---EXIT: $?\")",
+      "Bash(npx --yes vercel@latest --prod)"
+    ]
+  }
+}
