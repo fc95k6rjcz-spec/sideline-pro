@@ -831,9 +831,9 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-6">
             <Image
               src="/bottom-section.png"
-              alt="Sideline Pro features — modern websites, mobile apps, fixtures, teams, umpires, communications, reports — and the all-in-one club platform"
-              width={2880}
-              height={822}
+              alt="Sideline Pro all-in-one platform — club website, coach hub and player grading"
+              width={2172}
+              height={724}
               className="h-auto w-full"
             />
           </div>
