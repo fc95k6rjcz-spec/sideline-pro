@@ -680,8 +680,8 @@ function Contact() {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 shrink-0 text-[#E0A82E]" />
-                <a href="mailto:hello@sidelinepro.com.au" className={`${muted} transition-colors hover:text-white`}>
-                  hello@sidelinepro.com.au
+                <a href="mailto:rowan@sidelinepro.com.au" className={`${muted} transition-colors hover:text-white`}>
+                  rowan@sidelinepro.com.au
                 </a>
               </div>
             </div>

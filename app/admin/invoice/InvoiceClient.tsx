@@ -28,7 +28,7 @@ const ISSUER = {
   abn: "77 697 721 627",
   acn: "697 721 627",
   address: "Sydney, NSW, Australia",
-  email: "hello@sidelinepro.com.au",
+  email: "rowan@sidelinepro.com.au",
 } as const;
 
 const PAYMENT_DEFAULTS = {
@@ -1161,7 +1161,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
               on download
               <span className="block text-xs text-neutral-500">
                 The invoice PDF is attached and a branded HTML body is included.
-                Sender: hello@sidelinepro.com.au.
+                Sender: rowan@sidelinepro.com.au.
               </span>
             </span>
           </label>

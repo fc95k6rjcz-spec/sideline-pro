@@ -50,7 +50,7 @@ BLOB_READ_WRITE_TOKEN=vercel_blob_rw_XXXXXXXX
 # will return a 500. The other two vars are optional.
 RESEND_API_KEY=re_XXXXXXXX
 RESEND_FROM_EMAIL=Sideline Pro <invoices@sidelinepro.com.au>
-RESEND_REPLY_TO=hello@sidelinepro.com.au
+RESEND_REPLY_TO=rowan@sidelinepro.com.au
 ```
 
 > `ADMIN_EMAILS` is comma-separated. If unset, the app falls back to the hardcoded list in `lib/auth.ts` — update Rowan's email there too once confirmed.

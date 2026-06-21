@@ -698,10 +698,10 @@ function Contact() {
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 shrink-0 text-slate-400" />
                 <a
-                  href="mailto:hello@sidelinepro.com.au"
+                  href="mailto:rowan@sidelinepro.com.au"
                   className={`${textMuted} transition-colors hover:text-slate-900`}
                 >
-                  hello@sidelinepro.com.au
+                  rowan@sidelinepro.com.au
                 </a>
               </div>
             </div>
@@ -758,10 +758,10 @@ function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:hello@sidelinepro.com.au"
+                  href="mailto:rowan@sidelinepro.com.au"
                   className={`${darkTextMuted} transition-colors hover:text-white`}
                 >
-                  hello@sidelinepro.com.au
+                  rowan@sidelinepro.com.au
                 </a>
               </li>
             </ul>

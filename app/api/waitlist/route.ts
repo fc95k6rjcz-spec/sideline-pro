@@ -89,7 +89,7 @@ async function notifyWaitlistSignup(email: string) {
       },
       body: JSON.stringify({
         from,
-        // TODO: Switch back to hello@sidelinepro.com.au once Cloudflare Email Routing
+        // TODO: Switch back to rowan@sidelinepro.com.au once Cloudflare Email Routing
         // (or similar) forwards that address to the right inbox.
         to: ["jpcaruana@me.com"],
         subject: `New waitlist signup: ${email}`,

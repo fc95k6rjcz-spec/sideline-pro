@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
   const fromAddress =
     process.env.RESEND_FROM_EMAIL ?? "Sideline Pro <onboarding@resend.dev>";
-  const replyTo = process.env.RESEND_REPLY_TO ?? "hello@sidelinepro.com.au";
+  const replyTo = process.env.RESEND_REPLY_TO ?? "rowan@sidelinepro.com.au";
 
   const greeting = invoice.client_name
     ? escapeHtml(invoice.client_name)
