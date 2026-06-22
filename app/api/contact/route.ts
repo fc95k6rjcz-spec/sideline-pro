@@ -54,7 +54,12 @@ async function notifyTeam(lead: Lead) {
     return false
   }
   const from = process.env.RESEND_FROM_EMAIL ?? "Sideline Pro <onboarding@resend.dev>"
-  const to = process.env.CONTACT_NOTIFY_EMAIL ?? "jpcaruana@me.com"
+  // CONTACT_NOTIFY_EMAIL can be a single address or a comma-separated list.
+  // Default goes to both founders so demo requests aren't a single-point-of-failure.
+  const to = (process.env.CONTACT_NOTIFY_EMAIL ?? "justin@sidelinepro.com.au,rowan@sidelinepro.com.au")
+    .split(",")
+    .map((addr) => addr.trim())
+    .filter((addr) => addr.length > 0)
   const lines = [
     `Name:    ${lead.name ?? "—"}`,
     `Club:    ${lead.club ?? "—"}`,
@@ -71,7 +76,7 @@ async function notifyTeam(lead: Lead) {
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from,
-      to: [to],
+      to,
       reply_to: lead.email,
       subject: `New demo request: ${lead.club ?? lead.name ?? "Sideline Pro"}`,
       text: lines,
