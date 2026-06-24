@@ -75,7 +75,7 @@ function Logo({ size = "nav" }: { size?: "nav" | "footer" }) {
         <span className={`${word} font-extrabold tracking-tight text-white`}>
           SIDELINE <span className="text-[#E0A82E]">PRO</span>
         </span>
-        <span className="mt-1.5 text-[9px] font-medium uppercase tracking-[0.24em] text-zinc-500">
+        <span className="mt-1.5 hidden text-[9px] font-medium uppercase tracking-[0.24em] text-zinc-500 sm:inline">
           Club Management, Unleashed
         </span>
       </span>
@@ -370,7 +370,7 @@ function Hero() {
                 Built for community sport
               </span>
             </div>
-            <h1 className="text-[3.25rem] font-extrabold leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-[4.5rem]">
+            <h1 className="text-[2.25rem] font-extrabold leading-[1.02] tracking-tight text-white sm:text-[3.25rem] sm:leading-[0.98] lg:text-[4.5rem]">
               One Platform.
               <br />
               Every Part of
@@ -429,7 +429,7 @@ function Hero() {
 const features = [
   { icon: Globe, title: "Modern Club Websites", body: "Beautiful, mobile-first sites that update automatically." },
   { icon: Smartphone, title: "Native Mobile Apps", body: "iOS & Android apps for players, parents, coaches & officials." },
-  { icon: CalendarDays, title: "Fixtures & Ladders", body: "Real-time fixtures, results & ladders synced with PlayHQ." },
+  { icon: CalendarDays, title: "Fixtures & Ladders", body: "Real-time fixtures, results & ladders synced with your association." },
   { icon: Users, title: "Teams & Players", body: "Manage teams, player profiles, registrations and availability." },
   { icon: Tag, title: "Umpire Management", body: "Automate allocations, track availability & reduce admin by hours." },
   { icon: MessageSquare, title: "Communications", body: "Instant messaging, announcements & targeted notifications." },
@@ -762,7 +762,7 @@ function MobileApp() {
     },
   ]
   return (
-    <section id="mobile-apps" className={`relative overflow-hidden ${pageBg} py-24`}>
+    <section id="mobile-apps" className={`relative overflow-hidden ${pageBg} py-16 lg:py-24`}>
       <div
         className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse 55% 55% at 50% 0%, rgba(224,168,46,0.10), transparent 60%)" }}
@@ -803,8 +803,8 @@ function MobileApp() {
                 alt={s.alt}
                 width={853}
                 height={1844}
-                className="mx-auto h-auto w-full max-w-[260px] sm:max-w-none"
-                sizes="(max-width: 640px) 80vw, 33vw"
+                className="mx-auto h-auto w-full max-w-[200px] sm:max-w-none"
+                sizes="(max-width: 640px) 60vw, 33vw"
               />
             </div>
           ))}
@@ -827,7 +827,12 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <section id="features" className={`${pageBg} py-12`}>
+        {/* Mobile/tablet: native responsive HTML feature row */}
+        <div className="lg:hidden">
+          <FeatureRow />
+        </div>
+        {/* Desktop: polished composite image */}
+        <section id="features" className={`hidden ${pageBg} py-12 lg:block`}>
           <div className="mx-auto max-w-7xl px-6">
             <Image
               src="/bottom-section.png"
