@@ -108,10 +108,10 @@ function Navbar() {
           <NavLink href="#contact">Pricing</NavLink>
         </div>
         <div className="flex items-center gap-3">
-          <a href="/login" className={`${ghostBtn} hidden px-6 py-2.5 text-[13px] sm:inline-flex`}>
+          <a href="/login" className={`${ghostBtn} hidden whitespace-nowrap px-6 py-2.5 text-[13px] sm:inline-flex`}>
             Login
           </a>
-          <a href="#contact" className={`${goldBtn} px-6 py-2.5 text-[13px]`}>
+          <a href="#contact" className={`${goldBtn} whitespace-nowrap px-4 py-2.5 text-[13px] sm:px-6`}>
             Book a Demo
           </a>
         </div>
