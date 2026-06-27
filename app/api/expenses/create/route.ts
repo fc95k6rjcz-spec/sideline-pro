@@ -85,6 +85,17 @@ export async function POST(request: NextRequest) {
   if (typeof extras.is_recurring === "boolean") {
     insert.is_recurring = extras.is_recurring;
   }
+  // Currency support — amount_cents stays in AUD, original_amount_cents + currency
+  // capture what the receipt actually says.
+  if (typeof extras.currency === "string" && /^[A-Z]{3}$/.test(extras.currency)) {
+    insert.currency = extras.currency;
+  }
+  if (typeof extras.original_amount_cents === "number" && Number.isFinite(extras.original_amount_cents)) {
+    insert.original_amount_cents = Math.round(extras.original_amount_cents as number);
+  }
+  if (typeof extras.fx_rate === "number" && Number.isFinite(extras.fx_rate) && (extras.fx_rate as number) > 0) {
+    insert.fx_rate = extras.fx_rate;
+  }
 
   try {
     const admin = createAdminClient();

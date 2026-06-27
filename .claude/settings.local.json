@@ -14,7 +14,25 @@
       "Bash(sips -c 260 1010 /Users/justincaruana/Documents/Sideline_Pro/public/sideline-pro-logo.png)",
       "Bash(npx --yes vercel@latest whoami)",
       "Bash(echo \"---EXIT: $?\")",
-      "Bash(npx --yes vercel@latest --prod)"
+      "Bash(npx --yes vercel@latest --prod)",
+      "Read(//Users/justincaruana/**)",
+      "Bash(kill 3649 3633)",
+      "Bash(kill 3997 3981)",
+      "Bash(curl -sI https://sideline-ax2j46mm8-fc95k6rjcz-specs-projects.vercel.app)",
+      "Bash(curl -sI https://sideline-pro-fc95k6rjcz-specs-projects.vercel.app)",
+      "Bash(curl -sI https://sidelinepro.com.au)",
+      "Bash(curl -s https://sidelinepro.com.au)",
+      "Bash(curl -sL https://sidelinepro.com.au)",
+      "Bash(curl -sI https://www.sidelinepro.com.au)",
+      "Bash(curl -sI \"https://www.sidelinepro.com.au?cachebust=$\\(date +%s\\)\")",
+      "Bash(curl -sL \"https://www.sidelinepro.com.au?cachebust=$\\(date +%s\\)\")",
+      "Bash(python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\).get\\('token',''\\)[:20]+'...'\\)\")",
+      "Bash(python3 -c \"import json; print\\(json.load\\(open\\('/Users/justincaruana/Library/Application Support/com.vercel.cli/auth.json'\\)\\)['token']\\)\")",
+      "Bash(curl -s 'https://api.vercel.com/v13/deployments/dpl_rZFkcgoCZtFT4yg7kBUETtD3c6qJ?teamId=team_f4QPcWTyaDx9I4Xs9Zjl5OLz' -H 'Authorization: Bearer __TRACKED_VAR__')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s https://api.vercel.com/v2/teams/team_f4QPcWTyaDx9I4Xs9Zjl5OLz/members -H 'Authorization: Bearer __TRACKED_VAR__')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\).get\\('user',{}\\); print\\(d.get\\('email'\\),'/',d.get\\('username'\\)\\)\")",
+      "Bash(curl -s https://api.vercel.com/v2/user -H 'Authorization: Bearer __TRACKED_VAR__')"
     ]
   }
 }

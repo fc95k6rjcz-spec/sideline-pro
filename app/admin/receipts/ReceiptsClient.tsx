@@ -24,6 +24,10 @@ type Expense = {
   vendor: string | null;
   is_recurring: boolean | null;
   recurring_frequency: string | null;
+  // Currency (amount_cents stays in AUD)
+  currency: string | null;
+  original_amount_cents: number | null;
+  fx_rate: number | null;
   // metadata
   created_by_email: string;
   created_at: string;
@@ -43,19 +47,32 @@ type BusinessState = {
 type Filter = "all" | "awaiting_reimb" | "reimbursed" | "planned" | "paid_business";
 
 const CATEGORIES = [
-  "Travel",
-  "Software & subscriptions",
-  "Equipment",
+  "Coffee & catch-ups",
+  "Travel & accommodation",
   "Meals & entertainment",
-  "Phone & internet",
-  "Office supplies",
-  "Insurance",
-  "Professional services",
-  "Marketing",
+  "Client gifts",
+  "AI & dev tools",
   "Hosting & infrastructure",
+  "Software subscriptions",
+  "Marketing & advertising",
+  "Company admin",
+  "Equipment & hardware",
+  "Phone & internet",
   "Bank fees",
   "Other",
 ] as const;
+
+// Currency support — amount_cents stays in AUD (the books); original_amount_cents
+// + currency capture what's actually on the receipt. fx_rate is original→AUD.
+type Currency = "AUD" | "USD" | "EUR" | "GBP";
+const CURRENCIES: Currency[] = ["AUD", "USD", "EUR", "GBP"];
+// Default rates — edit per receipt. Approx mid-2026 levels.
+const DEFAULT_FX_TO_AUD: Record<Currency, number> = {
+  AUD: 1,
+  USD: 1.52,
+  EUR: 1.65,
+  GBP: 1.93,
+};
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -130,6 +147,8 @@ export default function ReceiptsClient() {
   const [amountStr, setAmountStr] = useState("");
   const [gstStr, setGstStr] = useState("");
   const [autoGst, setAutoGst] = useState(true);
+  const [currency, setCurrency] = useState<Currency>("AUD");
+  const [fxRateStr, setFxRateStr] = useState("1");
   const [vendor, setVendor] = useState("");
   const [category, setCategory] = useState<string>("");
   const [paidBy, setPaidBy] = useState<PaidBy>("business");
@@ -154,6 +173,8 @@ export default function ReceiptsClient() {
   const [editAmountStr, setEditAmountStr] = useState("");
   const [editGstStr, setEditGstStr] = useState("");
   const [editPaidBy, setEditPaidBy] = useState<PaidBy | "">("");
+  const [editCurrency, setEditCurrency] = useState<Currency>("AUD");
+  const [editFxRateStr, setEditFxRateStr] = useState("1");
 
   // Filter
   const [monthFilter, setMonthFilter] = useState("all");
@@ -173,9 +194,13 @@ export default function ReceiptsClient() {
     } catch {}
   }
 
-  // Auto-calc GST
+  // Auto-calc GST — only fires for AUD (can't claim GST on foreign receipts)
   useEffect(() => {
     if (!autoGst) return;
+    if (currency !== "AUD") {
+      setGstStr("0.00");
+      return;
+    }
     const cents = parseAmount(amountStr);
     if (cents === null) {
       setGstStr("");
@@ -183,7 +208,20 @@ export default function ReceiptsClient() {
     }
     const gstCents = Math.round((cents * 10) / 110);
     setGstStr((gstCents / 100).toFixed(2));
-  }, [amountStr, autoGst]);
+  }, [amountStr, autoGst, currency]);
+
+  // When currency changes, reset the FX rate to its default for that currency
+  useEffect(() => {
+    setFxRateStr(String(DEFAULT_FX_TO_AUD[currency]));
+  }, [currency]);
+
+  // Live AUD conversion preview (used in the form)
+  const originalAmountCents = parseAmount(amountStr);
+  const fxRate = Number(fxRateStr) || 0;
+  const audPreviewCents =
+    originalAmountCents !== null && fxRate > 0
+      ? Math.round(originalAmountCents * fxRate)
+      : null;
 
   // Load
   const loadExpenses = useCallback(async () => {
@@ -369,12 +407,20 @@ export default function ReceiptsClient() {
     e.preventDefault();
     setError(null);
 
-    const amountCents = parseAmount(amountStr);
-    if (amountCents === null) {
+    const enteredCents = parseAmount(amountStr);
+    if (enteredCents === null) {
       setError("Enter a valid amount");
       return;
     }
-    const gstCents = parseAmount(gstStr) ?? 0;
+    const rate = Number(fxRateStr) || 1;
+    if (currency !== "AUD" && rate <= 0) {
+      setError("Enter an FX rate to convert to AUD");
+      return;
+    }
+    // amount_cents is always the AUD-equivalent (what the books care about).
+    // For AUD entries, original == amount_cents and rate = 1.
+    const amountCents = currency === "AUD" ? enteredCents : Math.round(enteredCents * rate);
+    const gstCents = currency === "AUD" ? (parseAmount(gstStr) ?? 0) : 0;
     if (!description.trim()) {
       setError("Description required");
       return;
@@ -394,6 +440,9 @@ export default function ReceiptsClient() {
         gst_cents: gstCents,
         status: isPlannedForm ? "planned" : "paid",
         paid_by: paidBy,
+        currency,
+        original_amount_cents: enteredCents,
+        fx_rate: currency === "AUD" ? 1 : rate,
       };
       if (category) body.category = category;
       if (vendor.trim()) body.vendor = vendor.trim();
@@ -422,6 +471,8 @@ export default function ReceiptsClient() {
       setAmountStr("");
       setGstStr("");
       setAutoGst(true);
+      setCurrency("AUD");
+      setFxRateStr("1");
       setVendor("");
       setCategory("");
       setPaidBy("business");
@@ -481,7 +532,15 @@ export default function ReceiptsClient() {
     setEditVendor(exp.vendor ?? "");
     setEditDescription(exp.description);
     setEditCategory(exp.category ?? "");
-    setEditAmountStr((exp.amount_cents / 100).toFixed(2));
+    // If row has currency data, edit the ORIGINAL amount; otherwise treat as AUD.
+    const editingCurrency = ((exp.currency as Currency | null) ?? "AUD") as Currency;
+    setEditCurrency(editingCurrency);
+    setEditFxRateStr(
+      exp.fx_rate != null ? String(exp.fx_rate) : String(DEFAULT_FX_TO_AUD[editingCurrency]),
+    );
+    const originalCents =
+      exp.original_amount_cents != null ? exp.original_amount_cents : exp.amount_cents;
+    setEditAmountStr((originalCents / 100).toFixed(2));
     setEditGstStr((exp.gst_cents / 100).toFixed(2));
     setEditPaidBy((exp.paid_by as PaidBy | null) ?? "");
     setError(null);
@@ -495,14 +554,23 @@ export default function ReceiptsClient() {
     setEditAmountStr("");
     setEditGstStr("");
     setEditPaidBy("");
+    setEditCurrency("AUD");
+    setEditFxRateStr("1");
   }
   async function saveEdit(id: string) {
-    const amountCents = parseAmount(editAmountStr);
-    if (amountCents === null) {
+    const enteredCents = parseAmount(editAmountStr);
+    if (enteredCents === null) {
       setError("Enter a valid amount");
       return;
     }
-    const gstCents = parseAmount(editGstStr) ?? 0;
+    const rate = Number(editFxRateStr) || 1;
+    if (editCurrency !== "AUD" && rate <= 0) {
+      setError("Enter an FX rate to convert to AUD");
+      return;
+    }
+    const amountCents =
+      editCurrency === "AUD" ? enteredCents : Math.round(enteredCents * rate);
+    const gstCents = editCurrency === "AUD" ? (parseAmount(editGstStr) ?? 0) : 0;
     if (!editDescription.trim()) {
       setError("Description required");
       return;
@@ -517,6 +585,9 @@ export default function ReceiptsClient() {
         category: editCategory.trim() || null,
         amount_cents: amountCents,
         gst_cents: gstCents,
+        currency: editCurrency,
+        original_amount_cents: enteredCents,
+        fx_rate: editCurrency === "AUD" ? 1 : rate,
       };
       if (editPaidBy === "" || editPaidBy === null) {
         // Leave as-is; server treats omitted field as unchanged
@@ -840,15 +911,46 @@ export default function ReceiptsClient() {
               required
             />
           </Field>
-          <Field label="Amount (incl. GST)">
-            <input
-              inputMode="decimal"
-              className={inputClass}
-              placeholder="0.00"
-              value={amountStr}
-              onChange={(e) => setAmountStr(e.target.value)}
-              required
-            />
+          <Field label={`Amount (incl. ${currency === "AUD" ? "GST" : "tax"})`}>
+            <div className="flex gap-1.5">
+              <select
+                className={inputClass + " w-[78px] shrink-0"}
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
+                aria-label="Currency"
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <input
+                inputMode="decimal"
+                className={inputClass}
+                placeholder="0.00"
+                value={amountStr}
+                onChange={(e) => setAmountStr(e.target.value)}
+                required
+              />
+            </div>
+            {currency !== "AUD" && (
+              <div className="mt-1.5 flex items-center gap-2 text-[10.5px] text-neutral-500">
+                <span className="uppercase tracking-wider">FX → AUD</span>
+                <input
+                  inputMode="decimal"
+                  className={inputClass + " h-7 w-[80px] text-xs"}
+                  value={fxRateStr}
+                  onChange={(e) => setFxRateStr(e.target.value)}
+                  aria-label="FX rate to AUD"
+                />
+                {audPreviewCents !== null && (
+                  <span className="text-emerald-300/80">
+                    = ${(audPreviewCents / 100).toFixed(2)} AUD
+                  </span>
+                )}
+              </div>
+            )}
           </Field>
           <Field label="GST">
             <input
@@ -860,7 +962,14 @@ export default function ReceiptsClient() {
                 setAutoGst(false);
                 setGstStr(e.target.value);
               }}
+              disabled={currency !== "AUD"}
+              title={currency !== "AUD" ? "GST not claimable on foreign receipts" : undefined}
             />
+            {currency !== "AUD" && (
+              <p className="mt-1 text-[10px] text-neutral-500">
+                GST locked at 0 — not claimable on {currency} receipts.
+              </p>
+            )}
           </Field>
         </div>
 
@@ -1146,33 +1255,109 @@ export default function ReceiptsClient() {
                         </td>
                         <td className="px-3 py-3 align-middle text-right text-neutral-100">
                           {isEditing ? (
-                            <input
-                              inputMode="decimal"
-                              autoFocus
-                              className={cellInputClass + " min-w-[90px] text-right"}
-                              value={editAmountStr}
-                              onChange={(ev) => setEditAmountStr(ev.target.value)}
-                              onKeyDown={(ev) => {
-                                if (ev.key === "Enter") saveEdit(e.id);
-                                else if (ev.key === "Escape") cancelEdit();
-                              }}
-                            />
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1.5">
+                                <select
+                                  className={cellInputClass + " w-[72px]"}
+                                  value={editCurrency}
+                                  onChange={(ev) => {
+                                    const next = ev.target.value as Currency;
+                                    setEditCurrency(next);
+                                    setEditFxRateStr(String(DEFAULT_FX_TO_AUD[next]));
+                                    if (next !== "AUD") setEditGstStr("0.00");
+                                  }}
+                                  aria-label="Currency"
+                                >
+                                  {CURRENCIES.map((c) => (
+                                    <option key={c} value={c}>
+                                      {c}
+                                    </option>
+                                  ))}
+                                </select>
+                                <input
+                                  inputMode="decimal"
+                                  autoFocus
+                                  className={cellInputClass + " min-w-[90px] text-right"}
+                                  value={editAmountStr}
+                                  onChange={(ev) => setEditAmountStr(ev.target.value)}
+                                  onKeyDown={(ev) => {
+                                    if (ev.key === "Enter") saveEdit(e.id);
+                                    else if (ev.key === "Escape") cancelEdit();
+                                  }}
+                                />
+                              </div>
+                              {editCurrency !== "AUD" && (
+                                <div className="flex items-center gap-1.5 text-[10px] text-neutral-500">
+                                  <span className="uppercase tracking-wider">FX</span>
+                                  <input
+                                    inputMode="decimal"
+                                    className={cellInputClass + " h-6 w-[64px] text-right text-[11px]"}
+                                    value={editFxRateStr}
+                                    onChange={(ev) => setEditFxRateStr(ev.target.value)}
+                                    aria-label="FX rate to AUD"
+                                  />
+                                  {parseAmount(editAmountStr) !== null &&
+                                    Number(editFxRateStr) > 0 && (
+                                      <span className="text-emerald-300/80">
+                                        = $
+                                        {(
+                                          (parseAmount(editAmountStr) as number) *
+                                          Number(editFxRateStr) /
+                                          100
+                                        ).toFixed(2)}{" "}
+                                        AUD
+                                      </span>
+                                    )}
+                                </div>
+                              )}
+                            </div>
                           ) : (
-                            formatMoney(e.amount_cents)
+                            <div className="flex flex-col items-end leading-tight">
+                              <span>{formatMoney(e.amount_cents)}</span>
+                              {e.currency && e.currency !== "AUD" && e.original_amount_cents !== null && (
+                                <span
+                                  className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-sky-950/40 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-sky-300"
+                                  title={
+                                    e.fx_rate
+                                      ? `Original ${e.currency} ${(e.original_amount_cents / 100).toFixed(2)} @ ${e.fx_rate.toFixed(3)} → AUD`
+                                      : undefined
+                                  }
+                                >
+                                  {e.currency} {(e.original_amount_cents / 100).toFixed(2)}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </td>
                         <td className="px-3 py-3 align-middle text-right text-neutral-400">
                           {isEditing ? (
-                            <input
-                              inputMode="decimal"
-                              className={cellInputClass + " min-w-[70px] text-right"}
-                              value={editGstStr}
-                              onChange={(ev) => setEditGstStr(ev.target.value)}
-                              onKeyDown={(ev) => {
-                                if (ev.key === "Enter") saveEdit(e.id);
-                                else if (ev.key === "Escape") cancelEdit();
-                              }}
-                            />
+                            <div className="flex flex-col items-end">
+                              <input
+                                inputMode="decimal"
+                                className={
+                                  cellInputClass +
+                                  " min-w-[70px] text-right" +
+                                  (editCurrency !== "AUD" ? " opacity-50" : "")
+                                }
+                                value={editGstStr}
+                                onChange={(ev) => setEditGstStr(ev.target.value)}
+                                onKeyDown={(ev) => {
+                                  if (ev.key === "Enter") saveEdit(e.id);
+                                  else if (ev.key === "Escape") cancelEdit();
+                                }}
+                                disabled={editCurrency !== "AUD"}
+                                title={
+                                  editCurrency !== "AUD"
+                                    ? "GST not claimable on foreign receipts"
+                                    : undefined
+                                }
+                              />
+                              {editCurrency !== "AUD" && (
+                                <span className="mt-0.5 text-[9px] text-neutral-500">
+                                  N/A on {editCurrency}
+                                </span>
+                              )}
+                            </div>
                           ) : (
                             formatMoney(e.gst_cents)
                           )}
@@ -1478,7 +1663,8 @@ function StatusBadge({
     );
   }
   return (
-    <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-[10px] uppercase tracking-wider text-neutral-400">
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/25 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-200 ring-1 ring-inset ring-emerald-500/40">
+      <span aria-hidden>✓</span>
       Paid
     </span>
   );

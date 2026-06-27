@@ -25,6 +25,10 @@ const PATCHABLE_FIELDS = [
   "vendor",
   "is_recurring",
   "recurring_frequency",
+  // multi-currency
+  "currency",
+  "original_amount_cents",
+  "fx_rate",
 ] as const;
 
 async function requireUser() {
