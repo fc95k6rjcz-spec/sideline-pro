@@ -64,20 +64,17 @@ function SMark({ className = "h-9 w-9" }: { className?: string }) {
 }
 
 function Logo({ size = "nav" }: { size?: "nav" | "footer" }) {
-  const mark = size === "footer" ? "h-11 w-11" : "h-10 w-10"
-  const word = size === "footer" ? "text-2xl" : "text-xl sm:text-2xl"
+  const h = size === "footer" ? "h-12" : "h-9 sm:h-10"
   return (
-    <a href="/" className="inline-flex items-center gap-3">
-      <SMark className={mark} />
-      <span className="h-9 w-px shrink-0 bg-black/10" aria-hidden />
-      <span className="flex flex-col leading-none">
-        <span className={`${word} font-semibold tracking-tight text-[#1d1d1f]`}>
-          SIDELINE <span className="text-[#BD8A2C]">PRO</span>
-        </span>
-        <span className="mt-1.5 hidden text-[9px] font-medium uppercase tracking-[0.24em] text-[#86868b] sm:inline">
-          Club Management, Unleashed
-        </span>
-      </span>
+    <a href="/" className="inline-flex items-center">
+      <Image
+        src="/sideline-pro-logo-light.png"
+        alt="Sideline Pro — Complete Club Management"
+        width={2073}
+        height={758}
+        priority
+        className={`${h} w-auto`}
+      />
     </a>
   )
 }
