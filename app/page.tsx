@@ -762,7 +762,11 @@ function MobileApp() {
     },
   ]
   return (
-    <section id="mobile-apps" className={`relative overflow-hidden ${pageBg} py-16 lg:py-24`}>
+    <section
+      id="mobile-apps"
+      className="relative overflow-hidden py-16 lg:py-24"
+      style={{ background: "linear-gradient(180deg,#001020 0%,#021627 45%,#0a2238 100%)" }}
+    >
       <div
         className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse 55% 55% at 50% 0%, rgba(224,168,46,0.05), transparent 60%)" }}
@@ -776,7 +780,7 @@ function MobileApp() {
               Mobile apps
             </span>
           </div>
-          <h2 className="text-4xl font-semibold leading-tight tracking-tight text-[#1d1d1f] sm:text-5xl">
+          <h2 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
             Your club.{" "}
             <span
               style={{
@@ -789,7 +793,7 @@ function MobileApp() {
               In your pocket.
             </span>
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[#6e6e73]">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/70">
             Native iOS &amp; Android apps for players, parents, coaches and officials — everything they
             need to stay on top of the season, the team and the game day.
           </p>
@@ -811,7 +815,7 @@ function MobileApp() {
         </div>
 
         <div className="mt-14 flex flex-col items-center gap-4">
-          <p className="text-sm text-[#6e6e73]">Native iOS &amp; Android apps — available on launch</p>
+          <p className="text-sm text-white/70">Native iOS &amp; Android apps — available on launch</p>
           <a href="#contact" className={`${goldBtn} px-7 py-3.5 text-sm`}>
             Book a Demo <ArrowRight className="h-4 w-4" />
           </a>
