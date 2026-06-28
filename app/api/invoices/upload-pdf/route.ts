@@ -34,11 +34,16 @@ export async function POST(request: NextRequest) {
   const path = `invoices/${yearFolder()}/${sanitize(filename)}`;
 
   try {
+    // Vercel Blob store on this project is configured as PRIVATE — match it
+    // here. Public was throwing: "Cannot use public access on a private store".
+    // The TS types currently only declare "public" as a literal, but the API
+    // accepts "private" at runtime when the store is private; cast through
+    // unknown to bypass the compile-time check.
     const blob = await put(path, request.body, {
-      access: "public",
+      access: "private",
       addRandomSuffix: false,
       allowOverwrite: true,
-    });
+    } as unknown as Parameters<typeof put>[2]);
     return NextResponse.json(blob);
   } catch (err) {
     console.error("Invoice PDF upload failed", err);

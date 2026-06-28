@@ -44,6 +44,29 @@ type BusinessState = {
   updated_by_email: string | null;
 };
 
+type InvoiceSummary = {
+  outstanding_cents: number;
+  outstanding_count: number;
+  next_due: Array<{
+    invoice_number: string;
+    client_name: string;
+    total_cents: number;
+    due_date: string;
+  }>;
+  quarter: {
+    label: string;
+    start: string;
+    end: string;
+    issued_total_cents: number;
+    issued_gst_cents: number;
+    paid_total_cents: number;
+    paid_gst_cents: number;
+    expense_total_cents: number;
+    expense_gst_cents: number;
+    net_gst_payable_cents: number;
+  };
+};
+
 type Filter = "all" | "awaiting_reimb" | "reimbursed" | "planned" | "paid_business";
 
 const CATEGORIES = [
@@ -223,6 +246,19 @@ export default function ReceiptsClient() {
       ? Math.round(originalAmountCents * fxRate)
       : null;
 
+  // Invoice summary — outstanding invoices + BAS quarter snapshot
+  const [invoiceSummary, setInvoiceSummary] = useState<InvoiceSummary | null>(null);
+  const loadInvoiceSummary = useCallback(async () => {
+    try {
+      const res = await fetch("/api/invoices/summary", { cache: "no-store" });
+      if (res.ok) {
+        setInvoiceSummary((await res.json()) as InvoiceSummary);
+      }
+    } catch {
+      // silent — dashboard still works without it
+    }
+  }, []);
+
   // Load
   const loadExpenses = useCallback(async () => {
     try {
@@ -252,7 +288,8 @@ export default function ReceiptsClient() {
   useEffect(() => {
     loadExpenses();
     loadBalance();
-  }, [loadExpenses, loadBalance]);
+    loadInvoiceSummary();
+  }, [loadExpenses, loadBalance, loadInvoiceSummary]);
 
   // ── Derived ─────────────────────────────────────────
   const months = useMemo(() => {
@@ -312,10 +349,18 @@ export default function ReceiptsClient() {
       cumulativeCashOutCents - baselineCents,
     );
 
-    // Money OUT of the business: recent business spend not yet reflected in
-    // the snapshot, awaiting reimbursement (you'll owe), planned outflows.
+    // Money IN/OUT of the business:
+    //   IN  = outstanding invoices (clients owe us — expected inflow)
+    //   OUT = recent business spend not yet in snapshot,
+    //         awaiting reimbursement (we'll owe),
+    //         planned outflows.
+    const outstandingInvoicesCents = invoiceSummary?.outstanding_cents ?? 0;
     const projectedCents =
-      balanceCents - recentBusinessCents - awaitingReimbCents - plannedCents;
+      balanceCents
+      + outstandingInvoicesCents
+      - recentBusinessCents
+      - awaitingReimbCents
+      - plannedCents;
 
     // For the filtered list, also show count/totals
     const filteredTotalCents = filtered.reduce(
@@ -329,6 +374,7 @@ export default function ReceiptsClient() {
       awaitingReimb: awaitingReimbCents,
       planned: plannedCents,
       recentBusiness: recentBusinessCents,
+      outstandingInvoices: outstandingInvoicesCents,
       projected: projectedCents,
       filteredCount: filtered.length,
       filteredTotal: filteredTotalCents,
@@ -337,7 +383,7 @@ export default function ReceiptsClient() {
         (e) => !e.receipt_url && (e.status ?? "paid") === "paid",
       ).length,
     };
-  }, [businessState, expenses, filtered]);
+  }, [businessState, expenses, filtered, invoiceSummary]);
 
   // ── Balance edit ────────────────────────────────────
   function startEditBalance() {
@@ -737,7 +783,7 @@ export default function ReceiptsClient() {
   return (
     <div className="mt-8 space-y-8">
       {/* ── Bank balance + projections ── */}
-      <section className="grid gap-4 rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5 sm:grid-cols-[1.2fr_1fr_1fr_1fr_1fr]">
+      <section className="grid gap-4 rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr_1fr]">
         <div className="sm:border-r sm:border-neutral-800 sm:pr-5">
           <div className="flex items-center justify-between gap-2">
             <div className="text-xs uppercase tracking-wider text-gold">
@@ -872,16 +918,97 @@ export default function ReceiptsClient() {
           tone={totals.planned > 0 ? "amber" : "muted"}
         />
         <Stat
+          label="Outstanding invoices"
+          value={formatMoney(totals.outstandingInvoices)}
+          tone={totals.outstandingInvoices > 0 ? "good" : "muted"}
+          subline={
+            invoiceSummary && invoiceSummary.outstanding_count > 0
+              ? `${invoiceSummary.outstanding_count} unpaid · clients owe us`
+              : "All invoices paid"
+          }
+        />
+        <Stat
           label="Projected position"
           value={formatMoney(totals.projected)}
           tone={totals.projected < 0 ? "red" : "good"}
           subline={
             balanceMode === "auto"
-              ? "live balance − awaiting − planned"
-              : "balance − recent − awaiting − planned"
+              ? "live balance + invoices owed − awaiting − planned"
+              : "balance + invoices owed − recent − awaiting − planned"
           }
         />
       </section>
+
+      {/* ── BAS quarter snapshot ── */}
+      {invoiceSummary && (
+        <section className="rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <div>
+              <div className="text-xs uppercase tracking-wider text-gold">
+                BAS this quarter
+              </div>
+              <div className="mt-0.5 text-sm font-semibold text-neutral-100">
+                {invoiceSummary.quarter.label}
+              </div>
+            </div>
+            <div className="text-[10px] uppercase tracking-wider text-neutral-500">
+              Cash-basis · {formatDate(invoiceSummary.quarter.start)} –{" "}
+              {formatDate(invoiceSummary.quarter.end)}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <Stat
+              label="Invoices issued (incl GST)"
+              value={formatMoney(invoiceSummary.quarter.issued_total_cents)}
+              subline={`GST ${formatMoney(invoiceSummary.quarter.issued_gst_cents)}`}
+            />
+            <Stat
+              label="GST collected (paid)"
+              value={formatMoney(invoiceSummary.quarter.paid_gst_cents)}
+              tone={invoiceSummary.quarter.paid_gst_cents > 0 ? "amber" : "muted"}
+              subline={`From ${formatMoney(invoiceSummary.quarter.paid_total_cents)} received`}
+            />
+            <Stat
+              label="GST paid (expenses)"
+              value={formatMoney(invoiceSummary.quarter.expense_gst_cents)}
+              tone={invoiceSummary.quarter.expense_gst_cents > 0 ? "good" : "muted"}
+              subline={`From ${formatMoney(invoiceSummary.quarter.expense_total_cents)} spent · AUD only`}
+            />
+            <Stat
+              label="Net GST payable"
+              value={formatMoney(invoiceSummary.quarter.net_gst_payable_cents)}
+              tone={
+                invoiceSummary.quarter.net_gst_payable_cents > 0
+                  ? "red"
+                  : invoiceSummary.quarter.net_gst_payable_cents < 0
+                    ? "good"
+                    : "muted"
+              }
+              subline={
+                invoiceSummary.quarter.net_gst_payable_cents > 0
+                  ? "Owed to ATO at BAS"
+                  : invoiceSummary.quarter.net_gst_payable_cents < 0
+                    ? "ATO refund expected"
+                    : "Square at BAS"
+              }
+            />
+            <Stat
+              label="Next due"
+              value={
+                invoiceSummary.next_due[0]
+                  ? formatMoney(invoiceSummary.next_due[0].total_cents)
+                  : "—"
+              }
+              tone={invoiceSummary.next_due[0] ? "amber" : "muted"}
+              subline={
+                invoiceSummary.next_due[0]
+                  ? `${invoiceSummary.next_due[0].client_name} · ${invoiceSummary.next_due[0].invoice_number} · due ${formatDate(invoiceSummary.next_due[0].due_date)}`
+                  : "No invoices outstanding"
+              }
+            />
+          </div>
+        </section>
+      )}
 
       {/* ── Add expense form ── */}
       <form

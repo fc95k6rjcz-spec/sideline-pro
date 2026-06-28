@@ -109,11 +109,11 @@ type Props = {
 
 export default function InvoiceClient({ onSaved }: Props = {}) {
   // Issuer (always Sideline Pro)
-  const [fromName, setFromName] = useState(ISSUER.name);
-  const [fromAbn, setFromAbn] = useState(ISSUER.abn);
-  const [fromAcn, setFromAcn] = useState(ISSUER.acn);
-  const [fromAddress, setFromAddress] = useState(ISSUER.address);
-  const [fromEmail, setFromEmail] = useState(ISSUER.email);
+  const [fromName, setFromName] = useState<string>(ISSUER.name);
+  const [fromAbn, setFromAbn] = useState<string>(ISSUER.abn);
+  const [fromAcn, setFromAcn] = useState<string>(ISSUER.acn);
+  const [fromAddress, setFromAddress] = useState<string>(ISSUER.address);
+  const [fromEmail, setFromEmail] = useState<string>(ISSUER.email);
 
   // Bill-to (populated when a client is selected)
   const [toName, setToName] = useState("");
@@ -275,16 +275,23 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
   const [taxRate, setTaxRate] = useState(10);
   const [cadenceDays, setCadenceDays] = useState<number>(0);
 
-  // Auto-derive due date from issue date + payment terms. Parses "Net X" from
-  // the terms string (case-insensitive). Runs whenever either changes so the
-  // due date stays consistent. User can still manually override the date
-  // after — but if they later edit issue or terms, it re-derives.
+  // Auto-derive due date from issue date + payment terms. Handles:
+  //   "Net 14" / "net14" → 14 days
+  //   "Due on receipt"  → 0 days
+  // Read-only in the UI now — derived whenever issue date or terms change.
   useEffect(() => {
     if (!issueDate) return;
-    const match = paymentTerms.match(/net\s*(\d+)/i);
-    if (!match) return;
-    const days = parseInt(match[1], 10);
-    if (!Number.isFinite(days)) return;
+    let days: number | null = null;
+    if (/due\s*on\s*receipt/i.test(paymentTerms)) {
+      days = 0;
+    } else {
+      const match = paymentTerms.match(/net\s*(\d+)/i);
+      if (match) {
+        const parsed = parseInt(match[1], 10);
+        if (Number.isFinite(parsed)) days = parsed;
+      }
+    }
+    if (days === null) return;
     const base = new Date(`${issueDate}T00:00:00`);
     if (Number.isNaN(base.getTime())) return;
     base.setDate(base.getDate() + days);
@@ -969,13 +976,19 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
                 onChange={(e) => setIssueDate(e.target.value)}
               />
             </Field>
-            <Field label="Due date">
-              <input
-                type="date"
+            <Field label="Payment terms">
+              <select
                 className={inputClass}
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+              >
+                <option value="Due on receipt">Due on receipt</option>
+                <option value="Net 7">Net 7</option>
+                <option value="Net 14">Net 14</option>
+                <option value="Net 21">Net 21</option>
+                <option value="Net 30">Net 30</option>
+                <option value="Net 60">Net 60</option>
+              </select>
             </Field>
             <Field label="Billing period">
               <input
@@ -985,12 +998,19 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
                 placeholder="May 2026"
               />
             </Field>
-            <Field label="Payment terms">
-              <input
-                className={inputClass}
-                value={paymentTerms}
-                onChange={(e) => setPaymentTerms(e.target.value)}
-              />
+            <Field label="Due date (auto)">
+              <div
+                className={
+                  inputClass +
+                  " pointer-events-none flex items-center justify-between bg-neutral-950/60 text-neutral-300"
+                }
+                aria-readonly
+              >
+                <span>{formatDateLong(dueDate)}</span>
+                <span className="text-[10px] uppercase tracking-widest text-neutral-500">
+                  = issue + {paymentTerms.match(/net\s*(\d+)/i)?.[1] ?? "0"}d
+                </span>
+              </div>
             </Field>
             <Field label="Currency">
               <select
