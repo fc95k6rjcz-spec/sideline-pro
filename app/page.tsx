@@ -10,7 +10,6 @@ import {
   MessageSquare,
   BarChart3,
   Check,
-  ChevronDown,
   Mail,
   MapPin,
   ArrowRight,
@@ -86,27 +85,11 @@ function Logo({ size = "nav" }: { size?: "nav" | "footer" }) {
 /* ──────────────────────────────────────────────────────────
    Navbar
    ────────────────────────────────────────────────────────── */
-function NavLink({ children, href, caret }: { children: ReactNode; href: string; caret?: boolean }) {
-  return (
-    <a
-      href={href}
-      className="inline-flex items-center gap-1 text-[13px] font-semibold uppercase tracking-wide text-[#1d1d1f] transition-colors hover:text-[#1d1d1f]"
-    >
-      {children}
-      {caret && <ChevronDown className="h-3.5 w-3.5 text-[#86868b]" />}
-    </a>
-  )
-}
-
 function Navbar() {
   return (
     <nav className={`fixed top-0 z-50 w-full border-b ${hairline} bg-white/80 backdrop-blur-md`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
         <Logo />
-        <div className="hidden items-center gap-9 lg:flex">
-          <NavLink href="/">Product</NavLink>
-          <NavLink href="#contact">Pricing</NavLink>
-        </div>
         <div className="flex items-center gap-3">
           <a href="/login" className={`${ghostBtn} hidden whitespace-nowrap px-6 py-2.5 text-[13px] sm:inline-flex`}>
             Login
