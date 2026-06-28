@@ -687,34 +687,14 @@ function Contact() {
    Footer
    ────────────────────────────────────────────────────────── */
 function Footer() {
-  const cols = [
-    { head: "Product", links: ["Modern Websites", "Mobile Apps", "Fixtures & Ladders", "Umpire Management"] },
-    { head: "Company", links: ["About", "Pricing", "Contact"] },
-  ]
   return (
     <footer className={`border-t ${hairline} bg-[#f5f5f7] py-12`}>
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="lg:col-span-2">
-            <Logo size="footer" />
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#86868b]">
-              Designed and shipped from Sydney for Australian community clubs.
-            </p>
-          </div>
-          {cols.map((col) => (
-            <div key={col.head}>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868b]">{col.head}</p>
-              <ul className="flex flex-col gap-2 text-sm">
-                {col.links.map((l) => (
-                  <li key={l}>
-                    <a href="#contact" className="text-[#6e6e73] transition-colors hover:text-[#1d1d1f]">
-                      {l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div>
+          <Logo size="footer" />
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#86868b]">
+            Designed and shipped from Sydney for Australian community clubs.
+          </p>
         </div>
         <div className={`mt-10 border-t ${hairline} pt-8`}>
           <p className="text-sm text-[#86868b]">
