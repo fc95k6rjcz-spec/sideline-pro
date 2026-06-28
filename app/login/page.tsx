@@ -26,7 +26,7 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-ink text-neutral-100">
+    <main className="relative min-h-screen overflow-hidden bg-white text-[#1d1d1f]">
       <div className="absolute inset-0 hero-radial" />
       <div className="absolute inset-0 subtle-grid opacity-50" />
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6">
@@ -34,14 +34,14 @@ export default async function LoginPage({
           <Logo size={44} tagline />
         </a>
 
-        <div className="w-full rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8 backdrop-blur">
+        <div className="w-full rounded-2xl border border-black/10 bg-white p-8 shadow-[0_14px_38px_rgba(0,0,0,0.06)] backdrop-blur">
           <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-[#6e6e73]">
             Admin access for invoice generation and receipt uploads.
           </p>
 
           {errorMessage && (
-            <div className="mt-5 rounded-lg border border-red-900/60 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+            <div className="mt-5 rounded-lg border border-[#C8332B]/30 bg-[#FBE9E7] px-4 py-3 text-sm text-[#C8332B]">
               {errorMessage}
             </div>
           )}
@@ -49,7 +49,7 @@ export default async function LoginPage({
           <LoginForm redirectTo={redirectTo} />
         </div>
 
-        <p className="mt-6 text-xs text-neutral-500">
+        <p className="mt-6 text-xs text-[#86868b]">
           Authorised users only. Contact Justin if you need access.
         </p>
       </div>

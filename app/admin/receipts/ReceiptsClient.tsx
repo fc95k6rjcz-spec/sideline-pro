@@ -783,21 +783,21 @@ export default function ReceiptsClient() {
   return (
     <div className="mt-8 space-y-8">
       {/* ── Bank balance + projections ── */}
-      <section className="grid gap-4 rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr_1fr]">
-        <div className="sm:border-r sm:border-neutral-800 sm:pr-5">
+      <section className="grid gap-4 rounded-2xl border border-black/10 bg-white p-5 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr_1fr]">
+        <div className="sm:border-r sm:border-black/10 sm:pr-5">
           <div className="flex items-center justify-between gap-2">
             <div className="text-xs uppercase tracking-wider text-gold">
               Bank balance
             </div>
-            <div className="flex overflow-hidden rounded-md border border-neutral-700 text-[9px] font-bold uppercase tracking-wider">
+            <div className="flex overflow-hidden rounded-md border border-black/10 text-[9px] font-bold uppercase tracking-wider">
               <button
                 type="button"
                 onClick={() => changeBalanceMode("manual")}
                 className={
                   "px-2 py-1 " +
                   (balanceMode === "manual"
-                    ? "bg-gold text-ink"
-                    : "text-neutral-400 hover:text-neutral-200")
+                    ? "bg-gold text-[#1d1d1f]"
+                    : "text-[#6e6e73] hover:text-[#1d1d1f]")
                 }
                 title="Show the snapshot you typed in. Recent spend appears as a separate card."
               >
@@ -809,8 +809,8 @@ export default function ReceiptsClient() {
                 className={
                   "px-2 py-1 " +
                   (balanceMode === "auto"
-                    ? "bg-gold text-ink"
-                    : "text-neutral-400 hover:text-neutral-200")
+                    ? "bg-gold text-[#1d1d1f]"
+                    : "text-[#6e6e73] hover:text-[#1d1d1f]")
                 }
                 title="Auto-subtract Business-paid expenses logged since the last balance update."
               >
@@ -842,7 +842,7 @@ export default function ReceiptsClient() {
               <button
                 type="button"
                 onClick={() => setEditingBalance(false)}
-                className="text-xs text-neutral-500 hover:text-neutral-300"
+                className="text-xs text-[#86868b] hover:text-[#3a3a3c]"
               >
                 Cancel
               </button>
@@ -855,8 +855,8 @@ export default function ReceiptsClient() {
                   ((balanceMode === "auto"
                     ? totals.balance - totals.recentBusiness
                     : totals.balance) < 0
-                    ? "text-red-400"
-                    : "text-neutral-100")
+                    ? "text-[#C8332B]"
+                    : "text-[#1d1d1f]")
                 }
               >
                 {formatMoney(
@@ -868,14 +868,14 @@ export default function ReceiptsClient() {
               <button
                 type="button"
                 onClick={startEditBalance}
-                className="rounded-md border border-neutral-700 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-neutral-300 hover:border-gold hover:text-gold"
+                className="rounded-md border border-black/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#3a3a3c] hover:border-gold hover:text-gold"
               >
                 {balanceMode === "auto" ? "Reset" : "Update"}
               </button>
             </div>
           )}
           {businessState?.account_balance_updated_at && (
-            <div className="mt-1 text-[10px] uppercase tracking-wider text-neutral-500">
+            <div className="mt-1 text-[10px] uppercase tracking-wider text-[#86868b]">
               {balanceMode === "auto" ? (
                 <>
                   Snapshot {formatMoney(totals.balance)} as of{" "}
@@ -941,17 +941,17 @@ export default function ReceiptsClient() {
 
       {/* ── BAS quarter snapshot ── */}
       {invoiceSummary && (
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5">
+        <section className="rounded-2xl border border-black/10 bg-white p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <div>
               <div className="text-xs uppercase tracking-wider text-gold">
                 BAS this quarter
               </div>
-              <div className="mt-0.5 text-sm font-semibold text-neutral-100">
+              <div className="mt-0.5 text-sm font-semibold text-[#1d1d1f]">
                 {invoiceSummary.quarter.label}
               </div>
             </div>
-            <div className="text-[10px] uppercase tracking-wider text-neutral-500">
+            <div className="text-[10px] uppercase tracking-wider text-[#86868b]">
               Cash-basis · {formatDate(invoiceSummary.quarter.start)} –{" "}
               {formatDate(invoiceSummary.quarter.end)}
             </div>
@@ -1013,7 +1013,7 @@ export default function ReceiptsClient() {
       {/* ── Add expense form ── */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5"
+        className="rounded-2xl border border-black/10 bg-white p-5"
       >
         <h2 className="text-sm font-bold uppercase tracking-wider text-gold">
           New expense
@@ -1062,7 +1062,7 @@ export default function ReceiptsClient() {
               />
             </div>
             {currency !== "AUD" && (
-              <div className="mt-1.5 flex items-center gap-2 text-[10.5px] text-neutral-500">
+              <div className="mt-1.5 flex items-center gap-2 text-[10.5px] text-[#86868b]">
                 <span className="uppercase tracking-wider">FX → AUD</span>
                 <input
                   inputMode="decimal"
@@ -1072,7 +1072,7 @@ export default function ReceiptsClient() {
                   aria-label="FX rate to AUD"
                 />
                 {audPreviewCents !== null && (
-                  <span className="text-emerald-300/80">
+                  <span className="text-[#1B7A47]">
                     = ${(audPreviewCents / 100).toFixed(2)} AUD
                   </span>
                 )}
@@ -1093,7 +1093,7 @@ export default function ReceiptsClient() {
               title={currency !== "AUD" ? "GST not claimable on foreign receipts" : undefined}
             />
             {currency !== "AUD" && (
-              <p className="mt-1 text-[10px] text-neutral-500">
+              <p className="mt-1 text-[10px] text-[#86868b]">
                 GST locked at 0 — not claimable on {currency} receipts.
               </p>
             )}
@@ -1158,7 +1158,7 @@ export default function ReceiptsClient() {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
-          <label className="flex items-center gap-2 text-neutral-400">
+          <label className="flex items-center gap-2 text-[#6e6e73]">
             <input
               type="checkbox"
               checked={autoGst}
@@ -1171,7 +1171,7 @@ export default function ReceiptsClient() {
             />
             Auto-calc GST (10% of amount)
           </label>
-          <label className="flex items-center gap-2 text-neutral-400">
+          <label className="flex items-center gap-2 text-[#6e6e73]">
             <input
               type="checkbox"
               checked={isPlannedForm}
@@ -1180,8 +1180,8 @@ export default function ReceiptsClient() {
             />
             This is a planned future expense (not yet paid)
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-neutral-300 hover:text-gold">
-            <span className="rounded-md border border-neutral-800 px-3 py-1.5 font-semibold uppercase tracking-wider hover:border-gold">
+          <label className="flex cursor-pointer items-center gap-2 text-[#3a3a3c] hover:text-gold">
+            <span className="rounded-md border border-black/10 px-3 py-1.5 font-semibold uppercase tracking-wider hover:border-gold">
               {pendingFile ? `Attached: ${pendingFile.name}` : "+ Attach receipt (optional)"}
             </span>
             <input
@@ -1195,7 +1195,7 @@ export default function ReceiptsClient() {
             <button
               type="button"
               onClick={() => setPendingFile(null)}
-              className="text-xs text-neutral-500 hover:text-red-300"
+              className="text-xs text-[#86868b] hover:text-[#C8332B]"
             >
               clear file
             </button>
@@ -1203,7 +1203,7 @@ export default function ReceiptsClient() {
         </div>
 
         {error && (
-          <div className="mt-4 rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-2 text-xs text-red-200">
+          <div className="mt-4 rounded-lg border border-[#C8332B]/30 bg-[#FBE9E7] px-3 py-2 text-xs text-[#C8332B]">
             {error}
           </div>
         )}
@@ -1211,7 +1211,7 @@ export default function ReceiptsClient() {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-4 w-full rounded-lg gold-bg px-4 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90 disabled:opacity-50 sm:w-auto"
+          className="mt-4 w-full rounded-lg gold-bg px-4 py-3 text-sm font-bold uppercase tracking-wider text-[#1d1d1f] hover:opacity-90 disabled:opacity-50 sm:w-auto"
         >
           {submitting ? "Saving…" : isPlannedForm ? "Save planned expense" : "Save expense"}
         </button>
@@ -1231,7 +1231,7 @@ export default function ReceiptsClient() {
               <Stat label="GST" value={formatMoney(totals.filteredGst)} />
             </div>
             {totals.missingReceipts > 0 && (
-              <div className="mt-2 text-xs text-amber-400">
+              <div className="mt-2 text-xs text-[#9A6A1A]">
                 {totals.missingReceipts} paid expense
                 {totals.missingReceipts > 1 ? "s" : ""} still missing a receipt
               </div>
@@ -1268,26 +1268,26 @@ export default function ReceiptsClient() {
                 loadExpenses();
                 loadBalance();
               }}
-              className="text-xs text-neutral-400 hover:text-gold"
+              className="text-xs text-[#6e6e73] hover:text-gold"
             >
               ↻
             </button>
           </div>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950/40">
+        <div className="mt-4 overflow-hidden rounded-2xl border border-black/10 bg-white">
           {loading ? (
-            <div className="px-5 py-8 text-center text-sm text-neutral-500">
+            <div className="px-5 py-8 text-center text-sm text-[#86868b]">
               Loading…
             </div>
           ) : filtered.length === 0 ? (
-            <div className="px-5 py-8 text-center text-sm text-neutral-500">
+            <div className="px-5 py-8 text-center text-sm text-[#86868b]">
               No expenses match this filter.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-neutral-900 text-xs uppercase tracking-wider text-neutral-400">
+                <thead className="bg-[#f5f5f7] text-xs uppercase tracking-wider text-[#86868b]">
                   <tr>
                     <th className="px-3 py-3 text-left">Date</th>
                     <th className="px-3 py-3 text-left">Vendor</th>
@@ -1309,9 +1309,9 @@ export default function ReceiptsClient() {
                     return (
                       <tr
                         key={e.id}
-                        className="border-t border-neutral-900 hover:bg-neutral-900/40"
+                        className="border-t border-black/10 hover:bg-[#fafafa]"
                       >
-                        <td className="px-3 py-3 align-middle text-neutral-300">
+                        <td className="px-3 py-3 align-middle text-[#3a3a3c]">
                           {isEditing ? (
                             <input
                               type="date"
@@ -1323,7 +1323,7 @@ export default function ReceiptsClient() {
                             formatDate(e.date)
                           )}
                         </td>
-                        <td className="max-w-[160px] truncate px-3 py-3 align-middle text-neutral-300">
+                        <td className="max-w-[160px] truncate px-3 py-3 align-middle text-[#3a3a3c]">
                           {isEditing ? (
                             <input
                               className={cellInputClass}
@@ -1335,7 +1335,7 @@ export default function ReceiptsClient() {
                             e.vendor || "—"
                           )}
                         </td>
-                        <td className="max-w-[280px] truncate px-3 py-3 align-middle text-neutral-100">
+                        <td className="max-w-[280px] truncate px-3 py-3 align-middle text-[#1d1d1f]">
                           {isEditing ? (
                             <input
                               className={cellInputClass}
@@ -1360,7 +1360,7 @@ export default function ReceiptsClient() {
                             </>
                           )}
                         </td>
-                        <td className="max-w-[180px] px-3 py-3 align-middle text-neutral-400">
+                        <td className="max-w-[180px] px-3 py-3 align-middle text-[#6e6e73]">
                           {isEditing ? (
                             <select
                               className={cellInputClass}
@@ -1380,7 +1380,7 @@ export default function ReceiptsClient() {
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-3 align-middle text-right text-neutral-100">
+                        <td className="px-3 py-3 align-middle text-right text-[#1d1d1f]">
                           {isEditing ? (
                             <div className="flex flex-col items-end gap-1">
                               <div className="flex items-center gap-1.5">
@@ -1414,7 +1414,7 @@ export default function ReceiptsClient() {
                                 />
                               </div>
                               {editCurrency !== "AUD" && (
-                                <div className="flex items-center gap-1.5 text-[10px] text-neutral-500">
+                                <div className="flex items-center gap-1.5 text-[10px] text-[#86868b]">
                                   <span className="uppercase tracking-wider">FX</span>
                                   <input
                                     inputMode="decimal"
@@ -1425,7 +1425,7 @@ export default function ReceiptsClient() {
                                   />
                                   {parseAmount(editAmountStr) !== null &&
                                     Number(editFxRateStr) > 0 && (
-                                      <span className="text-emerald-300/80">
+                                      <span className="text-[#1B7A47]">
                                         = $
                                         {(
                                           (parseAmount(editAmountStr) as number) *
@@ -1443,7 +1443,7 @@ export default function ReceiptsClient() {
                               <span>{formatMoney(e.amount_cents)}</span>
                               {e.currency && e.currency !== "AUD" && e.original_amount_cents !== null && (
                                 <span
-                                  className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-sky-950/40 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-sky-300"
+                                  className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[#EAF2FB] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[#2B6CB0]"
                                   title={
                                     e.fx_rate
                                       ? `Original ${e.currency} ${(e.original_amount_cents / 100).toFixed(2)} @ ${e.fx_rate.toFixed(3)} → AUD`
@@ -1456,7 +1456,7 @@ export default function ReceiptsClient() {
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-3 align-middle text-right text-neutral-400">
+                        <td className="px-3 py-3 align-middle text-right text-[#6e6e73]">
                           {isEditing ? (
                             <div className="flex flex-col items-end">
                               <input
@@ -1480,7 +1480,7 @@ export default function ReceiptsClient() {
                                 }
                               />
                               {editCurrency !== "AUD" && (
-                                <span className="mt-0.5 text-[9px] text-neutral-500">
+                                <span className="mt-0.5 text-[9px] text-[#86868b]">
                                   N/A on {editCurrency}
                                 </span>
                               )}
@@ -1489,7 +1489,7 @@ export default function ReceiptsClient() {
                             formatMoney(e.gst_cents)
                           )}
                         </td>
-                        <td className="px-3 py-3 align-middle text-xs text-neutral-300">
+                        <td className="px-3 py-3 align-middle text-xs text-[#3a3a3c]">
                           {isEditing ? (
                             <select
                               className={cellInputClass + " min-w-[100px]"}
@@ -1517,7 +1517,7 @@ export default function ReceiptsClient() {
                                 )
                               }
                               disabled={busyId === e.id}
-                              className="rounded-full bg-neutral-800 px-2 py-0.5 text-[10px] uppercase tracking-wider text-neutral-300 hover:bg-neutral-700 hover:text-gold disabled:opacity-50"
+                              className="rounded-full bg-[#EEF0F3] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#5A5A5F] hover:bg-[#f5f5f7] hover:text-gold disabled:opacity-50"
                               aria-label="Set who paid this expense"
                             >
                               Paid ▾
@@ -1539,37 +1539,37 @@ export default function ReceiptsClient() {
                                 onClick={() => setPaidByPopoverId(null)}
                                 className="fixed inset-0 z-20 cursor-default"
                               />
-                              <div className="absolute left-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-md border border-neutral-800 bg-neutral-900 shadow-2xl">
+                              <div className="absolute left-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-md border border-black/10 bg-white shadow-2xl">
                                 <button
                                   type="button"
                                   onClick={() => updateRowPaidBy(e.id, "business")}
-                                  className="block w-full px-3 py-2 text-left text-xs text-neutral-300 hover:bg-neutral-800 hover:text-gold"
+                                  className="block w-full px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-gold"
                                 >
                                   Paid by{" "}
                                   <span className="font-semibold">Business</span>
-                                  <span className="block text-[10px] text-neutral-500">
+                                  <span className="block text-[10px] text-[#86868b]">
                                     no reimbursement needed
                                   </span>
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => updateRowPaidBy(e.id, "justin")}
-                                  className="block w-full border-t border-neutral-800 px-3 py-2 text-left text-xs text-neutral-300 hover:bg-neutral-800 hover:text-amber-300"
+                                  className="block w-full border-t border-black/10 px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-[#9A6A1A]"
                                 >
                                   Paid by{" "}
                                   <span className="font-semibold">Justin</span>
-                                  <span className="block text-[10px] text-neutral-500">
+                                  <span className="block text-[10px] text-[#86868b]">
                                     → awaiting reimbursement
                                   </span>
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => updateRowPaidBy(e.id, "rowan")}
-                                  className="block w-full border-t border-neutral-800 px-3 py-2 text-left text-xs text-neutral-300 hover:bg-neutral-800 hover:text-amber-300"
+                                  className="block w-full border-t border-black/10 px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-[#9A6A1A]"
                                 >
                                   Paid by{" "}
                                   <span className="font-semibold">Rowan</span>
-                                  <span className="block text-[10px] text-neutral-500">
+                                  <span className="block text-[10px] text-[#86868b]">
                                     → awaiting reimbursement
                                   </span>
                                 </button>
@@ -1592,12 +1592,12 @@ export default function ReceiptsClient() {
                               type="button"
                               onClick={() => startAttach(e.id)}
                               disabled={attachingId === e.id}
-                              className="text-xs text-neutral-400 hover:text-gold hover:underline disabled:opacity-50"
+                              className="text-xs text-[#6e6e73] hover:text-gold hover:underline disabled:opacity-50"
                             >
                               {attachingId === e.id ? "Uploading…" : "Attach"}
                             </button>
                           ) : (
-                            <span className="text-xs text-neutral-600">—</span>
+                            <span className="text-xs text-[#86868b]">—</span>
                           )}
                         </td>
                         <td className="px-3 py-3 text-right">
@@ -1615,7 +1615,7 @@ export default function ReceiptsClient() {
                                 type="button"
                                 onClick={cancelEdit}
                                 disabled={busyId === e.id}
-                                className="text-xs text-neutral-500 hover:text-neutral-300"
+                                className="text-xs text-[#86868b] hover:text-[#3a3a3c]"
                               >
                                 Cancel
                               </button>
@@ -1637,7 +1637,7 @@ export default function ReceiptsClient() {
                                   type="button"
                                   onClick={() => markReimbursed(e)}
                                   disabled={busyId === e.id}
-                                  className="text-xs font-semibold text-emerald-400 hover:underline disabled:opacity-50"
+                                  className="text-xs font-semibold text-[#1B7A47] hover:underline disabled:opacity-50"
                                 >
                                   Reimbursed
                                 </button>
@@ -1647,7 +1647,7 @@ export default function ReceiptsClient() {
                                   type="button"
                                   onClick={() => undoReimbursed(e)}
                                   disabled={busyId === e.id}
-                                  className="text-xs text-neutral-500 hover:text-amber-300 disabled:opacity-50"
+                                  className="text-xs text-[#86868b] hover:text-[#9A6A1A] disabled:opacity-50"
                                   title="Undo reimbursement"
                                 >
                                   Undo
@@ -1656,7 +1656,7 @@ export default function ReceiptsClient() {
                               <button
                                 type="button"
                                 onClick={() => startEdit(e)}
-                                className="text-xs text-neutral-500 hover:text-gold"
+                                className="text-xs text-[#86868b] hover:text-gold"
                               >
                                 Edit
                               </button>
@@ -1664,7 +1664,7 @@ export default function ReceiptsClient() {
                                 type="button"
                                 onClick={() => handleDelete(e.id)}
                                 disabled={busyId === e.id}
-                                className="text-xs text-neutral-500 hover:text-red-300 disabled:opacity-50"
+                                className="text-xs text-[#86868b] hover:text-[#C8332B] disabled:opacity-50"
                               >
                                 {busyId === e.id ? "…" : "Delete"}
                               </button>
@@ -1694,12 +1694,12 @@ export default function ReceiptsClient() {
 
 // ── tiny UI helpers ──
 const inputClass =
-  "block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-gold focus:ring-1 focus:ring-gold";
+  "w-full rounded-[10px] border border-black/15 bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-[#BD8A2C]";
 
 // Compact variant for inline-edit cells inside the expenses table.
 // px-2 py-1, text-xs, w-full so the cell drives the width.
 const cellInputClass =
-  "block w-full rounded border border-gold/60 bg-neutral-900 px-2 py-1 text-xs text-neutral-100 outline-none focus:border-gold focus:ring-1 focus:ring-gold";
+  "block w-full rounded border border-gold/60 bg-white px-2 py-1 text-xs text-[#1d1d1f] outline-none focus:border-gold focus:ring-1 focus:ring-gold";
 
 function statusFilterLabel(f: Filter): string {
   if (f === "awaiting_reimb") return "Awaiting reimbursement";
@@ -1718,7 +1718,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-wider text-neutral-400">{label}</span>
+      <span className="text-xs uppercase tracking-wider text-[#6e6e73]">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
   );
@@ -1737,18 +1737,18 @@ function Stat({
   tone?: "good" | "amber" | "red" | "muted";
   subline?: string;
 }) {
-  let valueClass = "text-neutral-200";
-  if (tone === "good") valueClass = "text-emerald-400";
-  else if (tone === "amber") valueClass = "text-amber-400";
-  else if (tone === "red") valueClass = "text-red-400";
-  else if (tone === "muted") valueClass = "text-neutral-400";
+  let valueClass = "text-[#1D1D1F]";
+  if (tone === "good") valueClass = "text-[#1B7A47]";
+  else if (tone === "amber") valueClass = "text-[#9A6A1A]";
+  else if (tone === "red") valueClass = "text-[#C8332B]";
+  else if (tone === "muted") valueClass = "text-[#1D1D1F]";
   if (highlight) valueClass = "text-gold";
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-neutral-500">{label}</div>
+      <div className="text-[10px] uppercase tracking-wider text-[#86868b]">{label}</div>
       <div className={"font-semibold " + valueClass}>{value}</div>
       {subline && (
-        <div className="text-[10px] text-neutral-600">{subline}</div>
+        <div className="text-[10px] text-[#86868b]">{subline}</div>
       )}
     </div>
   );
@@ -1767,14 +1767,14 @@ function StatusBadge({
 }) {
   if (status === "planned") {
     return (
-      <span className="rounded-full bg-amber-950/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-300">
+      <span className="rounded-full bg-[#FDF1E0] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#9A6A1A]">
         Planned
       </span>
     );
   }
   if (awaiting) {
     return (
-      <span className="rounded-full bg-amber-950/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-300">
+      <span className="rounded-full bg-[#FDF1E0] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#9A6A1A]">
         Awaiting reimb.
       </span>
     );
@@ -1782,7 +1782,7 @@ function StatusBadge({
   if (reimbursed) {
     return (
       <span
-        className="rounded-full bg-emerald-950/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-emerald-300"
+        className="rounded-full bg-[#E7F6EE] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#1B7A47]"
         title={reimbursedDate ?? undefined}
       >
         Reimbursed{reimbursedDate ? ` ${formatDate(reimbursedDate)}` : ""}
@@ -1790,7 +1790,7 @@ function StatusBadge({
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/25 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-200 ring-1 ring-inset ring-emerald-500/40">
+    <span className="inline-flex items-center gap-1 rounded-full bg-[#E7F6EE] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#1B7A47] ring-1 ring-inset ring-[#1B7A47]/30">
       <span aria-hidden>✓</span>
       Paid
     </span>

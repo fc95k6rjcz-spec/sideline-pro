@@ -249,7 +249,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-5">
+    <section className="rounded-2xl border border-black/10 bg-white p-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-sm font-bold uppercase tracking-wider text-gold">
@@ -279,7 +279,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as Filter)}
-            className="rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-gold"
+            className="rounded-md border border-black/10 bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-gold"
           >
             <option value="all">All ({invoices.length})</option>
             <option value="unpaid">
@@ -294,21 +294,21 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
             type="button"
             onClick={() => downloadCsv(filtered)}
             disabled={filtered.length === 0}
-            className="rounded-md border border-neutral-800 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-neutral-300 hover:border-gold hover:text-gold disabled:opacity-50"
+            className="rounded-md border border-black/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[#3a3a3c] hover:border-gold hover:text-gold disabled:opacity-50"
           >
             Export CSV
           </button>
           <button
             type="button"
             onClick={load}
-            className="text-xs text-neutral-400 hover:text-gold"
+            className="text-xs text-[#6e6e73] hover:text-gold"
             aria-label="Refresh"
           >
             ↻
           </button>
           <a
             href="#new-invoice"
-            className="rounded-md gold-bg px-3 py-2 text-xs font-bold uppercase tracking-wider text-ink hover:opacity-90"
+            className="rounded-md gold-bg px-3 py-2 text-xs font-bold uppercase tracking-wider text-[#1d1d1f] hover:opacity-90"
           >
             + New invoice
           </a>
@@ -316,16 +316,16 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-2 text-xs text-red-200">
+        <div className="mt-4 rounded-lg border border-[#C8332B]/30 bg-[#FBE9E7] px-3 py-2 text-xs text-[#C8332B]">
           {error}
         </div>
       )}
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950/40">
+      <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-white">
         {loading ? (
-          <div className="px-5 py-8 text-center text-sm text-neutral-500">Loading…</div>
+          <div className="px-5 py-8 text-center text-sm text-[#86868b]">Loading…</div>
         ) : filtered.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-neutral-500">
+          <div className="px-5 py-8 text-center text-sm text-[#86868b]">
             {invoices.length === 0
               ? "No invoices yet. Generate one below — every download lands in the ledger automatically."
               : "Nothing matches this filter."}
@@ -333,7 +333,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-neutral-900 text-xs uppercase tracking-wider text-neutral-400">
+              <thead className="bg-[#f5f5f7] text-xs uppercase tracking-wider text-[#86868b]">
                 <tr>
                   <th className="px-3 py-3 text-left">Paid</th>
                   <th className="px-3 py-3 text-left">Invoice #</th>
@@ -352,7 +352,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                   return (
                     <tr
                       key={inv.id}
-                      className="border-t border-neutral-900 hover:bg-neutral-900/40"
+                      className="border-t border-black/10 hover:bg-[#fafafa]"
                     >
                       <td className="px-3 py-3">
                         <input
@@ -364,7 +364,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                           aria-label="Paid"
                         />
                       </td>
-                      <td className="px-3 py-3 text-neutral-100">
+                      <td className="px-3 py-3 text-[#1d1d1f]">
                         {inv.pdf_url ? (
                           <a
                             href={inv.pdf_url}
@@ -378,43 +378,43 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                           <span className="font-semibold">{inv.invoice_number}</span>
                         )}
                       </td>
-                      <td className="max-w-[200px] truncate px-3 py-3 text-neutral-300">
+                      <td className="max-w-[200px] truncate px-3 py-3 text-[#3a3a3c]">
                         {inv.client_name}
                       </td>
-                      <td className="px-3 py-3 text-neutral-400">
+                      <td className="px-3 py-3 text-[#6e6e73]">
                         {formatDate(inv.issue_date)}
                       </td>
-                      <td className="px-3 py-3 text-neutral-400">
+                      <td className="px-3 py-3 text-[#6e6e73]">
                         {formatDate(inv.due_date)}
                       </td>
-                      <td className="px-3 py-3 text-right font-semibold text-neutral-100">
+                      <td className="px-3 py-3 text-right font-semibold text-[#1d1d1f]">
                         {formatMoney(inv.total_cents, inv.currency)}
                       </td>
                       <td className="px-3 py-3">
                         {inv.paid ? (
-                          <span className="text-xs text-emerald-400">
+                          <span className="text-xs text-[#1B7A47]">
                             Paid {formatDate(inv.paid_date)}
                           </span>
                         ) : overdue ? (
-                          <span className="text-xs font-semibold text-red-400">
+                          <span className="text-xs font-semibold text-[#C8332B]">
                             Overdue
                           </span>
                         ) : (
-                          <span className="text-xs text-neutral-400">Awaiting</span>
+                          <span className="text-xs text-[#86868b]">Awaiting</span>
                         )}
                       </td>
-                      <td className="px-3 py-3 text-xs text-neutral-400">
+                      <td className="px-3 py-3 text-xs text-[#6e6e73]">
                         {inv.next_invoice_date ? (
                           <>
                             {formatDate(inv.next_invoice_date)}
                             {inv.billing_cycle_days && (
-                              <span className="ml-1 text-neutral-600">
+                              <span className="ml-1 text-[#86868b]">
                                 ({inv.billing_cycle_days}d)
                               </span>
                             )}
                           </>
                         ) : (
-                          <span className="text-neutral-600">—</span>
+                          <span className="text-[#86868b]">—</span>
                         )}
                       </td>
                       <td className="px-3 py-3 text-right">
@@ -438,7 +438,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                             type="button"
                             onClick={() => handleDelete(inv)}
                             disabled={busyId === inv.id}
-                            className="text-xs text-neutral-500 hover:text-red-300 disabled:opacity-50"
+                            className="text-xs text-[#86868b] hover:text-[#C8332B] disabled:opacity-50"
                           >
                             Delete
                           </button>
@@ -469,17 +469,17 @@ function Stat({
 }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-neutral-500">
+      <div className="text-[10px] uppercase tracking-wider text-[#86868b]">
         {label}
       </div>
       <div
         className={
           "font-semibold " +
           (warning
-            ? "text-red-400"
+            ? "text-[#C8332B]"
             : highlight
               ? "text-gold"
-              : "text-neutral-200")
+              : "text-[#1D1D1F]")
         }
       >
         {value}

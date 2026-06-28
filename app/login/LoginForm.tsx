@@ -35,7 +35,7 @@ export default function LoginForm({ redirectTo }: { redirectTo: string }) {
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
       <label className="block">
-        <span className="text-xs uppercase tracking-wider text-neutral-400">
+        <span className="text-xs uppercase tracking-wider text-[#6e6e73]">
           Email
         </span>
         <input
@@ -44,12 +44,12 @@ export default function LoginForm({ redirectTo }: { redirectTo: string }) {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 outline-none ring-gold focus:border-gold focus:ring-1"
+          className="mt-1 block w-full rounded-[10px] border border-black/15 bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none ring-gold focus:border-gold focus:ring-1"
           placeholder="you@example.com"
         />
       </label>
       <label className="block">
-        <span className="text-xs uppercase tracking-wider text-neutral-400">
+        <span className="text-xs uppercase tracking-wider text-[#6e6e73]">
           Password
         </span>
         <input
@@ -58,13 +58,13 @@ export default function LoginForm({ redirectTo }: { redirectTo: string }) {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 outline-none ring-gold focus:border-gold focus:ring-1"
+          className="mt-1 block w-full rounded-[10px] border border-black/15 bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none ring-gold focus:border-gold focus:ring-1"
           placeholder="••••••••"
         />
       </label>
 
       {error && (
-        <div className="rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-2 text-xs text-red-200">
+        <div className="rounded-lg border border-[#C8332B]/30 bg-[#FBE9E7] px-3 py-2 text-xs text-[#C8332B]">
           {error}
         </div>
       )}
@@ -72,7 +72,7 @@ export default function LoginForm({ redirectTo }: { redirectTo: string }) {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-lg gold-bg px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90 disabled:opacity-50"
+        className="w-full rounded-full gold-bg px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-white hover:opacity-90 disabled:opacity-50"
       >
         {submitting ? "Signing in…" : "Sign in"}
       </button>

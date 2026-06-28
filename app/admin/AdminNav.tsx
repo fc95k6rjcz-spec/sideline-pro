@@ -13,7 +13,7 @@ export default function AdminNav({ email }: { email: string }) {
   const pathname = usePathname();
   return (
     <div className="flex items-center gap-4">
-      <nav className="hidden gap-5 text-sm text-neutral-300 md:flex">
+      <nav className="hidden gap-5 text-sm text-[#6e6e73] md:flex">
         {links.map((l) => {
           const active =
             l.href === "/admin"
@@ -34,13 +34,13 @@ export default function AdminNav({ email }: { email: string }) {
           );
         })}
       </nav>
-      <span className="hidden text-xs text-neutral-500 lg:inline">
+      <span className="hidden text-xs text-[#86868b] lg:inline">
         {email}
       </span>
       <form action="/auth/signout" method="post">
         <button
           type="submit"
-          className="rounded-lg border border-neutral-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-neutral-300 hover:border-gold hover:text-gold"
+          className="rounded-lg border border-black/10 bg-[#f5f5f7] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#6e6e73] hover:border-[#BD8A2C] hover:text-[#BD8A2C]"
         >
           Sign out
         </button>

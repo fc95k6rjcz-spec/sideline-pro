@@ -31,17 +31,17 @@ import {
 /* ──────────────────────────────────────────────────────────
    Theme tokens — black canvas, gold accent
    ────────────────────────────────────────────────────────── */
-const pageBg = "bg-[#0A0A0A]"
-const cardBg = "bg-[#121212]"
-const insetBg = "bg-[#161616]"
-const hairline = "border-white/[0.08]"
-const muted = "text-zinc-400"
-const goldGrad = "linear-gradient(135deg,#F0C552 0%,#E0A82E 60%,#C98C1A 100%)"
+const pageBg = "bg-white"
+const cardBg = "bg-white"
+const insetBg = "bg-[#f5f5f7]"
+const hairline = "border-black/10"
+const muted = "text-[#6e6e73]"
+const goldGrad = "linear-gradient(135deg,#D4A857 0%,#BD8A2C 60%,#9A6E1F 100%)"
 
 const goldBtn =
-  "inline-flex items-center justify-center gap-2 rounded-lg bg-[#E0A82E] font-bold uppercase tracking-wide text-black transition-colors hover:bg-[#EFBC4A]"
+  "inline-flex items-center justify-center gap-2 rounded-full bg-[#BD8A2C] font-medium text-white transition-opacity hover:opacity-90"
 const ghostBtn =
-  "inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 font-bold uppercase tracking-wide text-white transition-colors hover:bg-white/[0.06]"
+  "inline-flex items-center justify-center gap-2 rounded-full border border-black/15 font-medium text-[#1d1d1f] transition-colors hover:bg-black/[0.04]"
 
 /* ──────────────────────────────────────────────────────────
    Brand mark — angular gold S
@@ -51,9 +51,9 @@ function SMark({ className = "h-9 w-9" }: { className?: string }) {
     <svg viewBox="0 0 64 64" className={className} aria-hidden role="img">
       <defs>
         <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#F0C552" />
-          <stop offset="0.6" stopColor="#E0A82E" />
-          <stop offset="1" stopColor="#C98C1A" />
+          <stop offset="0" stopColor="#D4A857" />
+          <stop offset="0.6" stopColor="#BD8A2C" />
+          <stop offset="1" stopColor="#9A6E1F" />
         </linearGradient>
       </defs>
       <path
@@ -70,12 +70,12 @@ function Logo({ size = "nav" }: { size?: "nav" | "footer" }) {
   return (
     <a href="/" className="inline-flex items-center gap-3">
       <SMark className={mark} />
-      <span className="h-9 w-px shrink-0 bg-white/20" aria-hidden />
+      <span className="h-9 w-px shrink-0 bg-black/10" aria-hidden />
       <span className="flex flex-col leading-none">
-        <span className={`${word} font-extrabold tracking-tight text-white`}>
-          SIDELINE <span className="text-[#E0A82E]">PRO</span>
+        <span className={`${word} font-semibold tracking-tight text-[#1d1d1f]`}>
+          SIDELINE <span className="text-[#BD8A2C]">PRO</span>
         </span>
-        <span className="mt-1.5 hidden text-[9px] font-medium uppercase tracking-[0.24em] text-zinc-500 sm:inline">
+        <span className="mt-1.5 hidden text-[9px] font-medium uppercase tracking-[0.24em] text-[#86868b] sm:inline">
           Club Management, Unleashed
         </span>
       </span>
@@ -90,17 +90,17 @@ function NavLink({ children, href, caret }: { children: ReactNode; href: string;
   return (
     <a
       href={href}
-      className="inline-flex items-center gap-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-200 transition-colors hover:text-white"
+      className="inline-flex items-center gap-1 text-[13px] font-semibold uppercase tracking-wide text-[#1d1d1f] transition-colors hover:text-[#1d1d1f]"
     >
       {children}
-      {caret && <ChevronDown className="h-3.5 w-3.5 text-zinc-500" />}
+      {caret && <ChevronDown className="h-3.5 w-3.5 text-[#86868b]" />}
     </a>
   )
 }
 
 function Navbar() {
   return (
-    <nav className={`fixed top-0 z-50 w-full border-b ${hairline} bg-[#0A0A0A]/90 backdrop-blur-md`}>
+    <nav className={`fixed top-0 z-50 w-full border-b ${hairline} bg-white/80 backdrop-blur-md`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
         <Logo />
         <div className="hidden items-center gap-9 lg:flex">
@@ -174,14 +174,14 @@ function LaptopMockup() {
           <div className={`w-[30%] border-r ${hairline} bg-[#0B0B0B] p-2.5`}>
             <div className="mb-3 flex items-center gap-1.5 px-1">
               <SMark className="h-4 w-4" />
-              <span className="text-[9px] font-bold text-white">SIDELINE PRO</span>
+              <span className="text-[9px] font-bold text-[#1d1d1f]">SIDELINE PRO</span>
             </div>
             <ul className="flex flex-col gap-0.5">
               {nav.map(([Icon, label], i) => (
                 <li
                   key={label}
                   className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[8px] font-medium ${
-                    i === 0 ? "bg-[#E0A82E]/15 text-[#E0A82E]" : "text-zinc-500"
+                    i === 0 ? "bg-[#BD8A2C]/15 text-[#BD8A2C]" : "text-[#86868b]"
                   }`}
                 >
                   <Icon className="h-2.5 w-2.5" />
@@ -194,46 +194,46 @@ function LaptopMockup() {
           <div className="flex-1 p-3.5">
             <div className="mb-3 flex items-start justify-between">
               <div>
-                <p className="text-[11px] font-bold text-white">Welcome back, Seaforth Netball Club 👋</p>
-                <p className="text-[7.5px] text-zinc-500">Here&apos;s what&apos;s happening at your club today.</p>
+                <p className="text-[11px] font-bold text-[#1d1d1f]">Welcome back, Seaforth Netball Club 👋</p>
+                <p className="text-[7.5px] text-[#86868b]">Here&apos;s what&apos;s happening at your club today.</p>
               </div>
-              <Settings className="h-3 w-3 text-zinc-600" />
+              <Settings className="h-3 w-3 text-[#86868b]" />
             </div>
             <div className="mb-2.5 grid grid-cols-4 gap-1.5">
               {stats.map(([label, value, link]) => (
                 <div key={label} className={`rounded-lg border ${hairline} ${insetBg} p-2`}>
-                  <p className="text-[6px] font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
-                  <p className="mt-1 text-lg font-bold leading-none text-white">{value}</p>
-                  <p className="mt-1.5 text-[6px] font-medium text-[#E0A82E]">{link} →</p>
+                  <p className="text-[6px] font-semibold uppercase tracking-wide text-[#86868b]">{label}</p>
+                  <p className="mt-1 text-lg font-bold leading-none text-[#1d1d1f]">{value}</p>
+                  <p className="mt-1.5 text-[6px] font-medium text-[#BD8A2C]">{link} →</p>
                 </div>
               ))}
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               {/* next fixture */}
               <div className={`rounded-lg border ${hairline} ${insetBg} p-2.5`}>
-                <p className="text-[7px] font-semibold uppercase tracking-wide text-zinc-500">Next Fixture</p>
-                <p className="mb-2 text-[6.5px] text-zinc-600">Round 7</p>
+                <p className="text-[7px] font-semibold uppercase tracking-wide text-[#86868b]">Next Fixture</p>
+                <p className="mb-2 text-[6.5px] text-[#86868b]">Round 7</p>
                 <div className="flex items-center justify-between gap-1">
                   <div className="flex flex-col items-center gap-0.5 text-center">
                     <Crest {...seaforth} />
-                    <span className="text-[6px] font-semibold leading-tight text-white">Seaforth NC</span>
+                    <span className="text-[6px] font-semibold leading-tight text-[#1d1d1f]">Seaforth NC</span>
                   </div>
-                  <span className="text-[7px] font-bold text-zinc-500">VS</span>
+                  <span className="text-[7px] font-bold text-[#86868b]">VS</span>
                   <div className="flex flex-col items-center gap-0.5 text-center">
                     <Crest {...manly} />
-                    <span className="text-[6px] font-semibold leading-tight text-white">Manly Warringah</span>
+                    <span className="text-[6px] font-semibold leading-tight text-[#1d1d1f]">Manly Warringah</span>
                   </div>
                 </div>
-                <p className="mt-2 text-center text-[6px] text-zinc-400">Sat 20 Jun · 9:00 AM</p>
-                <p className="text-center text-[6px] text-zinc-600">Netball Central · Court 3</p>
-                <div className="mt-2 rounded-md bg-[#E0A82E] py-1 text-center text-[7px] font-bold text-black">
+                <p className="mt-2 text-center text-[6px] text-[#6e6e73]">Sat 20 Jun · 9:00 AM</p>
+                <p className="text-center text-[6px] text-[#86868b]">Netball Central · Court 3</p>
+                <div className="mt-2 rounded-md bg-[#BD8A2C] py-1 text-center text-[7px] font-bold text-black">
                   View Fixture
                 </div>
               </div>
               {/* ladder */}
               <div className={`rounded-lg border ${hairline} ${insetBg} p-2.5`}>
-                <p className="mb-1.5 text-[7px] font-semibold uppercase tracking-wide text-zinc-500">Ladder — A Grade</p>
-                <div className="mb-1 flex items-center justify-between text-[6px] font-semibold text-zinc-600">
+                <p className="mb-1.5 text-[7px] font-semibold uppercase tracking-wide text-[#86868b]">Ladder — A Grade</p>
+                <div className="mb-1 flex items-center justify-between text-[6px] font-semibold text-[#86868b]">
                   <span>#&nbsp;&nbsp;Team</span>
                   <span className="flex gap-2.5">
                     <span>P</span>
@@ -243,18 +243,18 @@ function LaptopMockup() {
                 <ul className="flex flex-col gap-1">
                   {ladder.map(([pos, team, p, pts]) => (
                     <li key={team} className="flex items-center justify-between text-[6.5px]">
-                      <span className="text-zinc-300">
-                        <span className="mr-1.5 font-bold text-[#E0A82E]">{pos}</span>
+                      <span className="text-[#3a3a3c]">
+                        <span className="mr-1.5 font-bold text-[#BD8A2C]">{pos}</span>
                         {team}
                       </span>
                       <span className="flex gap-2.5 tabular-nums">
-                        <span className="text-zinc-500">{p}</span>
-                        <span className="font-bold text-white">{pts}</span>
+                        <span className="text-[#86868b]">{p}</span>
+                        <span className="font-bold text-[#1d1d1f]">{pts}</span>
                       </span>
                     </li>
                   ))}
                 </ul>
-                <p className="mt-2 text-[6px] font-medium text-[#E0A82E]">View full ladder →</p>
+                <p className="mt-2 text-[6px] font-medium text-[#BD8A2C]">View full ladder →</p>
               </div>
             </div>
           </div>
@@ -281,7 +281,7 @@ function PhoneMockup() {
       <div className="absolute left-1/2 top-2 z-10 h-3.5 w-14 -translate-x-1/2 rounded-full bg-black" />
       <div className="overflow-hidden rounded-[1.6rem] px-2.5 pb-3 pt-2.5">
         {/* status bar */}
-        <div className="mb-2.5 flex items-center justify-between px-1.5 pt-1.5 text-zinc-300">
+        <div className="mb-2.5 flex items-center justify-between px-1.5 pt-1.5 text-[#3a3a3c]">
           <span className="text-[7px] font-semibold">9:41</span>
           <span className="flex items-center gap-1">
             <Signal className="h-2 w-2" />
@@ -291,10 +291,10 @@ function PhoneMockup() {
         </div>
         {/* app bar */}
         <div className="mb-2.5 flex items-center justify-between px-0.5">
-          <Menu className="h-3 w-3 text-zinc-400" />
+          <Menu className="h-3 w-3 text-[#6e6e73]" />
           <span className="flex items-center gap-1">
             <SMark className="h-3 w-3" />
-            <span className="text-[7px] font-bold text-white">SIDELINE PRO</span>
+            <span className="text-[7px] font-bold text-[#1d1d1f]">SIDELINE PRO</span>
           </span>
           <span className="h-3 w-3 rounded-full bg-white/10" />
         </div>
@@ -302,35 +302,35 @@ function PhoneMockup() {
         <div className={`mb-2.5 flex items-center gap-2 rounded-xl border ${hairline} ${insetBg} p-2`}>
           <Crest {...seaforth} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[7.5px] font-bold text-white">Seaforth Netball Club</p>
-            <p className="text-[6px] text-zinc-500">A grade</p>
+            <p className="truncate text-[7.5px] font-bold text-[#1d1d1f]">Seaforth Netball Club</p>
+            <p className="text-[6px] text-[#86868b]">A grade</p>
           </div>
-          <ChevronRight className="h-2.5 w-2.5 text-zinc-600" />
+          <ChevronRight className="h-2.5 w-2.5 text-[#86868b]" />
         </div>
-        <p className="text-[8.5px] font-bold text-white">Welcome back!</p>
-        <p className="mb-2.5 text-[6px] text-zinc-500">Here&apos;s what&apos;s happening today.</p>
+        <p className="text-[8.5px] font-bold text-[#1d1d1f]">Welcome back!</p>
+        <p className="mb-2.5 text-[6px] text-[#86868b]">Here&apos;s what&apos;s happening today.</p>
         {/* next fixture */}
         <div className={`mb-2.5 rounded-xl border ${hairline} ${insetBg} p-2.5`}>
-          <p className="text-[6.5px] font-semibold uppercase tracking-wide text-zinc-500">Next Fixture</p>
-          <p className="mb-2 text-[6px] text-zinc-600">Round 7</p>
+          <p className="text-[6.5px] font-semibold uppercase tracking-wide text-[#86868b]">Next Fixture</p>
+          <p className="mb-2 text-[6px] text-[#86868b]">Round 7</p>
           <div className="flex items-center justify-around">
             <div className="flex flex-col items-center gap-0.5">
               <Crest {...seaforth} />
-              <span className="text-[5.5px] text-zinc-400">Seaforth</span>
+              <span className="text-[5.5px] text-[#6e6e73]">Seaforth</span>
             </div>
-            <span className="text-[6.5px] font-bold text-zinc-500">VS</span>
+            <span className="text-[6.5px] font-bold text-[#86868b]">VS</span>
             <div className="flex flex-col items-center gap-0.5">
               <Crest {...manly} />
-              <span className="text-[5.5px] text-zinc-400">Manly</span>
+              <span className="text-[5.5px] text-[#6e6e73]">Manly</span>
             </div>
           </div>
-          <p className="mt-2 text-center text-[6px] text-zinc-400">Sat 20 Jun · 9:00 AM</p>
-          <p className="text-center text-[5.5px] text-zinc-600">Netball Central · Court 3</p>
-          <div className="mt-2 rounded-md bg-[#E0A82E] py-1 text-center text-[6.5px] font-bold text-black">
+          <p className="mt-2 text-center text-[6px] text-[#6e6e73]">Sat 20 Jun · 9:00 AM</p>
+          <p className="text-center text-[5.5px] text-[#86868b]">Netball Central · Court 3</p>
+          <div className="mt-2 rounded-md bg-[#BD8A2C] py-1 text-center text-[6.5px] font-bold text-black">
             View Fixture
           </div>
         </div>
-        <p className="mb-1.5 text-[7.5px] font-bold text-white">My Tasks</p>
+        <p className="mb-1.5 text-[7.5px] font-bold text-[#1d1d1f]">My Tasks</p>
         <div className="flex flex-col gap-1.5">
           {[
             ["Confirm Umpires", "2 due today"],
@@ -338,10 +338,10 @@ function PhoneMockup() {
           ].map(([t, sub]) => (
             <div key={t} className={`flex items-center justify-between rounded-lg border ${hairline} ${insetBg} px-2 py-1.5`}>
               <span>
-                <span className="block text-[6.5px] font-medium text-zinc-200">{t}</span>
-                <span className="block text-[5.5px] text-zinc-500">{sub}</span>
+                <span className="block text-[6.5px] font-medium text-[#1d1d1f]">{t}</span>
+                <span className="block text-[5.5px] text-[#86868b]">{sub}</span>
               </span>
-              <ArrowRight className="h-2.5 w-2.5 text-[#E0A82E]" />
+              <ArrowRight className="h-2.5 w-2.5 text-[#BD8A2C]" />
             </div>
           ))}
         </div>
@@ -358,19 +358,19 @@ function Hero() {
     <section className={`relative overflow-hidden pt-32 pb-16 ${pageBg}`}>
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse 60% 55% at 88% 12%, rgba(224,168,46,0.16), transparent 60%)" }}
+        style={{ background: "radial-gradient(ellipse 60% 55% at 88% 12%, rgba(224,168,46,0.05), transparent 60%)" }}
         aria-hidden
       />
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-10">
           <div>
-            <div className={`mb-7 inline-flex items-center gap-2 rounded-full border ${hairline} bg-white/[0.04] px-4 py-1.5`}>
-              <Users className="h-3.5 w-3.5 text-[#E0A82E]" />
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#E0A82E]">
+            <div className={`mb-7 inline-flex items-center gap-2 rounded-full border ${hairline} bg-[#f5f5f7] px-4 py-1.5`}>
+              <Users className="h-3.5 w-3.5 text-[#BD8A2C]" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#BD8A2C]">
                 Built for community sport
               </span>
             </div>
-            <h1 className="text-[2.25rem] font-extrabold leading-[1.02] tracking-tight text-white sm:text-[3.25rem] sm:leading-[0.98] lg:text-[4.5rem]">
+            <h1 className="text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-[#1d1d1f] sm:text-[3.25rem] sm:leading-[1.02] lg:text-[4.5rem]">
               One Platform.
               <br />
               Every Part of
@@ -386,7 +386,7 @@ function Hero() {
                 Your Club.
               </span>
             </h1>
-            <p className="mt-7 max-w-md text-base leading-relaxed text-zinc-400">
+            <p className="mt-7 max-w-md text-base leading-relaxed text-[#6e6e73]">
               Sideline Pro brings your website, app, teams, players, umpires, communications and more into
               one powerful platform — built for clubs, by people who get it.
             </p>
@@ -398,9 +398,9 @@ function Hero() {
                 Explore Features
               </a>
             </div>
-            <div className="mt-7 flex items-center gap-2 text-sm text-zinc-400">
-              <span className="grid h-5 w-5 place-items-center rounded-full bg-[#E0A82E]/15">
-                <Check className="h-3 w-3 text-[#E0A82E]" strokeWidth={3} />
+            <div className="mt-7 flex items-center gap-2 text-sm text-[#6e6e73]">
+              <span className="grid h-5 w-5 place-items-center rounded-full bg-[#BD8A2C]/15">
+                <Check className="h-3 w-3 text-[#BD8A2C]" strokeWidth={3} />
               </span>
               Trusted by clubs across Australia
             </div>
@@ -443,9 +443,9 @@ function FeatureRow() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 text-center sm:grid-cols-3 lg:grid-cols-7 lg:gap-x-4">
           {features.map((f) => (
             <div key={f.title}>
-              <f.icon className="mx-auto mb-4 h-8 w-8 text-[#E0A82E]" strokeWidth={1.5} />
-              <p className="mb-1.5 text-sm font-bold text-white">{f.title}</p>
-              <p className="text-xs leading-relaxed text-zinc-500">{f.body}</p>
+              <f.icon className="mx-auto mb-4 h-8 w-8 text-[#BD8A2C]" strokeWidth={1.5} />
+              <p className="mb-1.5 text-sm font-bold text-[#1d1d1f]">{f.title}</p>
+              <p className="text-xs leading-relaxed text-[#86868b]">{f.body}</p>
             </div>
           ))}
         </div>
@@ -460,7 +460,7 @@ function FeatureRow() {
 function MiniCard({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className={`rounded-xl border ${hairline} ${insetBg} p-3`}>
-      <p className="mb-2 text-[10px] font-bold text-white">{title}</p>
+      <p className="mb-2 text-[10px] font-bold text-[#1d1d1f]">{title}</p>
       {children}
     </div>
   )
@@ -513,25 +513,25 @@ function AllInOne() {
         >
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#E0A82E]">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#BD8A2C]">
                 All-in-one platform
               </span>
-              <h2 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
+              <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-[#1d1d1f] sm:text-4xl">
                 Everything your club
                 <br />
                 needs. All in one place.
               </h2>
-              <p className="mt-5 max-w-md text-sm leading-relaxed text-zinc-400">
+              <p className="mt-5 max-w-md text-sm leading-relaxed text-[#6e6e73]">
                 Sideline Pro replaces multiple tools and spreadsheets with a single platform that saves
                 time, reduces admin and helps your club thrive.
               </p>
               <ul className="mt-7 flex flex-col gap-3.5">
                 {checklist.map((item) => (
                   <li key={item} className="flex items-center gap-3">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#E0A82E]/15">
-                      <Check className="h-3 w-3 text-[#E0A82E]" strokeWidth={3} />
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#BD8A2C]/15">
+                      <Check className="h-3 w-3 text-[#BD8A2C]" strokeWidth={3} />
                     </span>
-                    <span className="text-sm text-zinc-300">{item}</span>
+                    <span className="text-sm text-[#3a3a3c]">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -547,7 +547,7 @@ function AllInOne() {
                       ["B Grade", avatarB],
                     ].map(([g, colors]) => (
                       <div key={g as string}>
-                        <p className="mb-1 text-[8px] text-zinc-500">{g}</p>
+                        <p className="mb-1 text-[8px] text-[#86868b]">{g}</p>
                         <div className="flex gap-1">
                           {(colors as string[]).map((c, i) => (
                             <Avatar key={i} c={c} size="h-5 w-5" />
@@ -566,8 +566,8 @@ function AllInOne() {
                     ].map(([u, status, c]) => (
                       <li key={u} className="flex items-center gap-1.5">
                         <Avatar c={c} size="h-5 w-5" />
-                        <span className="text-[8px] text-zinc-300">{u}</span>
-                        <span className={`ml-auto text-[7px] ${status === "Available" ? "text-[#E0A82E]" : "text-zinc-500"}`}>
+                        <span className="text-[8px] text-[#3a3a3c]">{u}</span>
+                        <span className={`ml-auto text-[7px] ${status === "Available" ? "text-[#BD8A2C]" : "text-[#86868b]"}`}>
                           {status}
                         </span>
                       </li>
@@ -608,7 +608,7 @@ function AllInOne() {
                 <div className="relative flex h-full flex-col p-3">
                   <div className="mb-auto flex items-center justify-between">
                     <span className="grid h-4 w-4 place-items-center rounded bg-white/90 text-[7px] font-black text-[#0b1a24]">S</span>
-                    <div className="flex items-center gap-1.5 text-[5.5px] font-semibold tracking-wide text-white/75">
+                    <div className="flex items-center gap-1.5 text-[5.5px] font-semibold tracking-wide text-[#1d1d1f]/75">
                       <span>HOME</span><span>TEAMS</span><span>FIXTURES</span><span>NEWS</span><span>ABOUT</span><span>CONTACT</span>
                     </div>
                     <div className="flex gap-1">
@@ -617,11 +617,11 @@ function AllInOne() {
                     </div>
                   </div>
                   <div className="pb-1 pt-6 text-center">
-                    <p className="text-[14px] font-extrabold leading-tight tracking-wide text-white drop-shadow">SEAFORTH NETBALL CLUB</p>
-                    <p className="mb-3 text-[9px] font-bold tracking-[0.28em] text-[#E0A82E]">STRONGER TOGETHER</p>
+                    <p className="text-[14px] font-semibold leading-tight tracking-wide text-[#1d1d1f] drop-shadow">SEAFORTH NETBALL CLUB</p>
+                    <p className="mb-3 text-[9px] font-bold tracking-[0.28em] text-[#BD8A2C]">STRONGER TOGETHER</p>
                     <div className="flex items-center justify-center gap-1.5">
-                      <span className="rounded bg-[#E0A82E] px-2.5 py-1 text-[6px] font-bold text-black">JOIN OUR CLUB</span>
-                      <span className="rounded border border-white/50 px-2.5 py-1 text-[6px] font-bold text-white">LATEST NEWS</span>
+                      <span className="rounded bg-[#BD8A2C] px-2.5 py-1 text-[6px] font-bold text-black">JOIN OUR CLUB</span>
+                      <span className="rounded border border-white/50 px-2.5 py-1 text-[6px] font-bold text-[#1d1d1f]">LATEST NEWS</span>
                     </div>
                   </div>
                 </div>
@@ -629,16 +629,16 @@ function AllInOne() {
 
               <div className="grid grid-cols-2 gap-3">
                 <MiniCard title="Dashboard">
-                  <p className="text-[8px] text-zinc-500">Registrations</p>
-                  <p className="text-lg font-bold leading-none text-white">128</p>
-                  <p className="mt-1 text-[7px] font-medium text-[#E0A82E]">+12 this week</p>
+                  <p className="text-[8px] text-[#86868b]">Registrations</p>
+                  <p className="text-lg font-bold leading-none text-[#1d1d1f]">128</p>
+                  <p className="mt-1 text-[7px] font-medium text-[#BD8A2C]">+12 this week</p>
                 </MiniCard>
                 <MiniCard title="Revenue">
-                  <p className="text-[8px] text-zinc-500">This month</p>
-                  <p className="text-lg font-bold leading-none text-white">$4,250</p>
-                  <p className="mt-1 text-[7px] font-medium text-[#E0A82E]">+18% this month</p>
+                  <p className="text-[8px] text-[#86868b]">This month</p>
+                  <p className="text-lg font-bold leading-none text-[#1d1d1f]">$4,250</p>
+                  <p className="mt-1 text-[7px] font-medium text-[#BD8A2C]">+18% this month</p>
                   <svg viewBox="0 0 60 16" className="mt-1 h-4 w-full" aria-hidden>
-                    <polyline fill="none" stroke="#E0A82E" strokeWidth="1.5" points="0,13 12,10 24,12 36,6 48,8 60,2" />
+                    <polyline fill="none" stroke="#BD8A2C" strokeWidth="1.5" points="0,13 12,10 24,12 36,6 48,8 60,2" />
                   </svg>
                 </MiniCard>
               </div>
@@ -647,8 +647,8 @@ function AllInOne() {
 
           {/* trust line */}
           <div className={`mt-12 flex items-center justify-center gap-3 border-t ${hairline} pt-8`}>
-            <p className="text-sm font-semibold text-white">Secure. Reliable. Australian.</p>
-            <AustraliaMap className="h-9 w-12 text-[#E0A82E]" />
+            <p className="text-sm font-semibold text-[#1d1d1f]">Secure. Reliable. Australian.</p>
+            <AustraliaMap className="h-9 w-12 text-[#BD8A2C]" />
           </div>
         </div>
       </div>
@@ -665,29 +665,29 @@ function Contact() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#E0A82E]">Contact</span>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#BD8A2C]">Contact</span>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#1d1d1f] sm:text-4xl">
               Tell us about your club
             </h2>
-            <p className="mt-5 max-w-md text-base text-zinc-400">
+            <p className="mt-5 max-w-md text-base text-[#6e6e73]">
               We&apos;ll come back within one business day with tailored pricing, a recommended rollout, and
               a demo time.
             </p>
             <div className="mt-8 flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <MapPin className="h-5 w-5 shrink-0 text-[#E0A82E]" />
+                <MapPin className="h-5 w-5 shrink-0 text-[#BD8A2C]" />
                 <span className={muted}>Sydney, Australia</span>
               </div>
               <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 shrink-0 text-[#E0A82E]" />
-                <a href="mailto:rowan@sidelinepro.com.au" className={`${muted} transition-colors hover:text-white`}>
+                <Mail className="h-5 w-5 shrink-0 text-[#BD8A2C]" />
+                <a href="mailto:rowan@sidelinepro.com.au" className={`${muted} transition-colors hover:text-[#1d1d1f]`}>
                   rowan@sidelinepro.com.au
                 </a>
               </div>
             </div>
             <div className={`mt-8 rounded-lg border ${hairline} ${cardBg} p-4`}>
               <p className={`text-sm ${muted}`}>
-                <span className="font-medium text-white">Sideline Pro Pty Ltd · ACN 697 721 627</span>
+                <span className="font-medium text-[#1d1d1f]">Sideline Pro Pty Ltd · ACN 697 721 627</span>
               </p>
             </div>
           </div>
@@ -709,22 +709,22 @@ function Footer() {
     { head: "Company", links: ["About", "Pricing", "Contact"] },
   ]
   return (
-    <footer className={`border-t ${hairline} ${pageBg} py-12`}>
+    <footer className={`border-t ${hairline} bg-[#f5f5f7] py-12`}>
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <Logo size="footer" />
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-500">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#86868b]">
               Designed and shipped from Sydney for Australian community clubs.
             </p>
           </div>
           {cols.map((col) => (
             <div key={col.head}>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">{col.head}</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868b]">{col.head}</p>
               <ul className="flex flex-col gap-2 text-sm">
                 {col.links.map((l) => (
                   <li key={l}>
-                    <a href="#contact" className="text-zinc-400 transition-colors hover:text-white">
+                    <a href="#contact" className="text-[#6e6e73] transition-colors hover:text-[#1d1d1f]">
                       {l}
                     </a>
                   </li>
@@ -734,7 +734,7 @@ function Footer() {
           ))}
         </div>
         <div className={`mt-10 border-t ${hairline} pt-8`}>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-[#86868b]">
             &copy; {new Date().getFullYear()} Sideline Pro Pty Ltd · ACN 697 721 627. All rights reserved.
           </p>
         </div>
@@ -765,18 +765,18 @@ function MobileApp() {
     <section id="mobile-apps" className={`relative overflow-hidden ${pageBg} py-16 lg:py-24`}>
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse 55% 55% at 50% 0%, rgba(224,168,46,0.10), transparent 60%)" }}
+        style={{ background: "radial-gradient(ellipse 55% 55% at 50% 0%, rgba(224,168,46,0.05), transparent 60%)" }}
         aria-hidden
       />
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="mb-14 text-center">
-          <div className={`mb-5 inline-flex items-center gap-2 rounded-full border ${hairline} bg-white/[0.04] px-4 py-1.5`}>
-            <Smartphone className="h-3.5 w-3.5 text-[#E0A82E]" />
-            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#E0A82E]">
+          <div className={`mb-5 inline-flex items-center gap-2 rounded-full border ${hairline} bg-[#f5f5f7] px-4 py-1.5`}>
+            <Smartphone className="h-3.5 w-3.5 text-[#BD8A2C]" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#BD8A2C]">
               Mobile apps
             </span>
           </div>
-          <h2 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
+          <h2 className="text-4xl font-semibold leading-tight tracking-tight text-[#1d1d1f] sm:text-5xl">
             Your club.{" "}
             <span
               style={{
@@ -789,7 +789,7 @@ function MobileApp() {
               In your pocket.
             </span>
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-zinc-400">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[#6e6e73]">
             Native iOS &amp; Android apps for players, parents, coaches and officials — everything they
             need to stay on top of the season, the team and the game day.
           </p>
@@ -811,7 +811,7 @@ function MobileApp() {
         </div>
 
         <div className="mt-14 flex flex-col items-center gap-4">
-          <p className="text-sm text-zinc-400">Native iOS &amp; Android apps — available on launch</p>
+          <p className="text-sm text-[#6e6e73]">Native iOS &amp; Android apps — available on launch</p>
           <a href="#contact" className={`${goldBtn} px-7 py-3.5 text-sm`}>
             Book a Demo <ArrowRight className="h-4 w-4" />
           </a>

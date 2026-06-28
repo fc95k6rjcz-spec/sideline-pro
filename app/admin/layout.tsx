@@ -25,12 +25,12 @@ export default async function AdminLayout({
   if (!isAllowedEmail(user.email)) redirect("/login?error=not_allowed");
 
   return (
-    <div className="relative min-h-screen bg-ink text-neutral-100">
-      <header className="sticky top-0 z-40 border-b border-neutral-900/80 bg-ink/85 backdrop-blur">
+    <div className="relative min-h-screen bg-white text-[#1d1d1f]">
+      <header className="sticky top-0 z-40 border-b border-black/10 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3">
           <a href="/admin" className="flex items-center gap-3">
             <Logo size={32} showWordmark />
-            <span className="hidden text-xs uppercase tracking-[0.25em] text-gold sm:inline">
+            <span className="hidden text-[10px] font-semibold uppercase tracking-[0.22em] text-gold sm:inline">
               Admin
             </span>
           </a>

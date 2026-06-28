@@ -20,9 +20,9 @@ export default function Logo({
       >
         <defs>
           <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#E8C988" />
-            <stop offset="55%" stopColor="#D4A857" />
-            <stop offset="100%" stopColor="#B8893A" />
+            <stop offset="0%" stopColor="#D4A857" />
+            <stop offset="55%" stopColor="#BD8A2C" />
+            <stop offset="100%" stopColor="#9A6E1F" />
           </linearGradient>
         </defs>
         <path
@@ -33,7 +33,7 @@ export default function Logo({
       {showWordmark && (
         <div className="leading-none">
           <div className="font-black tracking-tight text-xl sm:text-2xl">
-            <span className="text-white">SIDELINE</span>{" "}
+            <span className="text-[#1d1d1f]">SIDELINE</span>{" "}
             <span className="gold-gradient">PRO</span>
           </div>
           {tagline && (

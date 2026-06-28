@@ -787,11 +787,11 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
                 onChange={(e) => setSequence(parseInt(e.target.value, 10) || 1)}
               />
             </Field>
-            <div className="rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-sm text-gold">
+            <div className="rounded-md border border-black/10 bg-[#f5f5f7] px-3 py-2 text-sm text-gold">
               {invoiceNumber}
             </div>
           </div>
-          <p className="mt-2 text-xs text-neutral-500">
+          <p className="mt-2 text-xs text-[#86868b]">
             Prefix comes from the selected client. Sequence is remembered per
             prefix per year on this browser.
           </p>
@@ -858,7 +858,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
             <>
               {clients.length === 0 ? (
                 <div className="space-y-3">
-                  <div className="rounded-md border border-amber-900/40 bg-amber-950/20 px-3 py-2 text-xs text-amber-300">
+                  <div className="rounded-md border border-black/10 bg-[#FDF1E0] px-3 py-2 text-xs text-[#9A6A1A]">
                     No clients yet. Add your first one to start invoicing.
                   </div>
                   <button
@@ -895,17 +895,17 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
                   </Field>
 
                   {selectedClient && (
-                    <div className="flex items-start justify-between gap-3 rounded-md border border-neutral-800 bg-neutral-900/40 px-3 py-3 text-xs">
+                    <div className="flex items-start justify-between gap-3 rounded-md border border-black/10 bg-[#f5f5f7] px-3 py-3 text-xs">
                       <div className="space-y-0.5">
-                        <div className="font-semibold text-neutral-100">
+                        <div className="font-semibold text-[#1d1d1f]">
                           {selectedClient.name}
                         </div>
                         {selectedClient.sub_org && (
-                          <div className="text-neutral-400">
+                          <div className="text-[#6e6e73]">
                             {selectedClient.sub_org}
                           </div>
                         )}
-                        <div className="whitespace-pre-line text-neutral-400">
+                        <div className="whitespace-pre-line text-[#6e6e73]">
                           {selectedClient.address}
                         </div>
                         <div className="text-gold">{selectedClient.email}</div>
@@ -913,7 +913,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
                       <button
                         type="button"
                         onClick={openEditClient}
-                        className="text-xs text-neutral-400 hover:text-gold"
+                        className="text-xs text-[#6e6e73] hover:text-gold"
                       >
                         Edit
                       </button>
@@ -1002,12 +1002,12 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
               <div
                 className={
                   inputClass +
-                  " pointer-events-none flex items-center justify-between bg-neutral-950/60 text-neutral-300"
+                  " pointer-events-none flex items-center justify-between bg-[#f5f5f7] text-[#3a3a3c]"
                 }
                 aria-readonly
               >
                 <span>{formatDateLong(dueDate)}</span>
-                <span className="text-[10px] uppercase tracking-widest text-neutral-500">
+                <span className="text-[10px] uppercase tracking-widest text-[#86868b]">
                   = issue + {paymentTerms.match(/net\s*(\d+)/i)?.[1] ?? "0"}d
                 </span>
               </div>
@@ -1049,7 +1049,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
             </Field>
           </div>
           {cadenceDays > 0 && (
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-[#86868b]">
               Ledger will show the next invoice as due{" "}
               <span className="text-gold">
                 {(() => {
@@ -1072,7 +1072,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
             {items.map((it) => (
               <div
                 key={it.id}
-                className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-3"
+                className="rounded-lg border border-black/10 bg-white p-3"
               >
                 <input
                   className={inputClass + " font-semibold"}
@@ -1116,13 +1116,13 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
                       })
                     }
                   />
-                  <div className="rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-2 text-right text-sm font-semibold text-neutral-200">
+                  <div className="rounded-md border border-black/10 bg-[#f5f5f7] px-3 py-2 text-right text-sm font-semibold text-[#1d1d1f]">
                     {formatMoney(it.quantity * it.rate, currency)}
                   </div>
                   <button
                     type="button"
                     onClick={() => removeItem(it.id)}
-                    className="rounded-md border border-neutral-800 text-sm text-neutral-400 hover:border-red-700 hover:text-red-300"
+                    className="rounded-md border border-black/10 text-sm text-[#6e6e73] hover:border-[#C8332B]/30 hover:text-[#C8332B]"
                     aria-label="Remove line item"
                   >
                     ×
@@ -1134,7 +1134,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
           <button
             type="button"
             onClick={addItem}
-            className="mt-3 rounded-md border border-neutral-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-neutral-300 hover:border-gold hover:text-gold"
+            className="mt-3 rounded-md border border-black/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#3a3a3c] hover:border-gold hover:text-gold"
           >
             + Add line
           </button>
@@ -1151,13 +1151,13 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
               valueClassName="text-gold"
             />
           </div>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-[#86868b]">
             🔒 Bank details are locked in code for security. To change them, edit
-            <span className="mx-1 rounded bg-neutral-900 px-1.5 py-0.5 font-mono text-neutral-300">
+            <span className="mx-1 rounded bg-[#f5f5f7] px-1.5 py-0.5 font-mono text-[#3a3a3c]">
               PAYMENT_DEFAULTS
             </span>
             at the top of{" "}
-            <span className="font-mono text-neutral-400">
+            <span className="font-mono text-[#6e6e73]">
               app/admin/invoice/InvoiceClient.tsx
             </span>{" "}
             and redeploy.
@@ -1165,7 +1165,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
         </Section>
 
         {/* Email-on-download toggle */}
-        <div className="rounded-md border border-neutral-800 bg-neutral-900/40 px-4 py-3 text-sm">
+        <div className="rounded-md border border-black/10 bg-[#f5f5f7] px-4 py-3 text-sm">
           <label className="flex cursor-pointer items-start gap-3">
             <input
               type="checkbox"
@@ -1173,13 +1173,13 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
               onChange={(e) => setSendOnDownload(e.target.checked)}
               className="mt-0.5 h-4 w-4 accent-gold"
             />
-            <span className="text-neutral-300">
+            <span className="text-[#3a3a3c]">
               Email PDF to{" "}
               <span className="text-gold">
                 {toEmail || "(no client selected)"}
               </span>{" "}
               on download
-              <span className="block text-xs text-neutral-500">
+              <span className="block text-xs text-[#86868b]">
                 The invoice PDF is attached and a branded HTML body is included.
                 Sender: rowan@sidelinepro.com.au.
               </span>
@@ -1188,7 +1188,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-900/60 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+          <div className="rounded-lg border border-[#C8332B]/30 bg-[#FBE9E7] px-4 py-3 text-sm text-[#C8332B]">
             {error}
           </div>
         )}
@@ -1198,8 +1198,8 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
             className={
               "rounded-lg border px-4 py-3 text-sm " +
               (sendStatus.startsWith("Emailed")
-                ? "border-emerald-900/60 bg-emerald-950/40 text-emerald-200"
-                : "border-neutral-800 bg-neutral-900/40 text-neutral-300")
+                ? "border-black/10 bg-[#E7F6EE] text-[#1B7A47]"
+                : "border-black/10 bg-[#f5f5f7] text-[#3a3a3c]")
             }
           >
             {sendStatus}
@@ -1210,7 +1210,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
           type="button"
           disabled={generating || !selectedClient}
           onClick={handleDownload}
-          className="w-full rounded-lg gold-bg px-4 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90 disabled:opacity-50"
+          className="w-full rounded-lg gold-bg px-4 py-3 text-sm font-bold uppercase tracking-wider text-[#1d1d1f] hover:opacity-90 disabled:opacity-50"
         >
           {generating
             ? "Generating…"
@@ -1221,7 +1221,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
       </div>
 
       {/* ───── live preview ───── */}
-      <aside className="sticky top-24 h-fit rounded-2xl border border-neutral-800 bg-neutral-950/60 p-6">
+      <aside className="sticky top-24 h-fit rounded-2xl border border-black/10 bg-white p-6">
         <div className="text-xs uppercase tracking-wider text-gold">Live preview</div>
         <PreviewInvoice
           issuer={{
@@ -1252,12 +1252,11 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
 
 // ───── small UI helpers ─────
 const inputClass =
-  "block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-gold focus:ring-1 focus:ring-gold";
+  "w-full rounded-[10px] border border-black/15 bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-[#BD8A2C]";
 
 function lockedInputClass(locked: boolean) {
   return locked
-    ? inputClass +
-        " opacity-60 cursor-not-allowed focus:border-neutral-800 focus:ring-0"
+    ? "w-full rounded-[10px] border border-black/15 bg-[#f5f5f7] px-3 py-2 text-sm text-[#6e6e73] outline-none focus:border-[#BD8A2C] cursor-not-allowed"
     : inputClass;
 }
 
@@ -1271,7 +1270,7 @@ function Section({
   accessory?: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-5">
+    <section className="rounded-2xl border border-black/10 bg-white p-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-gold">
           {title}
@@ -1292,7 +1291,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-wider text-neutral-400">{label}</span>
+      <span className="text-xs uppercase tracking-wider text-[#6e6e73]">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
   );
@@ -1308,13 +1307,13 @@ function ReadOnlyField({
   valueClassName?: string;
 }) {
   return (
-    <div className="rounded-md border border-neutral-900 bg-neutral-950/60 px-3 py-2">
-      <div className="text-xs uppercase tracking-wider text-neutral-500">
+    <div className="rounded-md border border-black/10 bg-[#f5f5f7] px-3 py-2">
+      <div className="text-xs uppercase tracking-wider text-[#86868b]">
         {label}
       </div>
       <div
         className={
-          "mt-0.5 font-semibold " + (valueClassName ?? "text-neutral-200")
+          "mt-0.5 font-semibold " + (valueClassName ?? "text-[#1d1d1f]")
         }
       >
         {value}
@@ -1336,7 +1335,7 @@ function EditToggle({
     <label
       className={
         "flex cursor-pointer items-center gap-2 text-xs " +
-        (on ? "text-gold" : "text-neutral-500 hover:text-neutral-300")
+        (on ? "text-gold" : "text-[#86868b] hover:text-[#3a3a3c]")
       }
     >
       <input
@@ -1438,7 +1437,7 @@ function ClientForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-xs text-neutral-400 hover:text-gold"
+          className="text-xs text-[#6e6e73] hover:text-gold"
         >
           Cancel
         </button>
@@ -1448,7 +1447,7 @@ function ClientForm({
               type="button"
               onClick={onDelete}
               disabled={saving}
-              className="rounded-md border border-neutral-800 px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:border-red-700 hover:text-red-300 disabled:opacity-50"
+              className="rounded-md border border-black/10 px-3 py-1.5 text-xs font-semibold text-[#6e6e73] hover:border-[#C8332B]/30 hover:text-[#C8332B] disabled:opacity-50"
             >
               Delete
             </button>
@@ -1457,7 +1456,7 @@ function ClientForm({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="rounded-md gold-bg px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-ink hover:opacity-90 disabled:opacity-50"
+            className="rounded-md gold-bg px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#1d1d1f] hover:opacity-90 disabled:opacity-50"
           >
             {saving ? "Saving…" : mode === "add" ? "Add client" : "Save changes"}
           </button>

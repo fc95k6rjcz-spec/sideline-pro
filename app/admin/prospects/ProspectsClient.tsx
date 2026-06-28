@@ -60,13 +60,13 @@ function followupState(dateStr: string | null): FollowupState {
 function rowHighlightClass(state: FollowupState): string {
   switch (state) {
     case "overdue":
-      return "border-l-4 border-l-red-500 bg-red-950/10";
+      return "border-l-4 border-l-[#C8332B] bg-[#fdeceb]";
     case "today":
-      return "border-l-4 border-l-amber-400 bg-amber-950/15";
+      return "border-l-4 border-l-[#E0A82E] bg-[#fdf6e9]";
     case "upcoming":
-      return "border-l-4 border-l-amber-500/60 bg-amber-950/5";
+      return "border-l-4 border-l-[#E0A82E]/60";
     case "future":
-      return "border-l-4 border-l-neutral-700";
+      return "border-l-4 border-l-black/15";
     default:
       return "";
   }
@@ -75,26 +75,26 @@ function rowHighlightClass(state: FollowupState): string {
 function statusColor(status: string | null): string {
   switch (status) {
     case "Won":
-      return "bg-emerald-950/60 text-emerald-300";
+      return "bg-[#E7F6EE] text-[#1B7A47]";
     case "Lost":
     case "Not a fit":
-      return "bg-neutral-900 text-neutral-500";
+      return "bg-[#F0F0F2] text-[#86868B]";
     case "Meeting booked":
     case "Proposal sent":
-      return "bg-gold/15 text-gold";
+      return "bg-[rgba(189,138,44,0.14)] text-[#8A6418]";
     case "Contacted":
     case "Interested":
-      return "bg-amber-950/40 text-amber-300";
+      return "bg-[#FDF1E0] text-[#9A6A1A]";
     default:
-      return "bg-neutral-800 text-neutral-300";
+      return "bg-[#EEF0F3] text-[#5A5A5F]";
   }
 }
 
 function targetColor(target: string | null): string {
-  if (target === "Yes") return "bg-emerald-950/60 text-emerald-300";
-  if (target === "Maybe") return "bg-amber-950/40 text-amber-300";
-  if (target === "No") return "bg-neutral-900 text-neutral-500";
-  return "bg-neutral-800 text-neutral-400";
+  if (target === "Yes") return "bg-[#E7F6EE] text-[#1B7A47]";
+  if (target === "Maybe") return "bg-[#FDF1E0] text-[#9A6A1A]";
+  if (target === "No") return "bg-[#F0F0F2] text-[#86868B]";
+  return "bg-[#EEF0F3] text-[#5A5A5F]";
 }
 
 function fmtDate(s: string | null): string {
@@ -288,7 +288,7 @@ export default function ProspectsClient() {
 
   return (
     <div className="mt-6 space-y-6">
-      <section className="grid gap-4 rounded-2xl border border-neutral-800 bg-neutral-950/50 p-5 sm:grid-cols-5">
+      <section className="grid gap-4 rounded-2xl border border-black/10 bg-white p-5 sm:grid-cols-5">
         <Stat label="Total clubs" value={String(stats.total)} />
         <Stat
           label={`Needs follow-up${stats.overdue > 0 ? ` (${stats.overdue} overdue)` : ""}`}
@@ -303,7 +303,7 @@ export default function ProspectsClient() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <form onSubmit={handleCreate} className="flex items-end gap-2">
           <label className="block">
-            <span className="text-xs uppercase tracking-wider text-neutral-400">
+            <span className="text-xs uppercase tracking-wider text-[#6e6e73]">
               Add club
             </span>
             <input
@@ -316,7 +316,7 @@ export default function ProspectsClient() {
           <button
             type="submit"
             disabled={creating || !newClubName.trim()}
-            className="rounded-md gold-bg px-3 py-2 text-xs font-bold uppercase tracking-wider text-ink hover:opacity-90 disabled:opacity-50"
+            className="rounded-md gold-bg px-3 py-2 text-xs font-bold uppercase tracking-wider text-[#1d1d1f] hover:opacity-90 disabled:opacity-50"
           >
             {creating ? "Adding…" : "Add"}
           </button>
@@ -324,7 +324,7 @@ export default function ProspectsClient() {
 
         <div className="flex flex-wrap items-end gap-2">
           <label className="block">
-            <span className="text-xs uppercase tracking-wider text-neutral-400">
+            <span className="text-xs uppercase tracking-wider text-[#6e6e73]">
               Search
             </span>
             <input
@@ -335,7 +335,7 @@ export default function ProspectsClient() {
             />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-wider text-neutral-400">
+            <span className="text-xs uppercase tracking-wider text-[#6e6e73]">
               Filter
             </span>
             <select
@@ -354,7 +354,7 @@ export default function ProspectsClient() {
           <button
             type="button"
             onClick={load}
-            className="rounded-md border border-neutral-800 px-3 py-2 text-xs text-neutral-400 hover:border-gold hover:text-gold"
+            className="rounded-md border border-black/10 px-3 py-2 text-xs text-[#6e6e73] hover:border-gold hover:text-gold"
           >
             ↻
           </button>
@@ -362,18 +362,18 @@ export default function ProspectsClient() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-900/60 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+        <div className="rounded-lg border border-[#C8332B]/30 bg-[#FBE9E7] px-4 py-3 text-sm text-[#C8332B]">
           {error}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950/40">
+      <div className="overflow-hidden rounded-2xl border border-black/10 bg-white">
         {loading ? (
-          <div className="px-5 py-8 text-center text-sm text-neutral-500">
+          <div className="px-5 py-8 text-center text-sm text-[#86868b]">
             Loading…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-neutral-500">
+          <div className="px-5 py-8 text-center text-sm text-[#86868b]">
             {prospects.length === 0
               ? "No prospects yet. Add the first one above."
               : "Nothing matches the filter / search."}
@@ -381,7 +381,7 @@ export default function ProspectsClient() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1700px] text-xs">
-              <thead className="bg-neutral-900 text-[10px] uppercase tracking-wider text-neutral-400">
+              <thead className="bg-[#f5f5f7] text-[10px] uppercase tracking-wider text-[#86868b]">
                 <tr>
                   <Th>Actions</Th>
                   <Th>Follow up</Th>
@@ -411,7 +411,7 @@ export default function ProspectsClient() {
                   <tr
                     key={p.id}
                     className={
-                      "border-t border-neutral-900 align-top hover:bg-neutral-900/40 " +
+                      "border-t border-black/10 align-top hover:bg-[#fafafa] " +
                       rowHighlightClass(fState) + " " +
                       (busyId === p.id ? "opacity-60" : "")
                     }
@@ -428,7 +428,7 @@ export default function ProspectsClient() {
                         <button
                           type="button"
                           onClick={() => handleDelete(p)}
-                          className="rounded px-1 text-neutral-500 hover:text-red-300"
+                          className="rounded px-1 text-[#86868b] hover:text-[#C8332B]"
                           aria-label="Delete prospect"
                           title="Delete"
                         >
@@ -566,7 +566,7 @@ export default function ProspectsClient() {
         )}
       </div>
 
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-[#86868b]">
         Tip: click the gold <span className="text-gold">✎ Edit</span> button on
         any row for the full edit panel, or click a single cell for a quick
         change.
@@ -647,8 +647,8 @@ function EditDrawer({
         onClick={onClose}
         className="flex-1 bg-black/60 backdrop-blur-sm"
       />
-      <div className="flex h-full w-full max-w-2xl flex-col border-l border-neutral-800 bg-neutral-950 shadow-2xl">
-        <div className="flex items-start justify-between border-b border-neutral-800 px-6 py-4">
+      <div className="flex h-full w-full max-w-2xl flex-col border-l border-black/10 bg-white shadow-2xl">
+        <div className="flex items-start justify-between border-b border-black/10 px-6 py-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.25em] text-gold">
               Edit prospect
@@ -658,7 +658,7 @@ function EditDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="text-2xl text-neutral-500 hover:text-neutral-200"
+            className="text-2xl text-[#86868b] hover:text-[#1d1d1f]"
             aria-label="Close"
           >
             ×
@@ -796,12 +796,12 @@ function EditDrawer({
                     type="button"
                     onClick={() => set("follow_up_date", "")}
                     disabled={!form.follow_up_date}
-                    className="rounded-md border border-neutral-800 px-2 text-[10px] uppercase tracking-wider text-neutral-400 hover:border-gold hover:text-gold disabled:opacity-30"
+                    className="rounded-md border border-black/10 px-2 text-[10px] uppercase tracking-wider text-[#6e6e73] hover:border-gold hover:text-gold disabled:opacity-30"
                   >
                     Clear
                   </button>
                 </div>
-                <p className="mt-1 text-[10px] text-neutral-500">
+                <p className="mt-1 text-[10px] text-[#86868b]">
                   Set this to flag the row for follow-up. Overdue = red, within 7 days = amber.
                 </p>
               </Field>
@@ -836,7 +836,7 @@ function EditDrawer({
                   "12 Jun 26 — Replied with pricing + Seaforth link"
                 }
               />
-              <div className="mt-1 flex items-center justify-between text-[10px] text-neutral-500">
+              <div className="mt-1 flex items-center justify-between text-[10px] text-[#86868b]">
                 <span>Append new entries to the top with a date prefix.</span>
                 <button
                   type="button"
@@ -852,7 +852,7 @@ function EditDrawer({
                       prefix + (form.correspondence ? "\n" + form.correspondence : ""),
                     );
                   }}
-                  className="rounded border border-neutral-700 px-2 py-0.5 text-[10px] uppercase tracking-wider text-neutral-400 hover:border-gold hover:text-gold"
+                  className="rounded border border-black/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#6e6e73] hover:border-gold hover:text-gold"
                 >
                   + Today
                 </button>
@@ -871,18 +871,18 @@ function EditDrawer({
             </Field>
           </Section>
 
-          <div className="sticky bottom-0 -mx-6 mt-6 flex items-center justify-end gap-3 border-t border-neutral-800 bg-neutral-950 px-6 py-4">
+          <div className="sticky bottom-0 -mx-6 mt-6 flex items-center justify-end gap-3 border-t border-black/10 bg-white px-6 py-4">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-neutral-800 px-4 py-2 text-xs uppercase tracking-wider text-neutral-300 hover:border-neutral-600"
+              className="rounded-md border border-black/10 px-4 py-2 text-xs uppercase tracking-wider text-[#3a3a3c] hover:border-black/10"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="rounded-md gold-bg px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink hover:opacity-90 disabled:opacity-50"
+              className="rounded-md gold-bg px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1d1d1f] hover:opacity-90 disabled:opacity-50"
             >
               {busy ? "Saving…" : "Save changes"}
             </button>
@@ -919,7 +919,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] uppercase tracking-wider text-neutral-400">
+      <span className="mb-1 block text-[11px] uppercase tracking-wider text-[#6e6e73]">
         {label}
       </span>
       {children}
@@ -954,13 +954,13 @@ function Select({
 
 // ── inline-cell helpers (unchanged behaviour) ──
 const inputClass =
-  "block rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-gold focus:ring-1 focus:ring-gold";
+  "w-full rounded-[10px] border border-black/15 bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-[#BD8A2C]";
 
 const cellInputClass =
-  "block w-full rounded border border-gold bg-neutral-900 px-2 py-1 text-xs text-neutral-100 outline-none";
+  "block w-full rounded border border-gold bg-white px-2 py-1 text-xs text-[#1d1d1f] outline-none";
 
 const drawerInputClass =
-  "block w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-gold focus:ring-1 focus:ring-gold";
+  "w-full rounded-[10px] border border-black/15 bg-white px-3 py-2 text-sm text-[#1d1d1f] outline-none focus:border-[#BD8A2C]";
 
 function Th({ children }: { children?: React.ReactNode }) {
   return <th className="whitespace-nowrap px-3 py-3 text-left">{children}</th>;
@@ -1034,9 +1034,9 @@ function EditCell({
   const display = value.trim() || "—";
   const isEmpty = !value.trim();
   const baseClass =
-    "block cursor-text rounded px-1 py-0.5 hover:bg-neutral-800/70 " +
-    (bold ? "font-semibold text-neutral-100 " : "text-neutral-300 ") +
-    (isEmpty ? "text-neutral-600" : "");
+    "block cursor-text rounded px-1 py-0.5 hover:bg-[#f5f5f7] " +
+    (bold ? "font-semibold text-[#1d1d1f] " : "text-[#3a3a3c] ") +
+    (isEmpty ? "text-[#86868b]" : "");
 
   if (link && !isEmpty) {
     const href = value.startsWith("http") ? value : `https://${value}`;
@@ -1054,7 +1054,7 @@ function EditCell({
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="text-[10px] text-neutral-600 hover:text-neutral-300"
+          className="text-[10px] text-[#86868b] hover:text-[#3a3a3c]"
           aria-label="Edit"
         >
           ✎
@@ -1114,8 +1114,8 @@ function SelectCell({
       onClick={() => setEditing(true)}
       className={
         "rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider " +
-        (badgeClass ?? "bg-neutral-800 text-neutral-300") +
-        (value ? "" : " text-neutral-600")
+        (badgeClass ?? "bg-[#EEF0F3] text-[#5A5A5F]") +
+        (value ? "" : " text-[#86868b]")
       }
     >
       {display}
@@ -1151,8 +1151,8 @@ function DateCell({
       type="button"
       onClick={() => setEditing(true)}
       className={
-        "block rounded px-1 py-0.5 hover:bg-neutral-800/70 " +
-        (value ? "text-neutral-300" : "text-neutral-600")
+        "block rounded px-1 py-0.5 hover:bg-[#f5f5f7] " +
+        (value ? "text-[#3a3a3c]" : "text-[#86868b]")
       }
     >
       {fmtDate(value || null)}
@@ -1190,7 +1190,7 @@ function FollowupCell({
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="rounded px-2 py-0.5 text-[10px] uppercase tracking-wider text-neutral-600 hover:bg-neutral-800/70 hover:text-gold"
+        className="rounded px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#86868b] hover:bg-[#f5f5f7] hover:text-gold"
         title="Set a follow-up date to flag this row"
       >
         + Flag
@@ -1199,12 +1199,12 @@ function FollowupCell({
   }
   const tone =
     state === "overdue"
-      ? "bg-red-950/60 text-red-300 border border-red-500/40"
+      ? "bg-[#FBE9E7] text-[#C8332B] border border-[#C8332B]/30"
       : state === "today"
-        ? "bg-amber-950/60 text-amber-200 border border-amber-400/50"
+        ? "bg-[#FDF1E0] text-[#9A6A1A] border border-[#9A6A1A]/30"
         : state === "upcoming"
-          ? "bg-amber-950/30 text-amber-300 border border-amber-500/30"
-          : "bg-neutral-900 text-neutral-400 border border-neutral-700";
+          ? "bg-[#FDF1E0] text-[#9A6A1A] border border-[#9A6A1A]/20"
+          : "bg-[#F0F0F2] text-[#86868B] border border-black/10";
   const label =
     state === "overdue"
       ? "Overdue"
@@ -1241,7 +1241,7 @@ function TruncCell({
       <button
         type="button"
         onClick={onOpen}
-        className="block rounded px-1 py-0.5 text-neutral-600 hover:bg-neutral-800/70 hover:text-neutral-300"
+        className="block rounded px-1 py-0.5 text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#3a3a3c]"
       >
         — add log
       </button>
@@ -1256,12 +1256,12 @@ function TruncCell({
     <button
       type="button"
       onClick={onOpen}
-      className="block max-w-[260px] rounded px-1 py-0.5 text-left text-neutral-300 hover:bg-neutral-800/70"
+      className="block max-w-[260px] rounded px-1 py-0.5 text-left text-[#3a3a3c] hover:bg-[#f5f5f7]"
       title={trimmed}
     >
       <span className="block truncate">{preview}</span>
       {lineCount > 1 && (
-        <span className="text-[10px] text-neutral-500">
+        <span className="text-[10px] text-[#86868b]">
           + {lineCount - 1} more entr{lineCount - 1 === 1 ? "y" : "ies"}
         </span>
       )}
@@ -1282,17 +1282,17 @@ function Stat({
 }) {
   const cls =
     tone === "emerald"
-      ? "text-emerald-400"
+      ? "text-[#1B7A47]"
       : tone === "red"
-        ? "text-red-400"
+        ? "text-[#C8332B]"
         : tone === "amber"
-          ? "text-amber-400"
+          ? "text-[#9A6A1A]"
           : highlight
             ? "text-gold"
-            : "text-neutral-100";
+            : "text-[#1d1d1f]";
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-neutral-500">
+      <div className="text-[10px] uppercase tracking-wider text-[#86868b]">
         {label}
       </div>
       <div className={"mt-1 text-2xl font-bold " + cls}>{value}</div>

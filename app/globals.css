@@ -4,34 +4,34 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #141820;
-  --foreground: #FAFAFA;
-  --card: #1b1f2a;
-  --card-foreground: #FAFAFA;
-  --popover: #1b1f2a;
-  --popover-foreground: #FAFAFA;
-  --primary: #f4f4f5;
-  --primary-foreground: #12151c;
-  --secondary: #222733;
-  --secondary-foreground: #FAFAFA;
-  --muted: #222733;
-  --muted-foreground: #9ca3af;
-  --accent: #222733;
-  --accent-foreground: #FAFAFA;
+  --background: #FFFFFF;
+  --foreground: #1D1D1F;
+  --card: #FFFFFF;
+  --card-foreground: #1D1D1F;
+  --popover: #FFFFFF;
+  --popover-foreground: #1D1D1F;
+  --primary: #1D1D1F;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5F7;
+  --secondary-foreground: #1D1D1F;
+  --muted: #F5F5F7;
+  --muted-foreground: #6E6E73;
+  --accent: #F5F5F7;
+  --accent-foreground: #1D1D1F;
   --destructive: #DC2626;
   --destructive-foreground: #FAFAFA;
-  --border: #2f3440;
-  --input: #2f3440;
-  --ring: #64748b;
+  --border: #E5E5E7;
+  --input: #E5E5E7;
+  --ring: #BD8A2C;
   --radius: 0.625rem;
-  
-  --gold-light: #E8C988;
-  --gold: #D4A857;
-  --gold-dark: #B8893A;
+
+  --gold-light: #D4A857;
+  --gold: #BD8A2C;
+  --gold-dark: #9A6E1F;
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback', system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -63,7 +63,7 @@
 
   /* Admin area additions */
   --color-ink: #0A0A0A;
-  --color-gold-deep: #B8893A;
+  --color-gold-deep: #9A6E1F;
 }
 
 @layer base {
@@ -76,24 +76,24 @@
 }
 
 .gold-gradient {
-  background: linear-gradient(135deg, #E8C988 0%, #D4A857 50%, #B8893A 100%);
+  background: linear-gradient(135deg, #D4A857 0%, #BD8A2C 60%, #9A6E1F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gold-gradient-bg {
-  background: linear-gradient(135deg, #E8C988 0%, #D4A857 50%, #B8893A 100%);
+  background: linear-gradient(135deg, #D4A857 0%, #BD8A2C 60%, #9A6E1F 100%);
 }
 
 .gold-border {
-  border-image: linear-gradient(135deg, #E8C988 0%, #D4A857 50%, #B8893A 100%) 1;
+  border-image: linear-gradient(135deg, #D4A857 0%, #BD8A2C 60%, #9A6E1F 100%) 1;
 }
 
 /* ───── Admin area utility classes (used by /login and /admin/*) ───── */
 
 .gold-bg {
-  background: linear-gradient(135deg, #E8C988 0%, #D4A857 50%, #B8893A 100%);
+  background: linear-gradient(135deg, #D4A857 0%, #BD8A2C 60%, #9A6E1F 100%);
 }
 
 .subtle-grid {
@@ -105,16 +105,11 @@
 
 .hero-radial {
   background:
-    radial-gradient(ellipse at 50% -10%, rgba(212,168,87,0.18), transparent 60%),
-    radial-gradient(ellipse at 80% 30%, rgba(212,168,87,0.06), transparent 50%);
+    radial-gradient(ellipse at 50% -10%, rgba(212,168,87,0.05), transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgba(212,168,87,0.04), transparent 50%);
 }
 
-/* Barely-visible film grain for hero — no extra dependencies */
+/* Film-grain overlay was for the dark hero — disabled for the light theme. */
 .hero-noise {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  opacity: 0.02;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
+  display: none;
 }
