@@ -95,6 +95,7 @@ export async function GET() {
     .sort((a, b) => (a.due_date ?? "").localeCompare(b.due_date ?? ""))
     .slice(0, 3)
     .map((r) => ({
+      id: r.id,
       invoice_number: r.invoice_number,
       client_name: r.client_name,
       total_cents: r.total_cents,

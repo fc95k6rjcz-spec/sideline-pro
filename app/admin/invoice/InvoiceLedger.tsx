@@ -125,6 +125,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -165,8 +166,14 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
   }, [invoices]);
 
   async function togglePaid(inv: InvoiceRow) {
+    const amount = formatMoney(inv.total_cents, inv.currency);
+    const message = inv.paid
+      ? `Mark ${inv.invoice_number} as UNPAID?\n\nThe bank balance will decrease by ${amount}.`
+      : `Mark ${inv.invoice_number} (${amount}) as PAID?\n\nThe bank balance will automatically increase by ${amount}.`;
+    if (!confirm(message)) return;
     setBusyId(inv.id);
     setError(null);
+    setNotice(null);
     try {
       const res = await fetch(`/api/invoices/${inv.id}`, {
         method: "PATCH",
@@ -176,6 +183,15 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Update failed (${res.status})`);
+      }
+      const data = (await res.json()) as { balance_adjusted_cents?: number };
+      const adj = data.balance_adjusted_cents ?? 0;
+      if (adj !== 0) {
+        setNotice(
+          `${inv.invoice_number} marked ${inv.paid ? "unpaid" : "paid"} — bank balance ${
+            adj > 0 ? "+" : "−"
+          }${formatMoney(Math.abs(adj), inv.currency)}`,
+        );
       }
       await load();
     } catch (err) {
@@ -321,6 +337,20 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
         </div>
       )}
 
+      {notice && (
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-[#1B7A47]/30 bg-[#E9F6EF] px-3 py-2 text-xs text-[#1B7A47]">
+          <span>{notice}</span>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            className="text-[#1B7A47]/60 hover:text-[#1B7A47]"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-white">
         {loading ? (
           <div className="px-5 py-8 text-center text-sm text-[#86868b]">Loading…</div>
@@ -355,14 +385,27 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                       className="border-t border-black/10 hover:bg-[#fafafa]"
                     >
                       <td className="px-3 py-3">
-                        <input
-                          type="checkbox"
-                          checked={inv.paid}
-                          onChange={() => togglePaid(inv)}
-                          disabled={busyId === inv.id}
-                          className="h-4 w-4 accent-gold"
-                          aria-label="Paid"
-                        />
+                        {inv.paid ? (
+                          <button
+                            type="button"
+                            onClick={() => togglePaid(inv)}
+                            disabled={busyId === inv.id}
+                            title="Click to mark as unpaid (reverses the balance bump)"
+                            className="rounded-md border border-[#1B7A47]/40 bg-[#E9F6EF] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#1B7A47] hover:border-[#1B7A47] disabled:opacity-50"
+                          >
+                            ✓ Paid
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => togglePaid(inv)}
+                            disabled={busyId === inv.id}
+                            title="Mark as paid — adds the invoice total to your bank balance"
+                            className="whitespace-nowrap rounded-md border border-gold/60 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-gold hover:bg-gold/10 disabled:opacity-50"
+                          >
+                            {busyId === inv.id ? "…" : "Mark paid"}
+                          </button>
+                        )}
                       </td>
                       <td className="px-3 py-3 text-[#1d1d1f]">
                         {inv.pdf_url ? (

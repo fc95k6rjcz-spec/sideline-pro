@@ -62,6 +62,16 @@ export async function PATCH(request: NextRequest, ctx: Params) {
 
   try {
     const admin = createAdminClient();
+
+    // Read the current row first so we can detect a paid-state transition
+    // and adjust the bank balance accordingly.
+    const { data: existing, error: readErr } = await admin
+      .from("invoices")
+      .select("id,paid,total_cents")
+      .eq("id", id)
+      .single();
+    if (readErr) return NextResponse.json({ error: readErr.message }, { status: 500 });
+
     const { data, error } = await admin
       .from("invoices")
       .update(updates)
@@ -69,7 +79,35 @@ export async function PATCH(request: NextRequest, ctx: Params) {
       .select()
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ invoice: data });
+
+    // ── Auto-adjust bank balance on paid transitions ──
+    // Marking paid: the client's money has landed, so bump the balance up.
+    // Un-marking paid (accidental tick): reverse the bump.
+    let balanceAdjustedCents = 0;
+    if ("paid" in updates && existing && updates.paid !== existing.paid) {
+      const delta =
+        updates.paid === true ? (existing.total_cents ?? 0) : -(existing.total_cents ?? 0);
+      if (delta !== 0) {
+        const { data: state } = await admin
+          .from("business_state")
+          .select("account_balance_cents")
+          .eq("id", 1)
+          .single();
+        const currentBalance = state?.account_balance_cents ?? 0;
+        const { error: balErr } = await admin.from("business_state").upsert({
+          id: 1,
+          account_balance_cents: currentBalance + delta,
+          account_balance_updated_at: new Date().toISOString(),
+          updated_by_email: user.email,
+        });
+        if (!balErr) balanceAdjustedCents = delta;
+        // If the balance write fails we still return success for the invoice
+        // update itself — the client surfaces balance_adjusted_cents so the
+        // UI can tell the user whether the bump happened.
+      }
+    }
+
+    return NextResponse.json({ invoice: data, balance_adjusted_cents: balanceAdjustedCents });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Update failed";
     return NextResponse.json({ error: message }, { status: 500 });

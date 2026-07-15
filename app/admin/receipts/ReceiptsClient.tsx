@@ -48,6 +48,7 @@ type InvoiceSummary = {
   outstanding_cents: number;
   outstanding_count: number;
   next_due: Array<{
+    id: string;
     invoice_number: string;
     client_name: string;
     total_cents: number;
@@ -248,6 +249,8 @@ export default function ReceiptsClient() {
 
   // Invoice summary — outstanding invoices + BAS quarter snapshot
   const [invoiceSummary, setInvoiceSummary] = useState<InvoiceSummary | null>(null);
+  const [markingInvoiceId, setMarkingInvoiceId] = useState<string | null>(null);
+  const [invoiceNotice, setInvoiceNotice] = useState<string | null>(null);
   const loadInvoiceSummary = useCallback(async () => {
     try {
       const res = await fetch("/api/invoices/summary", { cache: "no-store" });
@@ -258,6 +261,43 @@ export default function ReceiptsClient() {
       // silent — dashboard still works without it
     }
   }, []);
+
+  // Mark an outstanding invoice as paid straight from this dashboard.
+  // The API bumps the bank balance automatically; we just reload state.
+  async function markInvoicePaid(inv: {
+    id: string;
+    invoice_number: string;
+    total_cents: number;
+  }) {
+    const amount = formatMoney(inv.total_cents);
+    if (
+      !confirm(
+        `Mark ${inv.invoice_number} (${amount}) as PAID?\n\nThe bank balance will automatically increase by ${amount}.`,
+      )
+    ) {
+      return;
+    }
+    setMarkingInvoiceId(inv.id);
+    setError(null);
+    setInvoiceNotice(null);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paid: true }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Update failed (${res.status})`);
+      }
+      setInvoiceNotice(`${inv.invoice_number} paid — bank balance +${amount}`);
+      await Promise.all([loadBalance(), loadInvoiceSummary()]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not mark invoice paid");
+    } finally {
+      setMarkingInvoiceId(null);
+    }
+  }
 
   // Load
   const loadExpenses = useCallback(async () => {
@@ -917,16 +957,49 @@ export default function ReceiptsClient() {
           value={formatMoney(totals.planned)}
           tone={totals.planned > 0 ? "amber" : "muted"}
         />
-        <Stat
-          label="Outstanding invoices"
-          value={formatMoney(totals.outstandingInvoices)}
-          tone={totals.outstandingInvoices > 0 ? "good" : "muted"}
-          subline={
-            invoiceSummary && invoiceSummary.outstanding_count > 0
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-[#86868b]">
+            Outstanding invoices
+          </div>
+          <div
+            className={
+              "font-semibold " +
+              (totals.outstandingInvoices > 0 ? "text-[#1B7A47]" : "text-[#1D1D1F]")
+            }
+          >
+            {formatMoney(totals.outstandingInvoices)}
+          </div>
+          <div className="text-[10px] text-[#86868b]">
+            {invoiceSummary && invoiceSummary.outstanding_count > 0
               ? `${invoiceSummary.outstanding_count} unpaid · clients owe us`
-              : "All invoices paid"
-          }
-        />
+              : "All invoices paid"}
+          </div>
+          {invoiceSummary && invoiceSummary.next_due.length > 0 && (
+            <ul className="mt-2 space-y-1.5">
+              {invoiceSummary.next_due.map((inv) => (
+                <li key={inv.id} className="flex items-center gap-2 text-[11px]">
+                  <span className="truncate text-[#3a3a3c]" title={inv.client_name}>
+                    {inv.invoice_number} · {formatMoney(inv.total_cents)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => markInvoicePaid(inv)}
+                    disabled={markingInvoiceId === inv.id}
+                    title="Mark as paid — adds this amount to your bank balance"
+                    className="shrink-0 whitespace-nowrap rounded-md border border-gold/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold hover:bg-gold/10 disabled:opacity-50"
+                  >
+                    {markingInvoiceId === inv.id ? "…" : "Mark paid"}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {invoiceNotice && (
+            <div className="mt-2 rounded-md border border-[#1B7A47]/30 bg-[#E9F6EF] px-2 py-1 text-[10px] text-[#1B7A47]">
+              {invoiceNotice}
+            </div>
+          )}
+        </div>
         <Stat
           label="Projected position"
           value={formatMoney(totals.projected)}
@@ -1019,7 +1092,7 @@ export default function ReceiptsClient() {
           New expense
         </h2>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-[120px_1fr_120px_100px]">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-[130px_1fr_220px_110px]">
           <Field label={isPlannedForm ? "Expected date" : "Date"}>
             <input
               type="date"
@@ -1039,7 +1112,7 @@ export default function ReceiptsClient() {
             />
           </Field>
           <Field label={`Amount (incl. ${currency === "AUD" ? "GST" : "tax"})`}>
-            <div className="flex gap-1.5">
+            <div className="flex min-w-0 gap-1.5">
               <select
                 className={inputClass + " w-[78px] shrink-0"}
                 value={currency}
@@ -1054,7 +1127,7 @@ export default function ReceiptsClient() {
               </select>
               <input
                 inputMode="decimal"
-                className={inputClass}
+                className={inputClass + " min-w-0 flex-1"}
                 placeholder="0.00"
                 value={amountStr}
                 onChange={(e) => setAmountStr(e.target.value)}
