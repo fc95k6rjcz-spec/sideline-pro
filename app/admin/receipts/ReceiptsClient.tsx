@@ -1113,18 +1113,22 @@ export default function ReceiptsClient() {
           </Field>
           <Field label={`Amount (incl. ${currency === "AUD" ? "GST" : "tax"})`}>
             <div className="flex min-w-0 gap-1.5">
-              <select
-                className={inputClass + " w-[78px] shrink-0"}
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value as Currency)}
-                aria-label="Currency"
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+              {/* Fixed-width wrapper: inputClass has w-full, so a width utility
+                  on the select itself conflicts and loses unpredictably. */}
+              <div className="w-[86px] shrink-0">
+                <select
+                  className={inputClass}
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value as Currency)}
+                  aria-label="Currency"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <input
                 inputMode="decimal"
                 className={inputClass + " min-w-0 flex-1"}
@@ -1137,13 +1141,15 @@ export default function ReceiptsClient() {
             {currency !== "AUD" && (
               <div className="mt-1.5 flex items-center gap-2 text-[10.5px] text-[#86868b]">
                 <span className="uppercase tracking-wider">FX → AUD</span>
-                <input
-                  inputMode="decimal"
-                  className={inputClass + " h-7 w-[80px] text-xs"}
-                  value={fxRateStr}
-                  onChange={(e) => setFxRateStr(e.target.value)}
-                  aria-label="FX rate to AUD"
-                />
+                <div className="w-[80px] shrink-0">
+                  <input
+                    inputMode="decimal"
+                    className={inputClass + " h-7 text-xs"}
+                    value={fxRateStr}
+                    onChange={(e) => setFxRateStr(e.target.value)}
+                    aria-label="FX rate to AUD"
+                  />
+                </div>
                 {audPreviewCents !== null && (
                   <span className="text-[#1B7A47]">
                     = ${(audPreviewCents / 100).toFixed(2)} AUD

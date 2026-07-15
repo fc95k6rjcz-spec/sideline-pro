@@ -113,3 +113,14 @@
 .hero-noise {
   display: none;
 }
+
+/* iPad/iPhone: Safari auto-zooms the whole page when focusing a form control
+   whose font-size is under 16px. Keep controls at 16px on touch devices so
+   the layout stays put while typing. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
