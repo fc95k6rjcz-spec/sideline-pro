@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAllowedEmail } from "@/lib/auth";
+import { cumulativeCashOutCents, type CashOutExpense } from "@/lib/cash-out";
 
 export const runtime = "nodejs";
 
@@ -67,26 +68,32 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  // Optional: snapshot_baseline_cents — the cumulative cash-out value at the
-  // moment of this reset. Client computes and sends it so the server can
-  // store it as the new "zero" for Recent cash out.
-  const baselineRaw = body.snapshot_baseline_cents;
-  const baseline =
-    typeof baselineRaw === "number" && Number.isFinite(baselineRaw)
-      ? Math.round(baselineRaw)
-      : null;
-
   try {
     const admin = createAdminClient();
+
+    // Reconcile: the caller confirms what the bank actually says right now, so
+    // the new baseline is the cumulative cash-out as of this instant — that
+    // resets "since last confirmation" to zero. Read it from the database
+    // rather than trusting a client-sent figure: a stale or partially-loaded
+    // client would persist a wrong baseline and skew the derived balance until
+    // the next reconcile.
+    const { data: expenseRows, error: expensesErr } = await admin
+      .from("expenses")
+      .select("amount_cents, status, paid_by, reimbursed");
+    if (expensesErr) {
+      return NextResponse.json({ error: expensesErr.message }, { status: 500 });
+    }
+    const baseline = cumulativeCashOutCents(
+      (expenseRows ?? []) as CashOutExpense[],
+    );
+
     const upsertRow: Record<string, unknown> = {
       id: 1,
       account_balance_cents: Math.round(balance),
       account_balance_updated_at: new Date().toISOString(),
       updated_by_email: user.email,
+      snapshot_baseline_cents: baseline,
     };
-    if (baseline !== null) {
-      upsertRow.snapshot_baseline_cents = baseline;
-    }
     const { data, error } = await admin
       .from("business_state")
       .upsert(upsertRow)

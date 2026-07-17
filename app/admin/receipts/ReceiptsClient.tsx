@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cashOutSinceBaselineCents } from "@/lib/cash-out";
 
 type ExpenseStatus = "planned" | "paid";
 type PaidBy = "business" | "justin" | "rowan";
@@ -204,20 +205,6 @@ export default function ReceiptsClient() {
   const [monthFilter, setMonthFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<Filter>("all");
 
-  // Balance display mode (persisted per-user via localStorage)
-  const [balanceMode, setBalanceMode] = useState<"manual" | "auto">("manual");
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem("sideline_balance_mode");
-    if (saved === "manual" || saved === "auto") setBalanceMode(saved);
-  }, []);
-  function changeBalanceMode(m: "manual" | "auto") {
-    setBalanceMode(m);
-    try {
-      window.localStorage.setItem("sideline_balance_mode", m);
-    } catch {}
-  }
-
   // Auto-calc GST — only fires for AUD (can't claim GST on foreign receipts)
   useEffect(() => {
     if (!autoGst) return;
@@ -358,7 +345,7 @@ export default function ReceiptsClient() {
   }, [expenses, monthFilter, statusFilter]);
 
   const totals = useMemo(() => {
-    const balanceCents = businessState?.account_balance_cents ?? 0;
+    const confirmedCents = businessState?.account_balance_cents ?? 0;
     const awaitingReimbCents = expenses
       .filter(isAwaitingReimbursement)
       .reduce((acc, e) => acc + e.amount_cents, 0);
@@ -366,39 +353,25 @@ export default function ReceiptsClient() {
       .filter(isPlanned)
       .reduce((acc, e) => acc + e.amount_cents, 0);
 
-    // Cumulative cash-out is deterministic from the data:
-    //   - every Business-paid (status=paid) expense's amount
-    //   - every Personal-paid + reimbursed expense's amount (the reimbursement
-    //     payment leaves the business account too)
-    // Recent cash-out = cumulative − baseline saved at last balance reset.
-    // This is robust against row updated_at noise.
-    const cumulativeBusinessCents = expenses
-      .filter(
-        (e) =>
-          (e.status ?? "paid") === "paid" && e.paid_by === "business",
-      )
-      .reduce((acc, e) => acc + e.amount_cents, 0);
-    const cumulativeReimbursedCents = expenses
-      .filter((e) => e.reimbursed && e.paid_by !== "business")
-      .reduce((acc, e) => acc + e.amount_cents, 0);
-    const cumulativeCashOutCents =
-      cumulativeBusinessCents + cumulativeReimbursedCents;
+    // Cash out since the last reconcile, derived from the expense rows rather
+    // than from any stored running total — so marking a reimbursement paid is
+    // reflected the moment the row comes back from the server.
     const baselineCents = businessState?.snapshot_baseline_cents ?? 0;
-    const recentBusinessCents = Math.max(
-      0,
-      cumulativeCashOutCents - baselineCents,
-    );
+    const recentCashOutCents = cashOutSinceBaselineCents(expenses, baselineCents);
 
-    // Money IN/OUT of the business:
+    // The headline balance. The confirmed figure is only ever a starting point:
+    // what we show is that figure minus everything that has left the account
+    // since it was confirmed.
+    const derivedBalanceCents = confirmedCents - recentCashOutCents;
+
+    // Money IN/OUT of the business, forward-looking from the derived balance:
     //   IN  = outstanding invoices (clients owe us — expected inflow)
-    //   OUT = recent business spend not yet in snapshot,
-    //         awaiting reimbursement (we'll owe),
-    //         planned outflows.
+    //   OUT = awaiting reimbursement (we'll owe), planned outflows.
+    // Cash already out is inside derivedBalanceCents — don't subtract it twice.
     const outstandingInvoicesCents = invoiceSummary?.outstanding_cents ?? 0;
     const projectedCents =
-      balanceCents
+      derivedBalanceCents
       + outstandingInvoicesCents
-      - recentBusinessCents
       - awaitingReimbCents
       - plannedCents;
 
@@ -410,10 +383,11 @@ export default function ReceiptsClient() {
     const filteredGstCents = filtered.reduce((acc, e) => acc + e.gst_cents, 0);
 
     return {
-      balance: balanceCents,
+      balance: derivedBalanceCents,
+      confirmed: confirmedCents,
       awaitingReimb: awaitingReimbCents,
       planned: plannedCents,
-      recentBusiness: recentBusinessCents,
+      recentCashOut: recentCashOutCents,
       outstandingInvoices: outstandingInvoicesCents,
       projected: projectedCents,
       filteredCount: filtered.length,
@@ -425,9 +399,12 @@ export default function ReceiptsClient() {
     };
   }, [businessState, expenses, filtered, invoiceSummary]);
 
-  // ── Balance edit ────────────────────────────────────
+  // ── Reconcile ───────────────────────────────────────
+  // Confirm what the bank actually says. Prefill with the derived figure —
+  // that's our best guess at the real balance, so an agreeing reconcile is
+  // just Enter. The server recomputes the baseline from the expenses table.
   function startEditBalance() {
-    setBalanceStr(((businessState?.account_balance_cents ?? 0) / 100).toFixed(2));
+    setBalanceStr((totals.balance / 100).toFixed(2));
     setEditingBalance(true);
     setError(null);
   }
@@ -437,18 +414,6 @@ export default function ReceiptsClient() {
       setError("Enter a valid balance");
       return;
     }
-    // Compute current cumulative cash-out so the server can save it as the
-    // new baseline. After this save, "Recent cash out" = 0 until new
-    // business spend or new reimbursements are logged.
-    const cumulativeBusinessCents = expenses
-      .filter(
-        (e) => (e.status ?? "paid") === "paid" && e.paid_by === "business",
-      )
-      .reduce((acc, e) => acc + e.amount_cents, 0);
-    const cumulativeReimbursedCents = expenses
-      .filter((e) => e.reimbursed && e.paid_by !== "business")
-      .reduce((acc, e) => acc + e.amount_cents, 0);
-    const baselineCents = cumulativeBusinessCents + cumulativeReimbursedCents;
 
     setSavingBalance(true);
     setError(null);
@@ -456,10 +421,7 @@ export default function ReceiptsClient() {
       const res = await fetch("/api/business-state", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          account_balance_cents: cents,
-          snapshot_baseline_cents: baselineCents,
-        }),
+        body: JSON.stringify({ account_balance_cents: cents }),
       });
       if (!res.ok) {
         const text = await res.text();
@@ -825,127 +787,77 @@ export default function ReceiptsClient() {
       {/* ── Bank balance + projections ── */}
       <section className="grid gap-4 rounded-2xl border border-black/10 bg-white p-5 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr_1fr]">
         <div className="sm:border-r sm:border-black/10 sm:pr-5">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-xs uppercase tracking-wider text-gold">
-              Bank balance
-            </div>
-            <div className="flex overflow-hidden rounded-md border border-black/10 text-[9px] font-bold uppercase tracking-wider">
-              <button
-                type="button"
-                onClick={() => changeBalanceMode("manual")}
-                className={
-                  "px-2 py-1 " +
-                  (balanceMode === "manual"
-                    ? "bg-gold text-[#1d1d1f]"
-                    : "text-[#6e6e73] hover:text-[#1d1d1f]")
-                }
-                title="Show the snapshot you typed in. Recent spend appears as a separate card."
-              >
-                Manual
-              </button>
-              <button
-                type="button"
-                onClick={() => changeBalanceMode("auto")}
-                className={
-                  "px-2 py-1 " +
-                  (balanceMode === "auto"
-                    ? "bg-gold text-[#1d1d1f]"
-                    : "text-[#6e6e73] hover:text-[#1d1d1f]")
-                }
-                title="Auto-subtract Business-paid expenses logged since the last balance update."
-              >
-                Auto
-              </button>
-            </div>
+          <div className="text-xs uppercase tracking-wider text-gold">
+            Bank balance
           </div>
           {editingBalance ? (
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                inputMode="decimal"
-                autoFocus
-                className={inputClass + " max-w-[140px]"}
-                value={balanceStr}
-                onChange={(e) => setBalanceStr(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") saveBalance();
-                  if (e.key === "Escape") setEditingBalance(false);
-                }}
-              />
-              <button
-                type="button"
-                onClick={saveBalance}
-                disabled={savingBalance}
-                className="text-xs font-semibold text-gold hover:underline disabled:opacity-50"
-              >
-                {savingBalance ? "Saving…" : "Save"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditingBalance(false)}
-                className="text-xs text-[#86868b] hover:text-[#3a3a3c]"
-              >
-                Cancel
-              </button>
+            <div className="mt-2">
+              <div className="flex items-center gap-2">
+                <input
+                  inputMode="decimal"
+                  autoFocus
+                  className={inputClass + " max-w-[140px]"}
+                  value={balanceStr}
+                  onChange={(e) => setBalanceStr(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveBalance();
+                    if (e.key === "Escape") setEditingBalance(false);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={saveBalance}
+                  disabled={savingBalance}
+                  className="text-xs font-semibold text-gold hover:underline disabled:opacity-50"
+                >
+                  {savingBalance ? "Saving…" : "Confirm"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingBalance(false)}
+                  className="text-xs text-[#86868b] hover:text-[#3a3a3c]"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="mt-1.5 text-[10px] leading-relaxed text-[#86868b]">
+                Enter what your bank shows right now. This becomes the new
+                confirmed baseline and resets Recent cash out to zero.
+              </div>
             </div>
           ) : (
             <div className="mt-1 flex items-baseline gap-3">
               <div
                 className={
                   "text-2xl font-bold " +
-                  ((balanceMode === "auto"
-                    ? totals.balance - totals.recentBusiness
-                    : totals.balance) < 0
-                    ? "text-[#C8332B]"
-                    : "text-[#1d1d1f]")
+                  (totals.balance < 0 ? "text-[#C8332B]" : "text-[#1d1d1f]")
                 }
               >
-                {formatMoney(
-                  balanceMode === "auto"
-                    ? totals.balance - totals.recentBusiness
-                    : totals.balance,
-                )}
+                {formatMoney(totals.balance)}
               </div>
               <button
                 type="button"
                 onClick={startEditBalance}
                 className="rounded-md border border-black/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#3a3a3c] hover:border-gold hover:text-gold"
+                title="Confirm what the bank actually says and reset the since-counter."
               >
-                {balanceMode === "auto" ? "Reset" : "Update"}
+                Update
               </button>
             </div>
           )}
           {businessState?.account_balance_updated_at && (
             <div className="mt-1 text-[10px] uppercase tracking-wider text-[#86868b]">
-              {balanceMode === "auto" ? (
-                <>
-                  Snapshot {formatMoney(totals.balance)} as of{" "}
-                  {formatDate(businessState.account_balance_updated_at.slice(0, 10))}
-                </>
-              ) : (
-                <>
-                  Updated{" "}
-                  {formatDate(businessState.account_balance_updated_at.slice(0, 10))}
-                </>
-              )}
+              Confirmed {formatMoney(totals.confirmed)} on{" "}
+              {formatDate(businessState.account_balance_updated_at.slice(0, 10))}
             </div>
           )}
         </div>
 
         <Stat
           label="Recent cash out"
-          value={formatMoney(totals.recentBusiness)}
-          tone={
-            balanceMode === "auto"
-              ? "muted"
-              : totals.recentBusiness > 0
-                ? "amber"
-                : "muted"
-          }
-          subline={
-            balanceMode === "auto"
-              ? "Business spend + reimbursements paid (already deducted above)"
-              : "Business spend + reimbursements paid since last balance update"
-          }
+          value={formatMoney(totals.recentCashOut)}
+          tone="muted"
+          subline="Business spend + reimbursements paid since confirmation (already deducted above)"
         />
         <Stat
           label="Awaiting reimbursement"
@@ -1004,11 +916,7 @@ export default function ReceiptsClient() {
           label="Projected position"
           value={formatMoney(totals.projected)}
           tone={totals.projected < 0 ? "red" : "good"}
-          subline={
-            balanceMode === "auto"
-              ? "live balance + invoices owed − awaiting − planned"
-              : "balance + invoices owed − recent − awaiting − planned"
-          }
+          subline="balance + invoices owed − awaiting − planned"
         />
       </section>
 
