@@ -127,7 +127,34 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
   const [sequence, setSequence] = useState(1);
 
   useEffect(() => {
-    setSequence(nextSeqFromLocalStorage(prefix, year));
+    if (!prefix) {
+      setSequence(1);
+      return;
+    }
+    // Start from the local hint, then reconcile against the ledger so the
+    // number is authoritative across devices/sessions (localStorage alone let
+    // invoices collide and overwrite each other). Never go below either.
+    const local = nextSeqFromLocalStorage(prefix, year);
+    setSequence(local);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/invoices/next-number?prefix=${encodeURIComponent(prefix)}&year=${year}`,
+          { cache: "no-store" },
+        );
+        if (!res.ok || cancelled) return;
+        const { next } = (await res.json()) as { next?: number };
+        if (Number.isFinite(next)) {
+          setSequence((prev) => Math.max(prev, next as number));
+        }
+      } catch {
+        /* keep the local hint if the lookup fails */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [prefix, year]);
 
   const invoiceNumber = prefix ? `${prefix}-${year}-${pad3(sequence)}` : "—";
@@ -669,39 +696,63 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
           .filter(Boolean)
           .join("; ");
 
-        const createRes = await fetch("/api/invoices/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            invoice_number: invoiceNumber,
-            prefix,
-            client_name: toName,
-            client_sub_org: toSubOrg || null,
-            client_email: toEmail,
-            issue_date: issueDate,
-            due_date: dueDate,
-            next_invoice_date: nextInvoiceDate,
-            billing_cycle_days: cadenceDays > 0 ? cadenceDays : null,
-            subtotal_cents: Math.round(subtotal * 100),
-            gst_cents: Math.round(taxAmount * 100),
-            total_cents: Math.round(total * 100),
-            currency,
-            description: summary || null,
-            pdf_url: pdfBlobUrl,
-            pdf_pathname: pdfBlobPathname,
-          }),
-        });
-        if (!createRes.ok) {
-          const text = await createRes.text().catch(() => "");
-          setError(
-            `PDF downloaded, but ledger save failed: ${text || createRes.status}. The file is on your device.`,
+        const payload = {
+          invoice_number: invoiceNumber,
+          prefix,
+          client_name: toName,
+          client_sub_org: toSubOrg || null,
+          client_email: toEmail,
+          issue_date: issueDate,
+          due_date: dueDate,
+          next_invoice_date: nextInvoiceDate,
+          billing_cycle_days: cadenceDays > 0 ? cadenceDays : null,
+          subtotal_cents: Math.round(subtotal * 100),
+          gst_cents: Math.round(taxAmount * 100),
+          total_cents: Math.round(total * 100),
+          currency,
+          description: summary || null,
+          pdf_url: pdfBlobUrl,
+          pdf_pathname: pdfBlobPathname,
+        };
+        const postLedger = (overwrite: boolean) =>
+          fetch("/api/invoices/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, overwrite }),
+          });
+
+        let createRes = await postLedger(false);
+        // A repeated number no longer silently overwrites — the server returns
+        // 409 and we only replace the existing invoice with explicit consent.
+        if (createRes.status === 409) {
+          const dup = (await createRes.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          const ok = window.confirm(
+            `${dup.error || `Invoice ${invoiceNumber} already exists`}.\n\n` +
+              `Overwrite that existing invoice with these details?\n` +
+              `Cancel to keep it and choose a different number.`,
           );
-        } else {
+          if (ok) {
+            createRes = await postLedger(true);
+          } else {
+            setError(
+              `Not saved — ${invoiceNumber} already exists. Change the number and download again. (PDF is on your device.)`,
+            );
+          }
+        }
+
+        if (createRes.ok) {
           const createData = (await createRes.json()) as {
             invoice: { id: string };
           };
           savedInvoiceId = createData.invoice.id;
           onSaved?.();
+        } else if (createRes.status !== 409) {
+          const text = await createRes.text().catch(() => "");
+          setError(
+            `PDF downloaded, but ledger save failed: ${text || createRes.status}. The file is on your device.`,
+          );
         }
       } catch (recordErr) {
         console.warn("Invoice ledger save threw:", recordErr);

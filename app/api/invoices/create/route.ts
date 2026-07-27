@@ -68,15 +68,43 @@ export async function POST(request: NextRequest) {
     updated_at: new Date().toISOString(),
   };
 
+  // Insert by default so a repeated number can never silently overwrite an
+  // existing invoice. Overwriting the same number is allowed only when the
+  // caller explicitly opts in (e.g. re-downloading an existing invoice after
+  // confirming), which keeps re-saves working without risking data loss.
+  const overwrite = body.overwrite === true;
+
   try {
     const admin = createAdminClient();
-    // Upsert on invoice_number — re-downloading the same invoice updates the record.
+
+    if (overwrite) {
+      const { data, error } = await admin
+        .from("invoices")
+        .upsert(row, { onConflict: "invoice_number" })
+        .select()
+        .single();
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      return NextResponse.json({ invoice: data });
+    }
+
     const { data, error } = await admin
       .from("invoices")
-      .upsert(row, { onConflict: "invoice_number" })
+      .insert(row)
       .select()
       .single();
     if (error) {
+      // 23505 = unique_violation on invoice_number
+      if (error.code === "23505") {
+        return NextResponse.json(
+          {
+            error: `Invoice ${row.invoice_number} already exists`,
+            code: "duplicate",
+          },
+          { status: 409 },
+        );
+      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     return NextResponse.json({ invoice: data });
