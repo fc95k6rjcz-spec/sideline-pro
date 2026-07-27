@@ -1424,13 +1424,17 @@ export default function ReceiptsClient() {
                               {editCurrency !== "AUD" && (
                                 <div className="flex items-center gap-1.5 text-[10px] text-[#86868b]">
                                   <span className="uppercase tracking-wider">FX</span>
-                                  <input
-                                    inputMode="decimal"
-                                    className={cellInputClass + " h-6 w-[64px] text-right text-[11px]"}
-                                    value={editFxRateStr}
-                                    onChange={(ev) => setEditFxRateStr(ev.target.value)}
-                                    aria-label="FX rate to AUD"
-                                  />
+                                  {/* Fixed-width wrapper: cellInputClass has w-full,
+                                      so a width utility on the input itself conflicts. */}
+                                  <div className="w-[64px] shrink-0">
+                                    <input
+                                      inputMode="decimal"
+                                      className={cellInputClass + " h-6 text-right text-[11px]"}
+                                      value={editFxRateStr}
+                                      onChange={(ev) => setEditFxRateStr(ev.target.value)}
+                                      aria-label="FX rate to AUD"
+                                    />
+                                  </div>
                                   {parseAmount(editAmountStr) !== null &&
                                     Number(editFxRateStr) > 0 && (
                                       <span className="text-[#1B7A47]">
