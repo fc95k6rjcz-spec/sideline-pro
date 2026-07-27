@@ -1385,29 +1385,34 @@ export default function ReceiptsClient() {
                         </td>
                         <td className="px-3 py-3 align-middle text-right text-[#1d1d1f]">
                           {isEditing ? (
-                            <div className="flex flex-col items-end gap-1">
+                            <div className="ml-auto flex w-[188px] flex-col items-stretch gap-1">
                               <div className="flex items-center gap-1.5">
-                                <select
-                                  className={cellInputClass + " w-[72px]"}
-                                  value={editCurrency}
-                                  onChange={(ev) => {
-                                    const next = ev.target.value as Currency;
-                                    setEditCurrency(next);
-                                    setEditFxRateStr(String(DEFAULT_FX_TO_AUD[next]));
-                                    if (next !== "AUD") setEditGstStr("0.00");
-                                  }}
-                                  aria-label="Currency"
-                                >
-                                  {CURRENCIES.map((c) => (
-                                    <option key={c} value={c}>
-                                      {c}
-                                    </option>
-                                  ))}
-                                </select>
+                                {/* Fixed-width wrapper: cellInputClass has w-full,
+                                    so a width utility on the select itself conflicts
+                                    and loses unpredictably (see the New expense form). */}
+                                <div className="w-[76px] shrink-0">
+                                  <select
+                                    className={cellInputClass}
+                                    value={editCurrency}
+                                    onChange={(ev) => {
+                                      const next = ev.target.value as Currency;
+                                      setEditCurrency(next);
+                                      setEditFxRateStr(String(DEFAULT_FX_TO_AUD[next]));
+                                      if (next !== "AUD") setEditGstStr("0.00");
+                                    }}
+                                    aria-label="Currency"
+                                  >
+                                    {CURRENCIES.map((c) => (
+                                      <option key={c} value={c}>
+                                        {c}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
                                 <input
                                   inputMode="decimal"
                                   autoFocus
-                                  className={cellInputClass + " min-w-[90px] text-right"}
+                                  className={cellInputClass + " min-w-0 flex-1 text-right"}
                                   value={editAmountStr}
                                   onChange={(ev) => setEditAmountStr(ev.target.value)}
                                   onKeyDown={(ev) => {
