@@ -87,12 +87,19 @@ export async function PATCH(request: NextRequest) {
       (expenseRows ?? []) as CashOutExpense[],
     );
 
+    // This is a manual reconcile, so record it as the confirmed snapshot too.
+    // Invoice auto-bumps move account_balance_cents but leave these untouched,
+    // keeping the "Confirmed $X on <date>" label pinned to the last human
+    // confirmation rather than the last automatic event.
+    const now = new Date().toISOString();
     const upsertRow: Record<string, unknown> = {
       id: 1,
       account_balance_cents: Math.round(balance),
-      account_balance_updated_at: new Date().toISOString(),
+      account_balance_updated_at: now,
       updated_by_email: user.email,
       snapshot_baseline_cents: baseline,
+      balance_confirmed_cents: Math.round(balance),
+      balance_confirmed_at: now,
     };
     const { data, error } = await admin
       .from("business_state")

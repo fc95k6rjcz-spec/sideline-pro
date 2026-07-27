@@ -37,11 +37,17 @@ type Expense = {
 
 type BusinessState = {
   id: number;
+  // Live figure: auto-bumped when an invoice is marked paid.
   account_balance_cents: number;
   account_balance_updated_at: string;
   // Cumulative cash-out at the moment the balance was last set. Recent cash
   // out is (current cumulative cash-out) − snapshot_baseline_cents.
   snapshot_baseline_cents: number | null;
+  // The balance the user last *manually* confirmed, and when. Written only by
+  // a manual reconcile — never by an invoice auto-bump — so the "Confirmed on"
+  // label stays honest. Null on legacy rows (fall back to account_balance_*).
+  balance_confirmed_cents: number | null;
+  balance_confirmed_at: string | null;
   updated_by_email: string | null;
 };
 
@@ -345,7 +351,13 @@ export default function ReceiptsClient() {
   }, [expenses, monthFilter, statusFilter]);
 
   const totals = useMemo(() => {
-    const confirmedCents = businessState?.account_balance_cents ?? 0;
+    // Live balance = last confirmed figure plus any invoice auto-bumps since.
+    // The headline derives from this. The label instead shows the manually
+    // confirmed snapshot, which auto-bumps leave untouched (falling back to the
+    // live figure on legacy rows that predate the snapshot columns).
+    const liveBalanceCents = businessState?.account_balance_cents ?? 0;
+    const confirmedSnapshotCents =
+      businessState?.balance_confirmed_cents ?? liveBalanceCents;
     const awaitingReimbCents = expenses
       .filter(isAwaitingReimbursement)
       .reduce((acc, e) => acc + e.amount_cents, 0);
@@ -362,7 +374,7 @@ export default function ReceiptsClient() {
     // The headline balance. The confirmed figure is only ever a starting point:
     // what we show is that figure minus everything that has left the account
     // since it was confirmed.
-    const derivedBalanceCents = confirmedCents - recentCashOutCents;
+    const derivedBalanceCents = liveBalanceCents - recentCashOutCents;
 
     // Money IN/OUT of the business, forward-looking from the derived balance:
     //   IN  = outstanding invoices (clients owe us — expected inflow)
@@ -384,7 +396,7 @@ export default function ReceiptsClient() {
 
     return {
       balance: derivedBalanceCents,
-      confirmed: confirmedCents,
+      confirmed: confirmedSnapshotCents,
       awaitingReimb: awaitingReimbCents,
       planned: plannedCents,
       recentCashOut: recentCashOutCents,
@@ -845,10 +857,14 @@ export default function ReceiptsClient() {
               </button>
             </div>
           )}
-          {businessState?.account_balance_updated_at && (
+          {(businessState?.balance_confirmed_at ??
+            businessState?.account_balance_updated_at) && (
             <div className="mt-1 text-[10px] uppercase tracking-wider text-[#86868b]">
               Confirmed {formatMoney(totals.confirmed)} on{" "}
-              {formatDate(businessState.account_balance_updated_at.slice(0, 10))}
+              {formatDate(
+                (businessState.balance_confirmed_at ??
+                  businessState.account_balance_updated_at).slice(0, 10),
+              )}
             </div>
           )}
         </div>
