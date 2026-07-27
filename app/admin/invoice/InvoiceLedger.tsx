@@ -21,6 +21,8 @@ export type InvoiceRow = {
   pdf_pathname: string | null;
   paid: boolean;
   paid_date: string | null;
+  auto_issue: boolean | null;
+  is_draft: boolean | null;
   client_email: string | null;
   email_sent_at: string | null;
   created_by_email: string;
@@ -55,6 +57,21 @@ function isOverdue(inv: InvoiceRow) {
   if (inv.paid) return false;
   const due = new Date(`${inv.due_date}T00:00:00`);
   return due.getTime() < Date.now();
+}
+
+// Next monthly occurrence (same day-of-month as the anchor) strictly after
+// `afterIso`. Clamps to month length so a 31st anchor stays sane.
+function nextMonthlyOnOrAfter(anchorIso: string, afterIso: string): string {
+  const d = new Date(`${anchorIso}T00:00:00`);
+  const after = new Date(`${afterIso}T00:00:00`);
+  const day = d.getDate();
+  while (d.getTime() <= after.getTime()) {
+    d.setDate(1);
+    d.setMonth(d.getMonth() + 1);
+    const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    d.setDate(Math.min(day, last));
+  }
+  return d.toISOString().slice(0, 10);
 }
 
 function downloadCsv(rows: InvoiceRow[]) {
@@ -193,6 +210,39 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
           }${formatMoney(Math.abs(adj), inv.currency)}`,
         );
       }
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function toggleAutoIssue(inv: InvoiceRow) {
+    const enabling = !inv.auto_issue;
+    const body: Record<string, unknown> = { auto_issue: enabling };
+    if (enabling) {
+      const today = new Date().toISOString().slice(0, 10);
+      body.next_invoice_date = nextMonthlyOnOrAfter(inv.issue_date, today);
+    }
+    setBusyId(inv.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Update failed (${res.status})`);
+      }
+      setNotice(
+        enabling
+          ? `${inv.invoice_number} will auto-draft monthly — next on ${formatDate(String(body.next_invoice_date))}. You'll get an email to review & send.`
+          : `${inv.invoice_number} auto-issue turned off`,
+      );
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update");
@@ -420,6 +470,14 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                         ) : (
                           <span className="font-semibold">{inv.invoice_number}</span>
                         )}
+                        {inv.is_draft && (
+                          <span
+                            className="ml-2 rounded-full bg-[#FDF1E0] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#9A6A1A]"
+                            title="Auto-drafted — not sent to the client yet"
+                          >
+                            Draft
+                          </span>
+                        )}
                       </td>
                       <td className="max-w-[200px] truncate px-3 py-3 text-[#3a3a3c]">
                         {inv.client_name}
@@ -447,7 +505,14 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                         )}
                       </td>
                       <td className="px-3 py-3 text-xs text-[#6e6e73]">
-                        {inv.next_invoice_date ? (
+                        {inv.auto_issue && inv.next_invoice_date ? (
+                          <span
+                            className="rounded-full bg-[#E9F6EF] px-1.5 py-0.5 text-[10px] font-semibold text-[#1B7A47]"
+                            title="Auto-drafts monthly; you get an email to review & send"
+                          >
+                            ⟳ {formatDate(inv.next_invoice_date)}
+                          </span>
+                        ) : inv.next_invoice_date ? (
                           <>
                             {formatDate(inv.next_invoice_date)}
                             {inv.billing_cycle_days && (
@@ -462,6 +527,31 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                       </td>
                       <td className="px-3 py-3 text-right">
                         <div className="flex items-center justify-end gap-3">
+                          {inv.is_draft && (
+                            <a
+                              href={`/admin/invoice?draft=${inv.id}`}
+                              className="whitespace-nowrap rounded-md border border-gold/60 px-2 py-0.5 text-xs font-semibold text-gold hover:bg-gold/10"
+                              title="Open in the form to review, then download & send"
+                            >
+                              Review &amp; send
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => toggleAutoIssue(inv)}
+                            disabled={busyId === inv.id}
+                            className={
+                              "text-xs hover:underline disabled:opacity-50 " +
+                              (inv.auto_issue ? "text-[#1B7A47]" : "text-[#86868b]")
+                            }
+                            title={
+                              inv.auto_issue
+                                ? "Auto-issue is ON — a draft is created monthly and emailed to you. Click to turn off."
+                                : "Turn on monthly auto-issue: drafts the next invoice each month and emails you to review & send."
+                            }
+                          >
+                            {inv.auto_issue ? "Auto ✓" : "Auto-issue"}
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleSend(inv)}

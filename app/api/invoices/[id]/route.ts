@@ -24,7 +24,28 @@ const PATCHABLE = [
   "pdf_pathname",
   "paid",
   "paid_date",
+  "auto_issue",
+  "is_draft",
 ] as const;
+
+export async function GET(_request: NextRequest, ctx: Params) {
+  const user = await requireUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await ctx.params;
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("invoices")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 404 });
+    return NextResponse.json({ invoice: data });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Load failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 
 async function requireUser() {
   const sb = await createClient();

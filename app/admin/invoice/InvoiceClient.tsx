@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type LineItem = {
   id: string;
@@ -126,7 +126,16 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
   const [year, setYear] = useState(currentYear());
   const [sequence, setSequence] = useState(1);
 
+  // When issuing an auto-drafted invoice (opened via ?draft=id) we reuse its
+  // exact number, so the DB reconcile below must not bump it to max+1.
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const skipSeqReconcile = useRef(false);
+
   useEffect(() => {
+    if (skipSeqReconcile.current) {
+      skipSeqReconcile.current = false;
+      return;
+    }
     if (!prefix) {
       setSequence(1);
       return;
@@ -391,11 +400,98 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
     setItems((prev) => (prev.length > 1 ? prev.filter((it) => it.id !== id) : prev));
   }
 
+  // Load an auto-drafted invoice for review & send when opened via ?draft=id.
+  // Reuses the draft's exact number and pre-fills the form; the normal
+  // Download & send flow then generates the PDF and issues it.
+  const draftLoadAttempted = useRef(false);
+  useEffect(() => {
+    if (draftLoadAttempted.current || typeof window === "undefined") return;
+    const id = new URLSearchParams(window.location.search).get("draft");
+    if (!id) return;
+    if (clients.length === 0) return; // wait so we can match the client's address
+    draftLoadAttempted.current = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/invoices/${id}`, { cache: "no-store" });
+        if (!res.ok) return;
+        const { invoice } = (await res.json()) as {
+          invoice: {
+            id: string;
+            invoice_number: string;
+            client_name: string;
+            client_sub_org: string | null;
+            client_email: string | null;
+            issue_date: string;
+            due_date: string;
+            subtotal_cents: number;
+            gst_cents: number;
+            currency: string | null;
+            description: string | null;
+          };
+        };
+        const match =
+          clients.find(
+            (c) =>
+              c.name === invoice.client_name &&
+              (c.sub_org ?? "") === (invoice.client_sub_org ?? ""),
+          ) ??
+          clients.find((c) => c.name === invoice.client_name) ??
+          null;
+        if (match) {
+          setSelectedClientId(match.id);
+          setToAddress(match.address);
+        }
+        setToName(invoice.client_name);
+        setToSubOrg(invoice.client_sub_org ?? "");
+        setToEmail(invoice.client_email ?? "");
+
+        const m = /^(.*)-(\d{4})-(\d+)$/.exec(invoice.invoice_number);
+        if (m) {
+          skipSeqReconcile.current = true;
+          setPrefix(m[1]);
+          setYear(parseInt(m[2], 10));
+          setSequence(parseInt(m[3], 10));
+        }
+        setIssueDate(invoice.issue_date);
+        setDueDate(invoice.due_date);
+        const d = new Date(`${invoice.issue_date}T00:00:00`);
+        setBillingPeriod(
+          d.toLocaleDateString("en-AU", { month: "long", year: "numeric" }),
+        );
+        const gap = Math.round(
+          (new Date(`${invoice.due_date}T00:00:00`).getTime() -
+            new Date(`${invoice.issue_date}T00:00:00`).getTime()) /
+            86_400_000,
+        );
+        setPaymentTerms(gap > 0 ? `Net ${gap}` : "Due on receipt");
+        setCurrency(invoice.currency ?? "AUD");
+        setTaxRate(
+          invoice.subtotal_cents
+            ? Math.round((invoice.gst_cents / invoice.subtotal_cents) * 100)
+            : 10,
+        );
+        setItems([
+          {
+            id: makeId(),
+            title: invoice.description ?? "Services",
+            description: "",
+            quantity: 1,
+            rate: (invoice.subtotal_cents ?? 0) / 100,
+          },
+        ]);
+        setDraftId(invoice.id);
+        setSendStatus("Draft loaded — review the details, then Download & send.");
+      } catch {
+        /* leave a blank form if the draft can't be loaded */
+      }
+    })();
+  }, [clients]);
+
   async function handleDownload() {
     setError(null);
     setSendStatus(null);
 
-    if (!selectedClient) {
+    if (!selectedClient && !draftId) {
       setError("Pick a client first (or add one).");
       return;
     }
@@ -713,6 +809,8 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
           description: summary || null,
           pdf_url: pdfBlobUrl,
           pdf_pathname: pdfBlobPathname,
+          // Issuing clears the draft flag — this is a real, sent invoice now.
+          is_draft: false,
         };
         const postLedger = (overwrite: boolean) =>
           fetch("/api/invoices/create", {
@@ -721,7 +819,8 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
             body: JSON.stringify({ ...payload, overwrite }),
           });
 
-        let createRes = await postLedger(false);
+        // Issuing a loaded draft reuses its number, so overwrite that row.
+        let createRes = await postLedger(Boolean(draftId));
         // A repeated number no longer silently overwrites — the server returns
         // 409 and we only replace the existing invoice with explicit consent.
         if (createRes.status === 409) {
@@ -747,6 +846,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
             invoice: { id: string };
           };
           savedInvoiceId = createData.invoice.id;
+          setDraftId(null); // it's now a real, issued invoice
           onSaved?.();
         } else if (createRes.status !== 409) {
           const text = await createRes.text().catch(() => "");
@@ -1259,7 +1359,7 @@ export default function InvoiceClient({ onSaved }: Props = {}) {
 
         <button
           type="button"
-          disabled={generating || !selectedClient}
+          disabled={generating || (!selectedClient && !draftId)}
           onClick={handleDownload}
           className="w-full rounded-lg gold-bg px-4 py-3 text-sm font-bold uppercase tracking-wider text-[#1d1d1f] hover:opacity-90 disabled:opacity-50"
         >

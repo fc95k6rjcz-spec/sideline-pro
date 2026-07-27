@@ -64,6 +64,8 @@ export async function POST(request: NextRequest) {
     // ledger later (before the first send has stamped it). Falsy → null so we
     // never overwrite a previously-saved value with an empty string on upsert.
     client_email: body.client_email ? String(body.client_email).trim() : null,
+    auto_issue: body.auto_issue === true,
+    is_draft: body.is_draft === true,
     created_by_email: user.email,
     updated_at: new Date().toISOString(),
   };
