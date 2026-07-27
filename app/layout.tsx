@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-white">
+    <html lang="en" className="scroll-smooth bg-white">
       <body className="font-sans antialiased bg-white text-[#1d1d1f]">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
