@@ -25,6 +25,10 @@ type Expense = {
   vendor: string | null;
   is_recurring: boolean | null;
   recurring_frequency: string | null;
+  // Recurring automation: templates carry the schedule in recurring_next_date;
+  // auto-generated instances point back to their template via recurring_source_id.
+  recurring_next_date: string | null;
+  recurring_source_id: string | null;
   // Currency (amount_cents stays in AUD)
   currency: string | null;
   original_amount_cents: number | null;
@@ -1356,8 +1360,23 @@ export default function ReceiptsClient() {
                             <>
                               {e.description}
                               {e.is_recurring && (
-                                <span className="ml-2 text-[10px] uppercase tracking-wider text-gold">
+                                <span
+                                  className="ml-2 text-[10px] uppercase tracking-wider text-gold"
+                                  title={
+                                    e.recurring_next_date
+                                      ? `Next auto-entry ${formatDate(e.recurring_next_date)}`
+                                      : undefined
+                                  }
+                                >
                                   ↻ {e.recurring_frequency ?? "recurring"}
+                                </span>
+                              )}
+                              {e.recurring_source_id && (
+                                <span
+                                  className="ml-2 rounded-full bg-[#EEF0F3] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[#5A5A5F]"
+                                  title="Automatically created from a recurring charge"
+                                >
+                                  auto
                                 </span>
                               )}
                             </>
