@@ -215,7 +215,9 @@ export default function ReceiptsClient() {
   const [monthFilter, setMonthFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<Filter>("all");
 
-  // Auto-calc GST — only fires for AUD (can't claim GST on foreign receipts)
+  // Auto-calc GST — the amount field is GST-inclusive, so the GST component is
+  // 1/11th of it (not 10% of it). Only fires for AUD (can't claim GST on
+  // foreign receipts).
   useEffect(() => {
     if (!autoGst) return;
     if (currency !== "AUD") {
@@ -1176,7 +1178,7 @@ export default function ReceiptsClient() {
               }}
               className="h-3.5 w-3.5 accent-gold"
             />
-            Auto-calc GST (10% of amount)
+            Auto-calc GST (1/11th of incl. amount)
           </label>
           <label className="flex items-center gap-2 text-[#6e6e73]">
             <input

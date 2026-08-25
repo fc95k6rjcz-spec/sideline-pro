@@ -11,8 +11,8 @@ export default function ExpensesPage() {
       </h1>
       <p className="mt-2 max-w-xl text-sm text-[#6e6e73]">
         Log an expense now, attach the receipt later. Both you and Rowan see
-        every entry. GST is auto-calculated at 10% of the gross amount but you
-        can override it.
+        every entry. GST is auto-calculated as 1/11th of the GST-inclusive
+        amount — you can override it.
       </p>
 
       <ReceiptsClient />
