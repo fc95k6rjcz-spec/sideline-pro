@@ -19,16 +19,17 @@ const tealBtn =
   "inline-flex items-center justify-center rounded-lg bg-[#10b3a3] font-medium text-white transition-colors duration-200 hover:bg-[#0d9a8c]"
 
 /* ──────────────────────────────────────────────────────────
-   Wordmark — text "Sideline" + teal "Pro"
+   Wordmark — official horizontal logo (dark-background variant)
    ────────────────────────────────────────────────────────── */
-function Wordmark({ size = 26 }: { size?: number }) {
+function Wordmark({ height = 44 }: { height?: number }) {
   return (
-    <span
-      style={{ fontSize: size, fontWeight: 700, letterSpacing: "-0.02em" }}
-      className="text-white"
-    >
-      Sideline<span style={{ color: TEAL_ON_NAVY }}>Pro</span>
-    </span>
+    <Image
+      src="/logo-horizontal-dark.svg"
+      alt="SidelinePro"
+      width={Math.round(height * 3.125)}
+      height={height}
+      priority
+    />
   )
 }
 
@@ -473,7 +474,7 @@ function Footer() {
       <div className="mx-auto max-w-[1120px]">
         <div className="grid gap-6 border-b border-white/[0.12] pb-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1fr]">
           <div>
-            <Wordmark size={22} />
+            <Wordmark height={36} />
             <p className="mt-3 max-w-[230px] text-[13px] leading-[1.55] text-[#8fa0b8]">
               Designed and shipped from Sydney for Australian community clubs.
             </p>
