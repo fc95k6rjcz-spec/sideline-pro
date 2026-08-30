@@ -39,7 +39,7 @@ function Wordmark({ height = 44 }: { height?: number }) {
 const navLinks = [
   ["Features", "#features"],
   ["Solutions", "#solutions"],
-  ["About", "#about"],
+  ["Apps", "#apps"],
   ["Contact", "#contact"],
 ]
 
@@ -74,10 +74,10 @@ function Navbar() {
 function Hero() {
   return (
     <section id="top" className="relative overflow-hidden bg-[#0e1a30] pt-[72px]">
-      <div className="grid items-stretch lg:min-h-[640px] lg:grid-cols-[46%_54%]">
-        {/* copy */}
-        <div className="flex w-full max-w-[640px] flex-col justify-center justify-self-end px-7 py-16 lg:py-[70px]">
-          <div className="lg:pl-7">
+      <div className="relative z-10 mx-auto flex max-w-[1180px] items-center px-7 py-16 lg:min-h-[calc(100vh-72px)] lg:py-[70px]">
+        {/* copy — shares the nav's container so the headline lines up with the logo */}
+        <div className="lg:max-w-[560px]">
+          <div>
             <h1
               className="font-bold text-white"
               style={{
@@ -108,21 +108,21 @@ function Hero() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* photo — angled left edge */}
-        <div
-          className="relative min-h-[360px] lg:min-h-0"
-          style={{ clipPath: "polygon(14% 0, 100% 0, 100% 100%, 0 100%)" }}
-        >
-          <Image
-            src="/hero-netball.png"
-            alt="Junior netball game on an indoor court"
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 54vw"
-            className="object-cover"
-          />
-        </div>
+      {/* photo — angled left edge, pinned right on desktop */}
+      <div
+        className="relative min-h-[360px] lg:absolute lg:bottom-0 lg:right-0 lg:top-[72px] lg:min-h-0 lg:w-[56%]"
+        style={{ clipPath: "polygon(14% 0, 100% 0, 100% 100%, 0 100%)" }}
+      >
+        <Image
+          src="/hero-netball.png"
+          alt="Junior netball game on an indoor court"
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 56vw"
+          className="object-cover"
+        />
       </div>
     </section>
   )
@@ -131,8 +131,6 @@ function Hero() {
 /* ──────────────────────────────────────────────────────────
    Features / ROI table
    ────────────────────────────────────────────────────────── */
-const HIGHLIGHT = "Player Grading"
-
 const roster = [
   {
     task: "Umpire & ref rostering",
@@ -182,7 +180,10 @@ const COLS = "grid-cols-[1.1fr_1.35fr_1.55fr_1fr]"
 
 function FeaturesTable() {
   return (
-    <section id="features" className="relative overflow-hidden bg-white px-7 py-[92px]">
+    <section
+      id="features"
+      className="relative flex min-h-[calc(100vh-72px)] scroll-mt-[72px] items-center overflow-hidden bg-white px-7 py-16"
+    >
       {/* decorative teal blob */}
       <div
         className="pointer-events-none absolute -right-[120px] -top-[140px] h-[620px] w-[620px] rounded-full"
@@ -192,7 +193,7 @@ function FeaturesTable() {
         }}
         aria-hidden
       />
-      <div className="relative mx-auto max-w-[1120px]">
+      <div className="relative mx-auto w-full max-w-[1120px]">
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#10b3a3]">
           Features
         </p>
@@ -221,33 +222,26 @@ function FeaturesTable() {
                 </span>
               ))}
             </div>
-            {/* rows */}
-            {roster.map((r) => {
-              const highlighted = r.task === HIGHLIGHT
-              return (
-                <div
-                  key={r.task}
-                  className={`grid ${COLS} items-center gap-5 border-b border-[#16233d]/[0.06] py-[19px] pl-6 pr-7`}
-                  style={{
-                    background: highlighted ? "#eaf7f3" : "transparent",
-                    borderLeft: `4px solid ${highlighted ? TEAL : "transparent"}`,
-                  }}
-                >
-                  <span className="text-[15.5px] font-semibold text-[#16233d]">{r.task}</span>
-                  <span className="text-[14px] leading-[1.45] text-[#8a95a3]">{r.old}</span>
-                  <span className="flex items-baseline gap-[9px] text-[14px] leading-[1.45] text-[#3d4a5c]">
-                    <Check className="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-[#10b3a3]" strokeWidth={3} />
-                    <span>{r.now}</span>
-                  </span>
-                  <span className="text-right text-[14px] font-semibold text-[#10b3a3]">{r.save}</span>
-                </div>
-              )
-            })}
+            {/* rows — highlight follows the cursor */}
+            {roster.map((r) => (
+              <div
+                key={r.task}
+                className={`grid ${COLS} items-center gap-5 border-b border-l-4 border-[#16233d]/[0.06] border-l-transparent py-3 pl-6 pr-7 transition-colors duration-150 hover:border-l-[#10b3a3] hover:bg-[#eaf7f3]`}
+              >
+                <span className="text-[15.5px] font-semibold text-[#16233d]">{r.task}</span>
+                <span className="text-[14px] leading-[1.45] text-[#8a95a3]">{r.old}</span>
+                <span className="flex items-baseline gap-[9px] text-[14px] leading-[1.45] text-[#3d4a5c]">
+                  <Check className="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-[#10b3a3]" strokeWidth={3} />
+                  <span>{r.now}</span>
+                </span>
+                <span className="text-right text-[14px] font-semibold text-[#10b3a3]">{r.save}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* add-it-up band */}
-        <div className="mt-[26px] flex flex-wrap items-center justify-between gap-6 rounded-xl bg-[#16233d] px-8 py-[26px]">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-6 rounded-xl bg-[#16233d] px-8 py-5">
           <p
             className="font-semibold text-white"
             style={{ fontSize: "clamp(18px,2vw,22px)", letterSpacing: "-0.01em" }}
@@ -315,8 +309,11 @@ const sports = [
 
 function Solutions() {
   return (
-    <section id="solutions" className="border-t border-white/[0.06] bg-[#121f38] px-7 py-[92px]">
-      <div className="mx-auto max-w-[1120px]">
+    <section
+      id="solutions"
+      className="flex min-h-[calc(100vh-72px)] scroll-mt-[72px] items-center border-t border-white/[0.06] bg-[#121f38] px-7 py-16"
+    >
+      <div className="mx-auto w-full max-w-[1120px]">
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#2dd4bf]">
           Solutions
         </p>
@@ -370,15 +367,18 @@ function Solutions() {
    About / Mobile apps — white, centered
    ────────────────────────────────────────────────────────── */
 const appScreens = [
-  { src: "/app-club-white.png", alt: "Club dashboard app screen", raised: false },
-  { src: "/app-lineup-white.png", alt: "Coach line-up builder app screen", raised: true },
-  { src: "/app-player-white.png", alt: "Player profile app screen", raised: false },
+  { src: "/app-club-white.png", alt: "Club dashboard app screen", height: 1479, raised: false },
+  { src: "/app-lineup-white.png", alt: "Coach line-up builder app screen", height: 1484, raised: true },
+  { src: "/app-player-white.png", alt: "Player profile app screen", height: 1484, raised: false },
 ]
 
 function MobileApps() {
   return (
-    <section id="about" className="overflow-hidden bg-white px-7 pb-[70px] pt-[92px]">
-      <div className="mx-auto max-w-[1120px] text-center">
+    <section
+      id="apps"
+      className="flex min-h-[calc(100vh-72px)] scroll-mt-[72px] items-center overflow-hidden bg-white px-7 py-16"
+    >
+      <div className="mx-auto w-full max-w-[1120px] text-center">
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#10b3a3]">
           Mobile apps
         </p>
@@ -394,14 +394,14 @@ function MobileApps() {
           on top of game day.
         </p>
 
-        <div className="mx-auto mt-[52px] grid max-w-[880px] grid-cols-3 items-end gap-6">
+        <div className="mx-auto mt-10 grid max-w-[820px] grid-cols-3 items-end gap-6">
           {appScreens.map((s) => (
             <div key={s.src} className={s.raised ? "mb-8" : ""}>
               <Image
                 src={s.src}
                 alt={s.alt}
                 width={853}
-                height={1484}
+                height={s.height}
                 sizes="(max-width: 880px) 33vw, 280px"
                 className="block h-auto w-full"
               />
@@ -418,8 +418,11 @@ function MobileApps() {
    ────────────────────────────────────────────────────────── */
 function Contact() {
   return (
-    <section id="contact" className="border-t border-white/[0.06] bg-[#121f38] px-7 py-[92px]">
-      <div className="mx-auto grid max-w-[1120px] items-start gap-12 lg:grid-cols-2 lg:gap-16">
+    <section
+      id="contact"
+      className="flex min-h-[calc(100vh-72px)] scroll-mt-[72px] items-center border-t border-white/[0.06] bg-[#121f38] px-7 py-16"
+    >
+      <div className="mx-auto grid w-full max-w-[1120px] items-start gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
           <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#2dd4bf]">
             Contact
@@ -431,8 +434,7 @@ function Contact() {
             Tell us about your club
           </h2>
           <p className="mt-3.5 max-w-[420px] text-[16px] leading-[1.55] text-[#a5b3c7]">
-            We&apos;ll get back to you within a day with pricing for your club and a time to show you
-            around — no hard sell.
+            Submit your details and we&apos;ll get in touch to discuss further or arrange a demo.
           </p>
           <div className="mt-7 flex flex-col gap-3">
             <p className="text-[15.5px] text-[#e6edf7]">Sydney, Australia</p>
@@ -461,18 +463,30 @@ function Contact() {
 /* ──────────────────────────────────────────────────────────
    Footer — deep navy, link columns
    ────────────────────────────────────────────────────────── */
-const footCols = [
-  { head: "Product", links: ["Websites", "Mobile apps", "Fixtures & ladders", "Umpire management"] },
-  { head: "Platform", links: ["Teams & players", "Communications", "Reports", "Payments"] },
-  { head: "Company", links: ["About", "Pricing", "Contact"] },
-  { head: "Support", links: ["Help centre", "Onboarding", "Status", "Privacy"] },
+const footCols: { head: string; links: [string, string][] }[] = [
+  {
+    head: "Explore",
+    links: [
+      ["Features", "#features"],
+      ["Solutions", "#solutions"],
+      ["Apps", "#apps"],
+      ["Contact", "#contact"],
+    ],
+  },
+  {
+    head: "Get in touch",
+    links: [
+      ["rowan@sidelinepro.com.au", "mailto:rowan@sidelinepro.com.au"],
+      ["Book a demo", "#contact"],
+    ],
+  },
 ]
 
 function Footer() {
   return (
     <footer className="bg-[#0a1426] px-7 pb-[26px] pt-12">
       <div className="mx-auto max-w-[1120px]">
-        <div className="grid gap-6 border-b border-white/[0.12] pb-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1fr]">
+        <div className="grid gap-6 border-b border-white/[0.12] pb-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr]">
           <div>
             <Wordmark height={36} />
             <p className="mt-3 max-w-[230px] text-[13px] leading-[1.55] text-[#8fa0b8]">
@@ -482,13 +496,13 @@ function Footer() {
           {footCols.map((c) => (
             <div key={c.head}>
               <p className="mb-2.5 text-[12.5px] font-semibold text-white">{c.head}</p>
-              {c.links.map((l) => (
+              {c.links.map(([label, href]) => (
                 <a
-                  key={l}
-                  href="#contact"
+                  key={label}
+                  href={href}
                   className="mb-[7px] block text-[12.5px] text-[#8fa0b8] transition-colors hover:text-[#2dd4bf]"
                 >
-                  {l}
+                  {label}
                 </a>
               ))}
             </div>

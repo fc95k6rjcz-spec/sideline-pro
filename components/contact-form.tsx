@@ -63,7 +63,7 @@ export function ContactForm() {
             id="name"
             name="name"
             required
-            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#BD8A2C] focus:outline-none focus:ring-1 focus:ring-[#BD8A2C]/30"
+            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
             placeholder="Your name"
           />
         </div>
@@ -76,7 +76,7 @@ export function ContactForm() {
             id="club"
             name="club"
             required
-            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#BD8A2C] focus:outline-none focus:ring-1 focus:ring-[#BD8A2C]/30"
+            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
             placeholder="Your club"
           />
         </div>
@@ -91,7 +91,7 @@ export function ContactForm() {
             id="email"
             name="email"
             required
-            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#BD8A2C] focus:outline-none focus:ring-1 focus:ring-[#BD8A2C]/30"
+            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
             placeholder="you@club.com.au"
           />
         </div>
@@ -103,21 +103,21 @@ export function ContactForm() {
             type="tel"
             id="phone"
             name="phone"
-            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#BD8A2C] focus:outline-none focus:ring-1 focus:ring-[#BD8A2C]/30"
+            className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
             placeholder="04XX XXX XXX"
           />
         </div>
       </div>
       <div>
         <label htmlFor="players" className="mb-2 block text-sm font-medium text-[#1d1d1f]">
-          Approx. number of registered players
+          Number of teams in your club
         </label>
         <input
           type="text"
           id="players"
           name="players"
-          className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#BD8A2C] focus:outline-none focus:ring-1 focus:ring-[#BD8A2C]/30"
-          placeholder="e.g. 250"
+          className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
+          placeholder="e.g. 20"
         />
       </div>
       <div>
@@ -128,16 +128,16 @@ export function ContactForm() {
           id="message"
           name="message"
           rows={4}
-          className="w-full resize-none rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#BD8A2C] focus:outline-none focus:ring-1 focus:ring-[#BD8A2C]/30"
+          className="w-full resize-none rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
           placeholder="Tell us about your club's biggest challenges..."
         />
       </div>
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-2 w-full rounded-full bg-[#BD8A2C] px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-2 w-full rounded-full bg-[#10b3a3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#0d9a8c] disabled:opacity-50"
       >
-        {isSubmitting ? "Sending..." : "Get my club's pricing"}
+        {isSubmitting ? "Sending..." : "Submit"}
       </button>
     </form>
   )

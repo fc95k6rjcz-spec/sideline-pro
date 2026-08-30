@@ -65,7 +65,7 @@ async function notifyTeam(lead: Lead) {
     `Club:    ${lead.club ?? "—"}`,
     `Email:   ${lead.email ?? "—"}`,
     `Phone:   ${lead.phone ?? "—"}`,
-    `Players: ${lead.players ?? "—"}`,
+    `Teams:   ${lead.players ?? "—"}`,
     ``,
     `Message:`,
     lead.message ?? "—",
