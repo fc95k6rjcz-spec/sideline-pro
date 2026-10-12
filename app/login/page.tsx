@@ -30,8 +30,8 @@ export default async function LoginPage({
       <div className="absolute inset-0 hero-radial" />
       <div className="absolute inset-0 subtle-grid opacity-50" />
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6">
-        <a href="/" className="mb-10">
-          <Logo size={44} tagline />
+        <a href="/" className="mb-8">
+          <Logo variant="stacked" size={160} className="rounded-2xl shadow-[0_14px_38px_rgba(0,16,37,0.25)]" />
         </a>
 
         <div className="w-full rounded-2xl border border-black/10 bg-white p-8 shadow-[0_14px_38px_rgba(0,0,0,0.06)] backdrop-blur">

@@ -29,7 +29,7 @@ export default async function AdminLayout({
       <header className="sticky top-0 z-40 border-b border-black/10 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3">
           <a href="/admin" className="flex items-center gap-3">
-            <Logo size={32} showWordmark />
+            <Logo size={32} />
             <span className="hidden text-[10px] font-semibold uppercase tracking-[0.22em] text-gold sm:inline">
               Admin
             </span>

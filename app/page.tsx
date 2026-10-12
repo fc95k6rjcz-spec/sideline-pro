@@ -32,11 +32,12 @@ const h2Style = {
    Wordmark — official horizontal logo (dark-background variant)
    ────────────────────────────────────────────────────────── */
 function Wordmark({ height = 44 }: { height?: number }) {
+  // Approved horizontal artwork is a 403:106 canvas (brand pack, 30 Aug 2026).
   return (
     <Image
       src="/logo-horizontal-dark.svg"
       alt="SidelinePro"
-      width={Math.round(height * 3.125)}
+      width={Math.round(height * (403 / 106))}
       height={height}
       priority
     />
