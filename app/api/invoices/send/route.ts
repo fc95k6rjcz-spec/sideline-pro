@@ -130,6 +130,13 @@ export async function POST(request: NextRequest) {
     body && typeof body === "object" && "to_email" in body
       ? String((body as { to_email: unknown }).to_email ?? "")
       : "";
+  // "invoice" (default) = the original invoice email. "reminder" = a gentle
+  // nudge whose tone depends on whether the due date has passed yet.
+  const modeRaw =
+    body && typeof body === "object" && "mode" in body
+      ? String((body as { mode: unknown }).mode ?? "")
+      : "";
+  const mode: "invoice" | "reminder" = modeRaw === "reminder" ? "reminder" : "invoice";
 
   if (!invoiceId) {
     return NextResponse.json({ error: "invoice_id required" }, { status: 400 });
@@ -180,9 +187,59 @@ export async function POST(request: NextRequest) {
   const greeting = invoice.client_name
     ? escapeHtml(invoice.client_name)
     : "there";
-  const subject = `Invoice ${invoice.invoice_number} from Sideline Pro Pty Ltd`;
+  const num = escapeHtml(invoice.invoice_number);
   const totalFormatted = formatMoney(invoice.total_cents, invoice.currency);
   const dueFormatted = formatDate(invoice.due_date);
+
+  if (mode === "reminder" && invoice.paid) {
+    return NextResponse.json(
+      { error: `${invoice.invoice_number} is already marked paid — no reminder sent.` },
+      { status: 400 },
+    );
+  }
+
+  // Days until due, from Sydney "today" (the business is AEST/AEDT).
+  const sydneyToday = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }),
+  );
+  sydneyToday.setHours(0, 0, 0, 0);
+  const dueDate = new Date(`${invoice.due_date}T00:00:00`);
+  const daysLeft = Math.round((dueDate.getTime() - sydneyToday.getTime()) / 86_400_000);
+  const overdueDays = -daysLeft;
+
+  let subject: string;
+  let bodyHtml: string;
+  if (mode === "invoice") {
+    subject = `Invoice ${invoice.invoice_number} from Sideline Pro Pty Ltd`;
+    bodyHtml = `
+      <p style="margin-top:0;">Hi ${greeting},</p>
+      <p>Please find attached invoice <strong>${num}</strong> from Sideline Pro Pty Ltd.</p>`;
+  } else if (daysLeft > 0) {
+    // Gentle pre-due reminder.
+    const when =
+      daysLeft === 1 ? "tomorrow" : `in ${daysLeft} days, on ${dueFormatted}`;
+    subject = `Friendly reminder: invoice ${invoice.invoice_number} is due ${
+      daysLeft === 1 ? "tomorrow" : `in ${daysLeft} days`
+    }`;
+    bodyHtml = `
+      <p style="margin-top:0;">Hi ${greeting},</p>
+      <p>Just a friendly heads-up that invoice <strong>${num}</strong> for <strong>${totalFormatted}</strong> is due ${when}. I've attached a copy again for convenience.</p>
+      <p>If it's already been paid or scheduled, please ignore this — and thank you!</p>`;
+  } else if (daysLeft === 0) {
+    subject = `Friendly reminder: invoice ${invoice.invoice_number} is due today`;
+    bodyHtml = `
+      <p style="margin-top:0;">Hi ${greeting},</p>
+      <p>Just a friendly reminder that invoice <strong>${num}</strong> for <strong>${totalFormatted}</strong> is due today. I've attached a copy again for convenience.</p>
+      <p>If it's already been paid or scheduled, please ignore this — and thank you!</p>`;
+  } else {
+    // Soft overdue follow-up — assume good faith.
+    const ago = overdueDays === 1 ? "yesterday" : `${overdueDays} days ago, on ${dueFormatted}`;
+    subject = `Following up on invoice ${invoice.invoice_number}`;
+    bodyHtml = `
+      <p style="margin-top:0;">Hi ${greeting},</p>
+      <p>Hope all's well. I'm just following up on invoice <strong>${num}</strong> for <strong>${totalFormatted}</strong>, which was due ${ago} — I suspect it may have slipped through the cracks, which is easily done.</p>
+      <p>I've attached a copy again. If payment is already on its way, please ignore this and thanks very much; if there's anything that needs changing on the invoice, just let me know.</p>`;
+  }
 
   const html = `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f5f5f5;">
@@ -196,14 +253,13 @@ export async function POST(request: NextRequest) {
       </div>
     </div>
     <div style="padding:32px 28px;">
-      <p style="margin-top:0;">Hi ${greeting},</p>
-      <p>Please find attached invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> from Sideline Pro Pty Ltd.</p>
+      ${bodyHtml}
       <table style="margin:24px 0;border-collapse:collapse;font-size:14px;">
         <tr><td style="padding:4px 14px 4px 0;color:#666;">Amount due</td><td style="padding:4px 0;font-weight:600;">${totalFormatted}</td></tr>
         <tr><td style="padding:4px 14px 4px 0;color:#666;">Due date</td><td style="padding:4px 0;font-weight:600;">${dueFormatted}</td></tr>
-        <tr><td style="padding:4px 14px 4px 0;color:#666;">Reference</td><td style="padding:4px 0;font-weight:600;">${escapeHtml(invoice.invoice_number)}</td></tr>
+        <tr><td style="padding:4px 14px 4px 0;color:#666;">Reference</td><td style="padding:4px 0;font-weight:600;">${num}</td></tr>
       </table>
-      <p>Payment details are inside the PDF. Please use <strong>${escapeHtml(invoice.invoice_number)}</strong> as the payment reference so we can reconcile it.</p>
+      <p>Payment details are inside the PDF. Please use <strong>${num}</strong> as the payment reference so we can reconcile it.</p>
       <p>Any questions, just reply to this email.</p>
       <p style="margin-top:32px;">Thanks,<br/><strong>Justin</strong><br/>Sideline Pro Pty Ltd</p>
       <div style="margin-top:40px;padding-top:16px;border-top:1px solid #eee;font-size:11px;color:#999;text-align:center;">
@@ -273,13 +329,31 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Stamp invoice ──────────────────────────────────────────────────────
-  await admin
-    .from("invoices")
-    .update({
-      email_sent_at: new Date().toISOString(),
-      client_email: toEmail,
-    })
-    .eq("id", invoiceId);
+  const nowIso = new Date().toISOString();
+  if (mode === "reminder") {
+    await admin
+      .from("invoices")
+      .update({
+        reminder_sent_at: nowIso,
+        reminder_count: (Number(invoice.reminder_count) || 0) + 1,
+        client_email: toEmail,
+      })
+      .eq("id", invoiceId);
+  } else {
+    await admin
+      .from("invoices")
+      .update({
+        email_sent_at: nowIso,
+        client_email: toEmail,
+      })
+      .eq("id", invoiceId);
+  }
 
-  return NextResponse.json({ ok: true, sent_to: toEmail, via: "gmail-smtp" });
+  return NextResponse.json({
+    ok: true,
+    sent_to: toEmail,
+    via: "gmail-smtp",
+    mode,
+    days_left: daysLeft,
+  });
 }

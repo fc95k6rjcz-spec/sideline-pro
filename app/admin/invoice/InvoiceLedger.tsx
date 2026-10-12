@@ -25,6 +25,8 @@ export type InvoiceRow = {
   is_draft: boolean | null;
   client_email: string | null;
   email_sent_at: string | null;
+  reminder_sent_at?: string | null;
+  reminder_count?: number | null;
   created_by_email: string;
   created_at: string;
   updated_at: string;
@@ -51,6 +53,14 @@ function formatDate(iso: string | null) {
     month: "short",
     year: "2-digit",
   });
+}
+
+/** Whole days from today (local) until the due date; negative when overdue. */
+function daysUntilDue(inv: InvoiceRow) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(`${inv.due_date}T00:00:00`);
+  return Math.round((due.getTime() - today.getTime()) / 86_400_000);
 }
 
 function isOverdue(inv: InvoiceRow) {
@@ -251,7 +261,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
     }
   }
 
-  async function handleSend(inv: InvoiceRow) {
+  async function handleSend(inv: InvoiceRow, mode: "invoice" | "reminder" = "invoice") {
     if (!inv.pdf_url) {
       setError(
         `Cannot send ${inv.invoice_number}: no PDF attached. Re-download from the form below to upload one.`,
@@ -261,9 +271,17 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
     // Prefer the email on file. If we don't have one, prompt — typing in a
     // recipient here also overrides whatever the saved value is.
     const promptDefault = inv.client_email ?? "";
-    const promptLabel = inv.email_sent_at
-      ? `Resend ${inv.invoice_number} to:`
-      : `Send ${inv.invoice_number} to:`;
+    const days = daysUntilDue(inv);
+    const promptLabel =
+      mode === "reminder"
+        ? days < 0
+          ? `Send a gentle follow-up for ${inv.invoice_number} (${-days} day${-days === 1 ? "" : "s"} overdue) to:`
+          : `Send a friendly reminder for ${inv.invoice_number} (due ${
+              days === 0 ? "today" : `in ${days} day${days === 1 ? "" : "s"}`
+            }) to:`
+        : inv.email_sent_at
+          ? `Resend ${inv.invoice_number} to:`
+          : `Send ${inv.invoice_number} to:`;
     const toEmail = window.prompt(promptLabel, promptDefault);
     if (toEmail === null) return; // cancelled
     const trimmed = toEmail.trim();
@@ -277,7 +295,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
       const res = await fetch("/api/invoices/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invoice_id: inv.id, to_email: trimmed }),
+        body: JSON.stringify({ invoice_id: inv.id, to_email: trimmed, mode }),
       });
       if (!res.ok) {
         const text = await res.text();
@@ -503,6 +521,12 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                         ) : (
                           <span className="text-xs text-[#86868b]">Awaiting</span>
                         )}
+                        {!inv.paid && inv.reminder_sent_at && (
+                          <div className="mt-0.5 text-[10px] text-[#9A6A1A]">
+                            Reminded {formatDate(inv.reminder_sent_at.slice(0, 10))}
+                            {(inv.reminder_count ?? 0) > 1 ? ` ×${inv.reminder_count}` : ""}
+                          </div>
+                        )}
                       </td>
                       <td className="px-3 py-3 text-xs text-[#6e6e73]">
                         {inv.auto_issue && inv.next_invoice_date ? (
@@ -552,6 +576,40 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                           >
                             {inv.auto_issue ? "Auto ✓" : "Auto-issue"}
                           </button>
+                          {!inv.paid && !inv.is_draft && inv.email_sent_at && (() => {
+                            const d = daysUntilDue(inv);
+                            const past = d < 0;
+                            const label = past
+                              ? `Follow up · ${-d}d overdue`
+                              : d === 0
+                                ? "Remind · due today"
+                                : `Remind · ${d}d left`;
+                            const remindedNote = inv.reminder_sent_at
+                              ? `Last reminded ${formatDate(inv.reminder_sent_at.slice(0, 10))}${
+                                  (inv.reminder_count ?? 0) > 1 ? ` (×${inv.reminder_count})` : ""
+                                }. `
+                              : "";
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => handleSend(inv, "reminder")}
+                                disabled={busyId === inv.id || !inv.pdf_url}
+                                className={
+                                  "whitespace-nowrap text-xs hover:underline disabled:cursor-not-allowed disabled:opacity-40 " +
+                                  (past ? "font-semibold text-[#C8332B]" : "text-[#9A6A1A]")
+                                }
+                                title={
+                                  remindedNote +
+                                  (past
+                                    ? "Sends a soft, no-blame follow-up with the PDF attached."
+                                    : "Sends a friendly heads-up that payment is coming due, with the PDF attached.")
+                                }
+                              >
+                                {label}
+                                {inv.reminder_sent_at ? " ✓" : ""}
+                              </button>
+                            );
+                          })()}
                           <button
                             type="button"
                             onClick={() => handleSend(inv)}
