@@ -11,10 +11,10 @@ export default function Logo({ size = 40 }: LogoProps) {
   const height = Math.round(size * 1.15);
   return (
     <Image
-      src="/sideline-pro-logo-light.png"
+      src="/logo-horizontal-light.svg"
       alt="Sideline Pro — Complete Club Management"
-      width={2073}
-      height={758}
+      width={1250}
+      height={400}
       priority
       style={{ height, width: "auto" }}
     />

@@ -10,10 +10,10 @@ export default function Home() {
         {/* Logo */}
         <div className="mb-10">
           <Image
-            src="/sideline-pro-logo.png"
+            src="/logo-horizontal-dark.svg"
             alt="Sideline Pro — Complete club management"
-            width={1010}
-            height={260}
+            width={1250}
+            height={400}
             className="h-14 w-auto sm:h-16"
             priority
           />

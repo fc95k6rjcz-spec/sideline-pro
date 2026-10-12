@@ -52,10 +52,10 @@ function Logo({ className = "", size = "nav" }: { className?: string; size?: "na
   return (
     <a href="/" className={`inline-block shrink-0 ${className}`}>
       <Image
-        src="/sideline-pro-logo.png"
+        src="/logo-horizontal-dark.svg"
         alt="Sideline Pro — Complete club management"
-        width={1010}
-        height={260}
+        width={1250}
+        height={400}
         className={imgClass}
         priority={size === "nav"}
       />
