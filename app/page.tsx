@@ -29,15 +29,15 @@ const h2Style = {
 } as const
 
 /* ──────────────────────────────────────────────────────────
-   Wordmark — official horizontal logo (dark-background variant)
+   Lockup — SidelinePro primary stacked logo (S mark over wordmark),
+   transparent dark-background artwork cropped to the drawing (832:690).
    ────────────────────────────────────────────────────────── */
-function Wordmark({ height = 44 }: { height?: number }) {
-  // Approved horizontal artwork is a 403:106 canvas (brand pack, 30 Aug 2026).
+function Lockup({ height = 68 }: { height?: number }) {
   return (
     <Image
-      src="/logo-horizontal-dark.svg"
+      src="/logo-stacked-dark-tight.svg"
       alt="SidelinePro"
-      width={Math.round(height * (403 / 106))}
+      width={Math.round(height * (832 / 690))}
       height={height}
       priority
     />
@@ -45,7 +45,7 @@ function Wordmark({ height = 44 }: { height?: number }) {
 }
 
 /* ──────────────────────────────────────────────────────────
-   Nav — 72px fixed, translucent navy + backdrop blur
+   Nav — 88px fixed, translucent navy + backdrop blur
    ────────────────────────────────────────────────────────── */
 const navLinks = [
   ["Features", "#features"],
@@ -56,10 +56,10 @@ const navLinks = [
 
 function Navbar() {
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 h-[72px] border-b border-white/[0.08] bg-[#0e1a30]/85 backdrop-blur-lg backdrop-saturate-150">
+    <nav className="fixed inset-x-0 top-0 z-50 h-[88px] border-b border-white/[0.08] bg-[#0e1a30]/85 backdrop-blur-lg backdrop-saturate-150">
       <div className="mx-auto flex h-full max-w-[1180px] items-center justify-between px-5 sm:px-7">
         <a href="#top" aria-label="SidelinePro home">
-          <Wordmark height={40} />
+          <Lockup height={68} />
         </a>
         <div className="flex items-center gap-5 sm:gap-8">
           {/* Anchor links hide on phones (they would overflow); the demo
@@ -91,8 +91,8 @@ const heroProof = ["Works with PlayHQ", "iOS & Android apps", "Every code, every
 
 function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden bg-[#0e1a30] pt-[72px]">
-      <div className="relative z-20 mx-auto flex max-w-[1180px] items-center px-7 py-16 lg:min-h-[min(calc(100vh-72px),720px)] lg:py-16">
+    <section id="top" className="relative overflow-hidden bg-[#0e1a30] pt-[88px]">
+      <div className="relative z-20 mx-auto flex max-w-[1180px] items-center px-7 py-16 lg:min-h-[min(calc(100vh-88px),720px)] lg:py-16">
         <div className="lg:max-w-[560px]">
           <h1
             className="font-bold text-white"
@@ -136,7 +136,7 @@ function Hero() {
       </div>
 
       {/* photo — straight edge on phones, angled left edge pinned right on desktop */}
-      <div className="relative min-h-[340px] lg:absolute lg:bottom-0 lg:right-0 lg:top-[72px] lg:min-h-0 lg:w-[56%] lg:[clip-path:polygon(14%_0,100%_0,100%_100%,0_100%)]">
+      <div className="relative min-h-[340px] lg:absolute lg:bottom-0 lg:right-0 lg:top-[88px] lg:min-h-0 lg:w-[56%] lg:[clip-path:polygon(14%_0,100%_0,100%_100%,0_100%)]">
         <Image
           src="/hero-netball.png"
           alt="Junior netball game on an indoor court"
@@ -202,7 +202,7 @@ const COLS = "grid-cols-[1.1fr_1.35fr_1.55fr_1fr]"
 
 function FeaturesTable() {
   return (
-    <section id="features" className={`relative scroll-mt-[72px] overflow-hidden bg-white ${sectionPad}`}>
+    <section id="features" className={`relative scroll-mt-[88px] overflow-hidden bg-white ${sectionPad}`}>
       {/* decorative teal blob */}
       <div
         className="pointer-events-none absolute -right-[120px] -top-[140px] h-[620px] w-[620px] rounded-full"
@@ -325,7 +325,7 @@ const sports = [
 
 function Solutions() {
   return (
-    <section id="solutions" className={`scroll-mt-[72px] bg-[#121f38] ${sectionPad}`}>
+    <section id="solutions" className={`scroll-mt-[88px] bg-[#121f38] ${sectionPad}`}>
       <div className={container}>
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#2dd4bf]">
           Solutions
@@ -384,7 +384,7 @@ const appScreens = [
 
 function MobileApps() {
   return (
-    <section id="apps" className={`scroll-mt-[72px] overflow-hidden bg-white ${sectionPad} pb-0 lg:pb-0`}>
+    <section id="apps" className={`scroll-mt-[88px] overflow-hidden bg-white ${sectionPad} pb-0 lg:pb-0`}>
       <div className={`${container} text-center`}>
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#10b3a3]">
           Mobile apps
@@ -429,7 +429,7 @@ const nextSteps = [
 
 function Contact() {
   return (
-    <section id="contact" className={`scroll-mt-[72px] bg-[#121f38] ${sectionPad}`}>
+    <section id="contact" className={`scroll-mt-[88px] bg-[#121f38] ${sectionPad}`}>
       <div className={`${container} grid items-start gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16`}>
         <div>
           <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#2dd4bf]">
@@ -506,7 +506,7 @@ function Footer() {
       <div className={container}>
         <div className="grid gap-6 border-b border-white/[0.12] pb-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr]">
           <div>
-            <Wordmark height={36} />
+            <Lockup height={88} />
             <p className="mt-3 max-w-[230px] text-[13px] leading-[1.55] text-[#8fa0b8]">
               Designed and shipped from Sydney for Australian community clubs.
             </p>
