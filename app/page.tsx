@@ -384,7 +384,7 @@ const appScreens = [
 
 function MobileApps() {
   return (
-    <section id="apps" className={`scroll-mt-[88px] overflow-hidden bg-white ${sectionPad} pb-0 lg:pb-0`}>
+    <section id="apps" className={`scroll-mt-[88px] overflow-hidden bg-white ${sectionPad}`}>
       <div className={`${container} text-center`}>
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#10b3a3]">
           Mobile apps
@@ -397,11 +397,10 @@ function MobileApps() {
           stays on top of game day.
         </p>
 
-        {/* Phones sit on the section's bottom edge so the screenshots feel
-            anchored rather than floating in white space. */}
-        <div className="mx-auto mt-12 grid max-w-[820px] grid-cols-3 items-end gap-4 sm:gap-6">
+        {/* Three phones, bottom-aligned, middle one lifted slightly. */}
+        <div className="mx-auto mt-14 grid max-w-[820px] grid-cols-3 items-end gap-4 sm:gap-6">
           {appScreens.map((s) => (
-            <div key={s.src} className={s.raised ? "mb-8" : ""}>
+            <div key={s.src} className={s.raised ? "mb-10" : ""}>
               <Image
                 src={s.src}
                 alt={s.alt}
