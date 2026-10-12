@@ -12,9 +12,8 @@ const poppins = Poppins({
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Sideline Pro | Complete Club Management',
-  description: 'The complete club management platform for community sporting clubs. Player grading, team selection, game day operations, member portals, merchandise, and player care.',
-  generator: 'v0.app',
+  title: 'SidelinePro | Club management for Australian community sport',
+  description: 'Club management software for Australian community sport. Registrations, fixtures and ladders, umpire rostering, player grading and club comms in one place, with native iOS and Android apps and a PlayHQ helper.',
   icons: {
     icon: [
       {
