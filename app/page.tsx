@@ -381,11 +381,6 @@ function Solutions() {
 /* ──────────────────────────────────────────────────────────
    Mobile apps — white, centred showcase
    ────────────────────────────────────────────────────────── */
-const appScreens = [
-  { src: "/app-club-white.png", alt: "Club dashboard app screen", height: 1511, raised: false },
-  { src: "/app-lineup-white.png", alt: "Coach line-up builder app screen", height: 1484, raised: true },
-  { src: "/app-player-white.png", alt: "Player profile app screen", height: 1484, raised: false },
-]
 
 function MobileApps() {
   return (
@@ -402,20 +397,16 @@ function MobileApps() {
           stays on top of game day.
         </p>
 
-        {/* Three phones, bottom-aligned, middle one lifted slightly. */}
-        <div className="mx-auto mt-14 grid max-w-[820px] grid-cols-3 items-end gap-4 sm:gap-6">
-          {appScreens.map((s) => (
-            <div key={s.src} className={s.raised ? "mb-10" : ""}>
-              <Image
-                src={s.src}
-                alt={s.alt}
-                width={853}
-                height={s.height}
-                sizes="(max-width: 880px) 33vw, 280px"
-                className="block h-auto w-full"
-              />
-            </div>
-          ))}
+        {/* Four phones — single showcase render. */}
+        <div className="mx-auto mt-14 max-w-[1020px]">
+          <Image
+            src="/app-screens-showcase.png"
+            alt="SidelinePro app screens: club dashboard, coach line-up builder, player profile and convenor tools"
+            width={1774}
+            height={887}
+            sizes="(max-width: 1080px) 94vw, 1020px"
+            className="block h-auto w-full"
+          />
         </div>
       </div>
     </section>
