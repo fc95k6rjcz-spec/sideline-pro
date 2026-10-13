@@ -263,19 +263,14 @@ export default function ReceiptsClient() {
 
   // Mark an outstanding invoice as paid straight from this dashboard.
   // The API bumps the bank balance automatically; we just reload state.
+  // Two-click confirm (no native confirm dialog — see handleDelete).
+  const [confirmingInvoiceId, setConfirmingInvoiceId] = useState<string | null>(null);
+
   async function markInvoicePaid(inv: {
     id: string;
     invoice_number: string;
     total_cents: number;
   }) {
-    const amount = formatMoney(inv.total_cents);
-    if (
-      !confirm(
-        `Mark ${inv.invoice_number} (${amount}) as PAID?\n\nThe bank balance will automatically increase by ${amount}.`,
-      )
-    ) {
-      return;
-    }
     setMarkingInvoiceId(inv.id);
     setError(null);
     setInvoiceNotice(null);
@@ -289,7 +284,7 @@ export default function ReceiptsClient() {
         const text = await res.text();
         throw new Error(text || `Update failed (${res.status})`);
       }
-      setInvoiceNotice(`${inv.invoice_number} paid — bank balance +${amount}`);
+      setInvoiceNotice(`${inv.invoice_number} paid — bank balance +${formatMoney(inv.total_cents)}`);
       await Promise.all([loadBalance(), loadInvoiceSummary()]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not mark invoice paid");
@@ -703,25 +698,24 @@ export default function ReceiptsClient() {
     }
   }
 
-  async function markPaid(exp: Expense) {
-    const todayStr = todayISO();
-    const paidDate = window.prompt(
-      `Mark "${exp.description}" as paid. Date paid:`,
-      todayStr,
-    );
-    if (paidDate === null) return;
+  // Inline date flow (no window.prompt — see markReimbursed).
+  const [markPaidPromptId, setMarkPaidPromptId] = useState<string | null>(null);
+  const [markPaidDate, setMarkPaidDate] = useState<string>(todayISO());
+
+  async function markPaid(exp: Expense, paidDate: string) {
     setBusyId(exp.id);
     setError(null);
     try {
       const res = await fetch(`/api/expenses/${exp.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "paid", date: paidDate.trim() || todayStr }),
+        body: JSON.stringify({ status: "paid", date: paidDate.trim() || todayISO() }),
       });
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Update failed (${res.status})`);
       }
+      setMarkPaidPromptId(null);
       await loadExpenses();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not mark paid");
@@ -764,7 +758,8 @@ export default function ReceiptsClient() {
   }
 
   async function undoReimbursed(exp: Expense) {
-    if (!window.confirm("Undo reimbursement?")) return;
+    // Direct (no window.confirm — browsers suppress repeat native dialogs,
+    // turning the click into a silent no-op). Undo is itself reversible.
     setBusyId(exp.id);
     try {
       const res = await fetch(`/api/expenses/${exp.id}`, {
@@ -785,8 +780,11 @@ export default function ReceiptsClient() {
   }
 
   // ── Delete ──────────────────────────────────────────
+  // Two-click inline confirm instead of window.confirm: suppressed native
+  // dialogs made the Delete button silently do nothing.
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+
   async function handleDelete(id: string) {
-    if (!confirm("Delete this expense?")) return;
     setBusyId(id);
     try {
       const res = await fetch(`/api/expenses/${id}`, { method: "DELETE" });
@@ -794,6 +792,7 @@ export default function ReceiptsClient() {
         const text = await res.text();
         throw new Error(text || `Delete failed (${res.status})`);
       }
+      setConfirmingDeleteId(null);
       await loadExpenses();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete");
@@ -917,15 +916,39 @@ export default function ReceiptsClient() {
                   <span className="truncate text-[#3a3a3c]" title={inv.client_name}>
                     {inv.invoice_number} · {formatMoney(inv.total_cents)}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => markInvoicePaid(inv)}
-                    disabled={markingInvoiceId === inv.id}
-                    title="Mark as paid — adds this amount to your bank balance"
-                    className="shrink-0 whitespace-nowrap rounded-md border border-gold/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold hover:bg-gold/10 disabled:opacity-50"
-                  >
-                    {markingInvoiceId === inv.id ? "…" : "Mark paid"}
-                  </button>
+                  {confirmingInvoiceId === inv.id ? (
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setConfirmingInvoiceId(null);
+                          markInvoicePaid(inv);
+                        }}
+                        disabled={markingInvoiceId === inv.id}
+                        title={`Adds ${formatMoney(inv.total_cents)} to your bank balance`}
+                        className="whitespace-nowrap rounded-md bg-[#1B7A47] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white hover:opacity-90 disabled:opacity-50"
+                      >
+                        Confirm +{formatMoney(inv.total_cents)}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingInvoiceId(null)}
+                        className="text-[10px] text-[#86868b] hover:text-[#3a3a3c]"
+                      >
+                        Cancel
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingInvoiceId(inv.id)}
+                      disabled={markingInvoiceId === inv.id}
+                      title="Mark as paid — adds this amount to your bank balance"
+                      className="shrink-0 whitespace-nowrap rounded-md border border-gold/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold hover:bg-gold/10 disabled:opacity-50"
+                    >
+                      {markingInvoiceId === inv.id ? "…" : "Mark paid"}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -1685,16 +1708,49 @@ export default function ReceiptsClient() {
                               </div>
                             ) : (
                               <div className="flex justify-end gap-3">
-                                {status === "planned" && (
-                                  <button
-                                    type="button"
-                                    onClick={() => markPaid(e)}
-                                    disabled={busyId === e.id}
-                                    className="text-xs font-semibold text-gold hover:underline disabled:opacity-50"
-                                  >
-                                    Mark paid
-                                  </button>
-                                )}
+                                {status === "planned" &&
+                                  (markPaidPromptId === e.id ? (
+                                    <span className="flex items-center gap-1.5">
+                                      <input
+                                        type="date"
+                                        autoFocus
+                                        className={cellInputClass + " w-[140px]"}
+                                        value={markPaidDate}
+                                        onChange={(ev) => setMarkPaidDate(ev.target.value)}
+                                        onKeyDown={(ev) => {
+                                          if (ev.key === "Enter") markPaid(e, markPaidDate);
+                                          else if (ev.key === "Escape") setMarkPaidPromptId(null);
+                                        }}
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => markPaid(e, markPaidDate)}
+                                        disabled={busyId === e.id}
+                                        className="text-xs font-semibold text-gold hover:underline disabled:opacity-50"
+                                      >
+                                        {busyId === e.id ? "Saving…" : "Confirm"}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setMarkPaidPromptId(null)}
+                                        className="text-xs text-[#86868b] hover:text-[#3a3a3c]"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setMarkPaidPromptId(e.id);
+                                        setMarkPaidDate(todayISO());
+                                      }}
+                                      disabled={busyId === e.id}
+                                      className="text-xs font-semibold text-gold hover:underline disabled:opacity-50"
+                                    >
+                                      Mark paid
+                                    </button>
+                                  ))}
                                 {awaiting && (
                                   <button
                                     type="button"
@@ -1726,14 +1782,34 @@ export default function ReceiptsClient() {
                                 >
                                   Edit
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDelete(e.id)}
-                                  disabled={busyId === e.id}
-                                  className="text-xs text-[#86868b] hover:text-[#C8332B] disabled:opacity-50"
-                                >
-                                  {busyId === e.id ? "…" : "Delete"}
-                                </button>
+                                {confirmingDeleteId === e.id ? (
+                                  <span className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDelete(e.id)}
+                                      disabled={busyId === e.id}
+                                      className="text-xs font-semibold text-[#C8332B] hover:underline disabled:opacity-50"
+                                    >
+                                      {busyId === e.id ? "Deleting…" : "Confirm delete"}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setConfirmingDeleteId(null)}
+                                      className="text-xs text-[#86868b] hover:text-[#3a3a3c]"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfirmingDeleteId(e.id)}
+                                    disabled={busyId === e.id}
+                                    className="text-xs text-[#86868b] hover:text-[#C8332B] disabled:opacity-50"
+                                  >
+                                    Delete
+                                  </button>
+                                )}
                               </div>
                             )}
                           </div>
