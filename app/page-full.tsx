@@ -769,7 +769,7 @@ function Footer() {
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-blue-100/40">Made in Sydney</p>
             <p className={`text-sm leading-relaxed ${darkTextMuted}`}>
-              Designed and shipped from Sydney for Australian community clubs.
+              Designed in Sydney, for Australian community clubs.
             </p>
             <p className={`mt-2 text-xs ${darkTextMuted}`}>Sideline Pro Pty Ltd · ACN 697 721 627</p>
           </div>

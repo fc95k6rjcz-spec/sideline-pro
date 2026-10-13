@@ -382,7 +382,7 @@ function Solutions() {
    Mobile apps — white, centred showcase
    ────────────────────────────────────────────────────────── */
 const appScreens = [
-  { src: "/app-club-white.png", alt: "Club dashboard app screen", height: 1479, raised: false },
+  { src: "/app-club-white.png", alt: "Club dashboard app screen", height: 1511, raised: false },
   { src: "/app-lineup-white.png", alt: "Coach line-up builder app screen", height: 1484, raised: true },
   { src: "/app-player-white.png", alt: "Player profile app screen", height: 1484, raised: false },
 ]
@@ -512,7 +512,7 @@ function Footer() {
           <div>
             <Lockup height={88} />
             <p className="mt-3 max-w-[230px] text-[13px] leading-[1.55] text-[#8fa0b8]">
-              Designed and shipped from Sydney for Australian community clubs.
+              Designed in Sydney, for Australian community clubs.
             </p>
           </div>
           {footCols.map((c) => (
