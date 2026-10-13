@@ -731,12 +731,12 @@ export default function ReceiptsClient() {
   }
 
   // ── Mark reimbursed ─────────────────────────────────
-  async function markReimbursed(exp: Expense) {
-    const txnId = window.prompt(
-      `Mark "${exp.description}" (${formatMoney(exp.amount_cents)}) as reimbursed.\n\nBank transaction reference (optional):`,
-      "",
-    );
-    if (txnId === null) return; // user cancelled
+  // Inline flow (no window.prompt — browsers suppress repeat native dialogs,
+  // which made the old button silently do nothing after the first use).
+  const [reimbursePromptId, setReimbursePromptId] = useState<string | null>(null);
+  const [reimburseTxnRef, setReimburseTxnRef] = useState("");
+
+  async function markReimbursed(exp: Expense, txnRef: string) {
     setBusyId(exp.id);
     setError(null);
     try {
@@ -746,13 +746,15 @@ export default function ReceiptsClient() {
         body: JSON.stringify({
           reimbursed: true,
           reimbursed_date: todayISO(),
-          reimbursed_txn_id: txnId.trim() || null,
+          reimbursed_txn_id: txnRef.trim() || null,
         }),
       });
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Update failed (${res.status})`);
       }
+      setReimbursePromptId(null);
+      setReimburseTxnRef("");
       await loadExpenses();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not mark reimbursed");
@@ -1294,348 +1296,190 @@ export default function ReceiptsClient() {
               No expenses match this filter.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-[#f5f5f7] text-xs uppercase tracking-wider text-[#86868b]">
-                  <tr>
-                    <th className="px-3 py-3 text-left">Date</th>
-                    <th className="px-3 py-3 text-left">Vendor</th>
-                    <th className="px-3 py-3 text-left">Description</th>
-                    <th className="px-3 py-3 text-left">Category</th>
-                    <th className="px-3 py-3 text-right">Amount</th>
-                    <th className="px-3 py-3 text-right">GST</th>
-                    <th className="px-3 py-3 text-left">Paid by</th>
-                    <th className="px-3 py-3 text-left">Status</th>
-                    <th className="px-3 py-3 text-left">Receipt</th>
-                    <th className="px-3 py-3 text-right" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((e) => {
-                    const isEditing = editingId === e.id;
-                    const status = e.status ?? "paid";
-                    const awaiting = isAwaitingReimbursement(e);
-                    return (
-                      <tr
-                        key={e.id}
-                        className="border-t border-black/10 hover:bg-[#fafafa]"
-                      >
-                        <td className="px-3 py-3 align-middle text-[#3a3a3c]">
-                          {isEditing ? (
-                            <input
-                              type="date"
-                              className={cellInputClass + " min-w-[130px]"}
-                              value={editDateStr}
-                              onChange={(ev) => setEditDateStr(ev.target.value)}
-                            />
-                          ) : (
-                            formatDate(e.date)
-                          )}
-                        </td>
-                        <td className="max-w-[160px] truncate px-3 py-3 align-middle text-[#3a3a3c]">
-                          {isEditing ? (
-                            <input
-                              className={cellInputClass}
-                              placeholder="Vendor"
-                              value={editVendor}
-                              onChange={(ev) => setEditVendor(ev.target.value)}
-                            />
-                          ) : (
-                            e.vendor || "—"
-                          )}
-                        </td>
-                        <td className="max-w-[280px] truncate px-3 py-3 align-middle text-[#1d1d1f]">
-                          {isEditing ? (
-                            <input
-                              className={cellInputClass}
-                              placeholder="Description"
-                              value={editDescription}
-                              onChange={(ev) =>
-                                setEditDescription(ev.target.value)
-                              }
-                              onKeyDown={(ev) => {
-                                if (ev.key === "Enter") saveEdit(e.id);
-                                else if (ev.key === "Escape") cancelEdit();
-                              }}
-                            />
-                          ) : (
-                            <>
-                              {e.description}
-                              {e.is_recurring && (
-                                <span
-                                  className="ml-2 text-[10px] uppercase tracking-wider text-gold"
-                                  title={
-                                    e.recurring_next_date
-                                      ? `Next auto-entry ${formatDate(e.recurring_next_date)}`
-                                      : undefined
-                                  }
-                                >
-                                  ↻ {e.recurring_frequency ?? "recurring"}
-                                </span>
-                              )}
-                              {e.recurring_source_id && (
-                                <span
-                                  className="ml-2 rounded-full bg-[#EEF0F3] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[#5A5A5F]"
-                                  title="Automatically created from a recurring charge"
-                                >
-                                  auto
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </td>
-                        <td className="max-w-[180px] px-3 py-3 align-middle text-[#6e6e73]">
-                          {isEditing ? (
-                            <select
-                              className={cellInputClass}
-                              value={editCategory}
-                              onChange={(ev) => setEditCategory(ev.target.value)}
-                            >
-                              <option value="">—</option>
-                              {CATEGORIES.map((c) => (
-                                <option key={c} value={c}>
-                                  {c}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="block truncate">
-                              {e.category || "—"}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 py-3 align-middle text-right text-[#1d1d1f]">
-                          {isEditing ? (
-                            <div className="ml-auto flex w-[188px] flex-col items-stretch gap-1">
-                              <div className="flex items-center gap-1.5">
-                                {/* Fixed-width wrapper: cellInputClass has w-full,
-                                    so a width utility on the select itself conflicts
-                                    and loses unpredictably (see the New expense form). */}
-                                <div className="w-[76px] shrink-0">
-                                  <select
-                                    className={cellInputClass}
-                                    value={editCurrency}
-                                    onChange={(ev) => {
-                                      const next = ev.target.value as Currency;
-                                      setEditCurrency(next);
-                                      setEditFxRateStr(String(DEFAULT_FX_TO_AUD[next]));
-                                      if (next !== "AUD") setEditGstStr("0.00");
-                                    }}
-                                    aria-label="Currency"
-                                  >
-                                    {CURRENCIES.map((c) => (
-                                      <option key={c} value={c}>
-                                        {c}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
+            <div>
+              {(() => {
+                // Group consecutive rows by date (list arrives newest-first).
+                const groups: { date: string; items: Expense[] }[] = [];
+                for (const e of filtered) {
+                  const last = groups[groups.length - 1];
+                  if (last && last.date === e.date) last.items.push(e);
+                  else groups.push({ date: e.date, items: [e] });
+                }
+                return groups.map((g) => (
+                  <div key={g.date}>
+                    {/* Date group header — bank-statement style */}
+                    <div className="border-b border-[#1d1d1f]/25 bg-white px-5 pb-2 pt-5 text-[13px] font-bold tracking-tight text-[#1d1d1f]">
+                      {new Date(`${g.date}T00:00:00`).toLocaleDateString("en-AU", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </div>
+                    {g.items.map((e) => {
+                      const isEditing = editingId === e.id;
+                      const status = e.status ?? "paid";
+                      const awaiting = isAwaitingReimbursement(e);
+
+                      if (isEditing) {
+                        return (
+                          <div
+                            key={e.id}
+                            className="border-b border-black/[0.07] bg-[#fbfaf7] px-5 py-4"
+                          >
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#86868b]">
+                                Date
                                 <input
-                                  inputMode="decimal"
-                                  autoFocus
-                                  className={cellInputClass + " min-w-0 flex-1 text-right"}
-                                  value={editAmountStr}
-                                  onChange={(ev) => setEditAmountStr(ev.target.value)}
+                                  type="date"
+                                  className={cellInputClass + " mt-1"}
+                                  value={editDateStr}
+                                  onChange={(ev) => setEditDateStr(ev.target.value)}
+                                />
+                              </label>
+                              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#86868b]">
+                                Vendor
+                                <input
+                                  className={cellInputClass + " mt-1"}
+                                  placeholder="Vendor"
+                                  value={editVendor}
+                                  onChange={(ev) => setEditVendor(ev.target.value)}
+                                />
+                              </label>
+                              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#86868b] sm:col-span-2 lg:col-span-1">
+                                Description
+                                <input
+                                  className={cellInputClass + " mt-1"}
+                                  placeholder="Description"
+                                  value={editDescription}
+                                  onChange={(ev) => setEditDescription(ev.target.value)}
                                   onKeyDown={(ev) => {
                                     if (ev.key === "Enter") saveEdit(e.id);
                                     else if (ev.key === "Escape") cancelEdit();
                                   }}
                                 />
-                              </div>
-                              {editCurrency !== "AUD" && (
-                                <div className="flex items-center gap-1.5 text-[10px] text-[#86868b]">
-                                  <span className="uppercase tracking-wider">FX</span>
-                                  {/* Fixed-width wrapper: cellInputClass has w-full,
-                                      so a width utility on the input itself conflicts. */}
-                                  <div className="w-[64px] shrink-0">
-                                    <input
-                                      inputMode="decimal"
-                                      className={cellInputClass + " h-6 text-right text-[11px]"}
-                                      value={editFxRateStr}
-                                      onChange={(ev) => setEditFxRateStr(ev.target.value)}
-                                      aria-label="FX rate to AUD"
-                                    />
+                              </label>
+                              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#86868b]">
+                                Category
+                                <select
+                                  className={cellInputClass + " mt-1"}
+                                  value={editCategory}
+                                  onChange={(ev) => setEditCategory(ev.target.value)}
+                                >
+                                  <option value="">—</option>
+                                  {CATEGORIES.map((c) => (
+                                    <option key={c} value={c}>
+                                      {c}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#86868b]">
+                                Amount
+                                <div className="mt-1 flex items-center gap-1.5">
+                                  <div className="w-[76px] shrink-0">
+                                    <select
+                                      className={cellInputClass}
+                                      value={editCurrency}
+                                      onChange={(ev) => {
+                                        const next = ev.target.value as Currency;
+                                        setEditCurrency(next);
+                                        setEditFxRateStr(String(DEFAULT_FX_TO_AUD[next]));
+                                        if (next !== "AUD") setEditGstStr("0.00");
+                                      }}
+                                      aria-label="Currency"
+                                    >
+                                      {CURRENCIES.map((c) => (
+                                        <option key={c} value={c}>
+                                          {c}
+                                        </option>
+                                      ))}
+                                    </select>
                                   </div>
-                                  {parseAmount(editAmountStr) !== null &&
-                                    Number(editFxRateStr) > 0 && (
-                                      <span className="text-[#1B7A47]">
-                                        = $
-                                        {(
-                                          (parseAmount(editAmountStr) as number) *
-                                          Number(editFxRateStr) /
-                                          100
-                                        ).toFixed(2)}{" "}
-                                        AUD
-                                      </span>
-                                    )}
+                                  <input
+                                    inputMode="decimal"
+                                    autoFocus
+                                    className={cellInputClass + " min-w-0 flex-1 text-right"}
+                                    value={editAmountStr}
+                                    onChange={(ev) => setEditAmountStr(ev.target.value)}
+                                    onKeyDown={(ev) => {
+                                      if (ev.key === "Enter") saveEdit(e.id);
+                                      else if (ev.key === "Escape") cancelEdit();
+                                    }}
+                                  />
                                 </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-end leading-tight">
-                              <span>{formatMoney(e.amount_cents)}</span>
-                              {e.currency && e.currency !== "AUD" && e.original_amount_cents !== null && (
-                                <span
-                                  className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[#EAF2FB] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[#2B6CB0]"
+                                {editCurrency !== "AUD" && (
+                                  <div className="mt-1 flex items-center gap-1.5 text-[10px] font-normal normal-case text-[#86868b]">
+                                    <span className="uppercase tracking-wider">FX</span>
+                                    <div className="w-[64px] shrink-0">
+                                      <input
+                                        inputMode="decimal"
+                                        className={cellInputClass + " h-6 text-right text-[11px]"}
+                                        value={editFxRateStr}
+                                        onChange={(ev) => setEditFxRateStr(ev.target.value)}
+                                        aria-label="FX rate to AUD"
+                                      />
+                                    </div>
+                                    {parseAmount(editAmountStr) !== null &&
+                                      Number(editFxRateStr) > 0 && (
+                                        <span className="text-[#1B7A47]">
+                                          = $
+                                          {(
+                                            (parseAmount(editAmountStr) as number) *
+                                            Number(editFxRateStr) /
+                                            100
+                                          ).toFixed(2)}{" "}
+                                          AUD
+                                        </span>
+                                      )}
+                                  </div>
+                                )}
+                              </label>
+                              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#86868b]">
+                                GST
+                                <input
+                                  inputMode="decimal"
+                                  className={
+                                    cellInputClass +
+                                    " mt-1 text-right" +
+                                    (editCurrency !== "AUD" ? " opacity-50" : "")
+                                  }
+                                  value={editGstStr}
+                                  onChange={(ev) => setEditGstStr(ev.target.value)}
+                                  onKeyDown={(ev) => {
+                                    if (ev.key === "Enter") saveEdit(e.id);
+                                    else if (ev.key === "Escape") cancelEdit();
+                                  }}
+                                  disabled={editCurrency !== "AUD"}
                                   title={
-                                    e.fx_rate
-                                      ? `Original ${e.currency} ${(e.original_amount_cents / 100).toFixed(2)} @ ${e.fx_rate.toFixed(3)} → AUD`
+                                    editCurrency !== "AUD"
+                                      ? "GST not claimable on foreign receipts"
                                       : undefined
                                   }
+                                />
+                                {editCurrency !== "AUD" && (
+                                  <span className="mt-0.5 block text-[9px] font-normal normal-case text-[#86868b]">
+                                    N/A on {editCurrency}
+                                  </span>
+                                )}
+                              </label>
+                              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#86868b]">
+                                Paid by
+                                <select
+                                  className={cellInputClass + " mt-1"}
+                                  value={editPaidBy}
+                                  onChange={(ev) =>
+                                    setEditPaidBy(ev.target.value as PaidBy | "")
+                                  }
                                 >
-                                  {e.currency} {(e.original_amount_cents / 100).toFixed(2)}
-                                </span>
-                              )}
+                                  <option value="">—</option>
+                                  <option value="business">Business</option>
+                                  <option value="justin">Justin</option>
+                                  <option value="rowan">Rowan</option>
+                                </select>
+                              </label>
                             </div>
-                          )}
-                        </td>
-                        <td className="px-3 py-3 align-middle text-right text-[#6e6e73]">
-                          {isEditing ? (
-                            <div className="flex flex-col items-end">
-                              <input
-                                inputMode="decimal"
-                                className={
-                                  cellInputClass +
-                                  " min-w-[70px] text-right" +
-                                  (editCurrency !== "AUD" ? " opacity-50" : "")
-                                }
-                                value={editGstStr}
-                                onChange={(ev) => setEditGstStr(ev.target.value)}
-                                onKeyDown={(ev) => {
-                                  if (ev.key === "Enter") saveEdit(e.id);
-                                  else if (ev.key === "Escape") cancelEdit();
-                                }}
-                                disabled={editCurrency !== "AUD"}
-                                title={
-                                  editCurrency !== "AUD"
-                                    ? "GST not claimable on foreign receipts"
-                                    : undefined
-                                }
-                              />
-                              {editCurrency !== "AUD" && (
-                                <span className="mt-0.5 text-[9px] text-[#86868b]">
-                                  N/A on {editCurrency}
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            formatMoney(e.gst_cents)
-                          )}
-                        </td>
-                        <td className="px-3 py-3 align-middle text-xs text-[#3a3a3c]">
-                          {isEditing ? (
-                            <select
-                              className={cellInputClass + " min-w-[100px]"}
-                              value={editPaidBy}
-                              onChange={(ev) =>
-                                setEditPaidBy(ev.target.value as PaidBy | "")
-                              }
-                            >
-                              <option value="">—</option>
-                              <option value="business">Business</option>
-                              <option value="justin">Justin</option>
-                              <option value="rowan">Rowan</option>
-                            </select>
-                          ) : (
-                            paidByLabel(e.paid_by)
-                          )}
-                        </td>
-                        <td className="relative px-3 py-3">
-                          {status === "paid" && !awaiting && !e.reimbursed && !e.paid_by ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setPaidByPopoverId(
-                                  paidByPopoverId === e.id ? null : e.id,
-                                )
-                              }
-                              disabled={busyId === e.id}
-                              className="rounded-full bg-[#EEF0F3] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#5A5A5F] hover:bg-[#f5f5f7] hover:text-gold disabled:opacity-50"
-                              aria-label="Set who paid this expense"
-                            >
-                              Paid ▾
-                            </button>
-                          ) : (
-                            <StatusBadge
-                              status={status}
-                              awaiting={awaiting}
-                              reimbursed={e.reimbursed}
-                              reimbursedDate={e.reimbursed_date}
-                            />
-                          )}
-                          {paidByPopoverId === e.id && (
-                            <>
-                              {/* click-outside catcher */}
-                              <button
-                                type="button"
-                                aria-label="Close menu"
-                                onClick={() => setPaidByPopoverId(null)}
-                                className="fixed inset-0 z-20 cursor-default"
-                              />
-                              <div className="absolute left-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-md border border-black/10 bg-white shadow-2xl">
-                                <button
-                                  type="button"
-                                  onClick={() => updateRowPaidBy(e.id, "business")}
-                                  className="block w-full px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-gold"
-                                >
-                                  Paid by{" "}
-                                  <span className="font-semibold">Business</span>
-                                  <span className="block text-[10px] text-[#86868b]">
-                                    no reimbursement needed
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateRowPaidBy(e.id, "justin")}
-                                  className="block w-full border-t border-black/10 px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-[#9A6A1A]"
-                                >
-                                  Paid by{" "}
-                                  <span className="font-semibold">Justin</span>
-                                  <span className="block text-[10px] text-[#86868b]">
-                                    → awaiting reimbursement
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateRowPaidBy(e.id, "rowan")}
-                                  className="block w-full border-t border-black/10 px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-[#9A6A1A]"
-                                >
-                                  Paid by{" "}
-                                  <span className="font-semibold">Rowan</span>
-                                  <span className="block text-[10px] text-[#86868b]">
-                                    → awaiting reimbursement
-                                  </span>
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </td>
-                        <td className="px-3 py-3">
-                          {e.receipt_url ? (
-                            <a
-                              href={e.receipt_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-gold hover:underline"
-                            >
-                              View
-                            </a>
-                          ) : status === "paid" ? (
-                            <button
-                              type="button"
-                              onClick={() => startAttach(e.id)}
-                              disabled={attachingId === e.id}
-                              className="text-xs text-[#6e6e73] hover:text-gold hover:underline disabled:opacity-50"
-                            >
-                              {attachingId === e.id ? "Uploading…" : "Attach"}
-                            </button>
-                          ) : (
-                            <span className="text-xs text-[#86868b]">—</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          {isEditing ? (
-                            <div className="flex justify-end gap-3">
+                            <div className="mt-3 flex justify-end gap-3">
                               <button
                                 type="button"
                                 onClick={() => saveEdit(e.id)}
@@ -1653,62 +1497,252 @@ export default function ReceiptsClient() {
                                 Cancel
                               </button>
                             </div>
-                          ) : (
-                            <div className="flex justify-end gap-3">
-                              {status === "planned" && (
-                                <button
-                                  type="button"
-                                  onClick={() => markPaid(e)}
-                                  disabled={busyId === e.id}
-                                  className="text-xs font-semibold text-gold hover:underline disabled:opacity-50"
-                                >
-                                  Mark paid
-                                </button>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={e.id}
+                          className="flex items-start justify-between gap-6 border-b border-black/[0.07] px-5 py-4 hover:bg-[#fafafa]"
+                        >
+                          {/* Left: description block, free to wrap */}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[14.5px] leading-snug text-[#1d1d1f]">
+                              {e.vendor && (
+                                <span className="font-semibold">{e.vendor}</span>
                               )}
-                              {awaiting && (
+                              {e.vendor && e.description ? " — " : ""}
+                              {e.description}
+                              {e.is_recurring && (
+                                <span
+                                  className="ml-2 whitespace-nowrap text-[10px] uppercase tracking-wider text-gold"
+                                  title={
+                                    e.recurring_next_date
+                                      ? `Next auto-entry ${formatDate(e.recurring_next_date)}`
+                                      : undefined
+                                  }
+                                >
+                                  ↻ {e.recurring_frequency ?? "recurring"}
+                                </span>
+                              )}
+                              {e.recurring_source_id && (
+                                <span
+                                  className="ml-2 rounded-full bg-[#EEF0F3] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[#5A5A5F]"
+                                  title="Automatically created from a recurring charge"
+                                >
+                                  auto
+                                </span>
+                              )}
+                            </p>
+                            <p className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-[#86868b]">
+                              <span>{e.category || "Uncategorised"}</span>
+                              <span aria-hidden>·</span>
+                              <span>Paid by {paidByLabel(e.paid_by)}</span>
+                              <span aria-hidden>·</span>
+                              <span>GST {formatMoney(e.gst_cents)}</span>
+                              <span aria-hidden>·</span>
+                              {e.receipt_url ? (
+                                <a
+                                  href={e.receipt_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-gold hover:underline"
+                                >
+                                  View receipt
+                                </a>
+                              ) : status === "paid" ? (
                                 <button
                                   type="button"
-                                  onClick={() => markReimbursed(e)}
+                                  onClick={() => startAttach(e.id)}
+                                  disabled={attachingId === e.id}
+                                  className="text-[#9A6A1A] hover:underline disabled:opacity-50"
+                                >
+                                  {attachingId === e.id ? "Uploading…" : "Attach receipt"}
+                                </button>
+                              ) : (
+                                <span>no receipt</span>
+                              )}
+                            </p>
+                          </div>
+
+                          {/* Right: amount, status, actions */}
+                          <div className="relative flex shrink-0 flex-col items-end gap-1.5 text-right">
+                            <span className="text-[15px] font-semibold tabular-nums text-[#1d1d1f]">
+                              {formatMoney(e.amount_cents)}
+                            </span>
+                            {e.currency && e.currency !== "AUD" && e.original_amount_cents !== null && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-full bg-[#EAF2FB] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[#2B6CB0]"
+                                title={
+                                  e.fx_rate
+                                    ? `Original ${e.currency} ${(e.original_amount_cents / 100).toFixed(2)} @ ${e.fx_rate.toFixed(3)} → AUD`
+                                    : undefined
+                                }
+                              >
+                                {e.currency} {(e.original_amount_cents / 100).toFixed(2)}
+                              </span>
+                            )}
+                            {status === "paid" && !awaiting && !e.reimbursed && !e.paid_by ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPaidByPopoverId(
+                                    paidByPopoverId === e.id ? null : e.id,
+                                  )
+                                }
+                                disabled={busyId === e.id}
+                                className="rounded-full bg-[#EEF0F3] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#5A5A5F] hover:bg-[#f5f5f7] hover:text-gold disabled:opacity-50"
+                                aria-label="Set who paid this expense"
+                              >
+                                Paid ▾
+                              </button>
+                            ) : (
+                              <StatusBadge
+                                status={status}
+                                awaiting={awaiting}
+                                reimbursed={e.reimbursed}
+                                reimbursedDate={e.reimbursed_date}
+                              />
+                            )}
+                            {paidByPopoverId === e.id && (
+                              <>
+                                {/* click-outside catcher */}
+                                <button
+                                  type="button"
+                                  aria-label="Close menu"
+                                  onClick={() => setPaidByPopoverId(null)}
+                                  className="fixed inset-0 z-20 cursor-default"
+                                />
+                                <div className="absolute right-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-md border border-black/10 bg-white text-left shadow-2xl">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateRowPaidBy(e.id, "business")}
+                                    className="block w-full px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-gold"
+                                  >
+                                    Paid by <span className="font-semibold">Business</span>
+                                    <span className="block text-[10px] text-[#86868b]">
+                                      no reimbursement needed
+                                    </span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateRowPaidBy(e.id, "justin")}
+                                    className="block w-full border-t border-black/10 px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-[#9A6A1A]"
+                                  >
+                                    Paid by <span className="font-semibold">Justin</span>
+                                    <span className="block text-[10px] text-[#86868b]">
+                                      → awaiting reimbursement
+                                    </span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateRowPaidBy(e.id, "rowan")}
+                                    className="block w-full border-t border-black/10 px-3 py-2 text-left text-xs text-[#3a3a3c] hover:bg-[#f5f5f7] hover:text-[#9A6A1A]"
+                                  >
+                                    Paid by <span className="font-semibold">Rowan</span>
+                                    <span className="block text-[10px] text-[#86868b]">
+                                      → awaiting reimbursement
+                                    </span>
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                            {reimbursePromptId === e.id ? (
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  autoFocus
+                                  className={cellInputClass + " w-[150px]"}
+                                  placeholder="Bank txn ref (optional)"
+                                  value={reimburseTxnRef}
+                                  onChange={(ev) => setReimburseTxnRef(ev.target.value)}
+                                  onKeyDown={(ev) => {
+                                    if (ev.key === "Enter") markReimbursed(e, reimburseTxnRef);
+                                    else if (ev.key === "Escape") {
+                                      setReimbursePromptId(null);
+                                      setReimburseTxnRef("");
+                                    }
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => markReimbursed(e, reimburseTxnRef)}
                                   disabled={busyId === e.id}
                                   className="text-xs font-semibold text-[#1B7A47] hover:underline disabled:opacity-50"
                                 >
-                                  Reimbursed
+                                  {busyId === e.id ? "Saving…" : "Confirm"}
                                 </button>
-                              )}
-                              {e.reimbursed && (
                                 <button
                                   type="button"
-                                  onClick={() => undoReimbursed(e)}
-                                  disabled={busyId === e.id}
-                                  className="text-xs text-[#86868b] hover:text-[#9A6A1A] disabled:opacity-50"
-                                  title="Undo reimbursement"
+                                  onClick={() => {
+                                    setReimbursePromptId(null);
+                                    setReimburseTxnRef("");
+                                  }}
+                                  className="text-xs text-[#86868b] hover:text-[#3a3a3c]"
                                 >
-                                  Undo
+                                  Cancel
                                 </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => startEdit(e)}
-                                className="text-xs text-[#86868b] hover:text-gold"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(e.id)}
-                                disabled={busyId === e.id}
-                                className="text-xs text-[#86868b] hover:text-[#C8332B] disabled:opacity-50"
-                              >
-                                {busyId === e.id ? "…" : "Delete"}
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                              </div>
+                            ) : (
+                              <div className="flex justify-end gap-3">
+                                {status === "planned" && (
+                                  <button
+                                    type="button"
+                                    onClick={() => markPaid(e)}
+                                    disabled={busyId === e.id}
+                                    className="text-xs font-semibold text-gold hover:underline disabled:opacity-50"
+                                  >
+                                    Mark paid
+                                  </button>
+                                )}
+                                {awaiting && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setReimbursePromptId(e.id);
+                                      setReimburseTxnRef("");
+                                    }}
+                                    disabled={busyId === e.id}
+                                    className="text-xs font-semibold text-[#1B7A47] hover:underline disabled:opacity-50"
+                                  >
+                                    Reimbursed
+                                  </button>
+                                )}
+                                {e.reimbursed && (
+                                  <button
+                                    type="button"
+                                    onClick={() => undoReimbursed(e)}
+                                    disabled={busyId === e.id}
+                                    className="text-xs text-[#86868b] hover:text-[#9A6A1A] disabled:opacity-50"
+                                    title="Undo reimbursement"
+                                  >
+                                    Undo
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => startEdit(e)}
+                                  className="text-xs text-[#86868b] hover:text-gold"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(e.id)}
+                                  disabled={busyId === e.id}
+                                  className="text-xs text-[#86868b] hover:text-[#C8332B] disabled:opacity-50"
+                                >
+                                  {busyId === e.id ? "…" : "Delete"}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ));
+              })()}
             </div>
           )}
         </div>
