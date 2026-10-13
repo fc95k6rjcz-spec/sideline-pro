@@ -1,6 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import nodemailer from "nodemailer";
+import { put } from "@vercel/blob";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  buildInvoicePdf,
+  sendInvoiceEmailDirect,
+  type AutoSendInvoice,
+} from "@/lib/invoice-auto-send";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -69,6 +75,7 @@ type Anchor = {
   currency: string;
   description: string | null;
   created_by_email: string;
+  auto_send: boolean | null;
 };
 
 /**
@@ -92,7 +99,7 @@ export async function GET(request: NextRequest) {
   const { data: anchors, error } = await admin
     .from("invoices")
     .select(
-      "id,prefix,invoice_number,client_name,client_sub_org,client_email,issue_date,due_date,next_invoice_date,subtotal_cents,gst_cents,total_cents,currency,description,created_by_email",
+      "id,prefix,invoice_number,client_name,client_sub_org,client_email,issue_date,due_date,next_invoice_date,subtotal_cents,gst_cents,total_cents,currency,description,created_by_email,auto_send",
     )
     .eq("auto_issue", true)
     .not("next_invoice_date", "is", null)
@@ -102,6 +109,7 @@ export async function GET(request: NextRequest) {
   }
 
   const created: Array<{ recipient: string; draft: Record<string, unknown> }> = [];
+  const autoSent: Array<{ recipient: string; invoice: Record<string, unknown> }> = [];
 
   for (const a of (anchors ?? []) as Anchor[]) {
     const issue = a.next_invoice_date as string;
@@ -161,6 +169,77 @@ export async function GET(request: NextRequest) {
       .update({ next_invoice_date: addMonthsISO(issue, 1), updated_at: new Date().toISOString() })
       .eq("id", a.id);
 
+    // ── Auto-send: generate the PDF server-side and email the client directly.
+    // Safety rails: only when the anchor explicitly has auto_send on AND a
+    // valid client email. Any failure leaves the invoice as a reviewable
+    // draft and records the error on the row — never a half-sent state.
+    const canAutoSend =
+      a.auto_send === true &&
+      typeof a.client_email === "string" &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.client_email);
+
+    if (canAutoSend) {
+      const nowIso = new Date().toISOString();
+      const invForSend: AutoSendInvoice = {
+        id: (inserted as { id: string }).id,
+        invoice_number: number,
+        client_name: a.client_name,
+        client_sub_org: a.client_sub_org,
+        client_email: a.client_email,
+        issue_date: issue,
+        due_date: due,
+        subtotal_cents: a.subtotal_cents,
+        gst_cents: a.gst_cents,
+        total_cents: a.total_cents,
+        currency: a.currency ?? "AUD",
+        description: rollDescription(a.description, issue),
+      };
+      try {
+        const pdfBuffer = buildInvoicePdf(invForSend);
+        const pdfName = `Sideline_Pro_Invoice_${number}.pdf`;
+        const pdfPath = `invoices/${new Date(`${issue}T00:00:00`).getFullYear()}/${pdfName}`;
+        // Blob store is PRIVATE on this project — mirror upload-pdf/route.ts.
+        const blob = await put(pdfPath, pdfBuffer, {
+          access: "private",
+          addRandomSuffix: false,
+          allowOverwrite: true,
+        } as unknown as Parameters<typeof put>[2]);
+
+        await sendInvoiceEmailDirect(invForSend, pdfBuffer, a.client_email as string);
+
+        await admin
+          .from("invoices")
+          .update({
+            is_draft: false,
+            pdf_url: blob.url,
+            pdf_pathname: blob.pathname,
+            email_sent_at: nowIso,
+            last_auto_send_attempt_at: nowIso,
+            last_auto_send_result: "sent",
+            updated_at: nowIso,
+          })
+          .eq("id", invForSend.id);
+
+        autoSent.push({
+          recipient: a.created_by_email,
+          invoice: inserted as Record<string, unknown>,
+        });
+        continue; // sent — no review-draft email needed for this one
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "auto-send failed";
+        console.warn("[auto-issue] auto-send failed, leaving draft:", number, message);
+        await admin
+          .from("invoices")
+          .update({
+            last_auto_send_attempt_at: nowIso,
+            last_auto_send_result: `error: ${message.slice(0, 300)}`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", invForSend.id);
+        // fall through: it stays a draft and goes in the review email
+      }
+    }
+
     created.push({ recipient: a.created_by_email, draft: inserted as Record<string, unknown> });
   }
 
@@ -170,7 +249,7 @@ export async function GET(request: NextRequest) {
   const gmailPass = process.env.GMAIL_APP_PASS;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.sidelinepro.com.au";
 
-  if (created.length > 0 && gmailUser && gmailPass) {
+  if ((created.length > 0 || autoSent.length > 0) && gmailUser && gmailPass) {
     const transport = nodemailer.createTransport({
       service: "gmail",
       auth: { user: gmailUser, pass: gmailPass },
@@ -232,7 +311,62 @@ export async function GET(request: NextRequest) {
         console.warn("[auto-issue] reminder email failed:", err);
       }
     }
+
+    // ── Confirmation for invoices that were auto-sent (no action needed) ──
+    const sentByRecipient = new Map<string, typeof autoSent>();
+    for (const s of autoSent) {
+      const list = sentByRecipient.get(s.recipient) ?? [];
+      list.push(s);
+      sentByRecipient.set(s.recipient, list);
+    }
+    for (const [recipient, sent] of sentByRecipient) {
+      const rows = sent
+        .map((d) => {
+          const inv = d.invoice as {
+            invoice_number: string;
+            client_name: string;
+            total_cents: number;
+            due_date: string;
+          };
+          return `<tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${inv.invoice_number}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${inv.client_name}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${money(inv.total_cents)}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;">${longDate(inv.due_date)}</td>
+          </tr>`;
+        })
+        .join("");
+      const html = `<div style="font-family:Arial,sans-serif;color:#1d1d1f;">
+        <h2 style="margin:0 0 8px;">Invoices sent automatically</h2>
+        <p style="color:#555;margin:0 0 16px;">These recurring invoices were generated and <strong>emailed to the client</strong> just now. No action needed — this is your record. Manage auto-send from the <a href="${siteUrl}/admin/invoice">invoice ledger</a>.</p>
+        <table style="border-collapse:collapse;font-size:14px;">
+          <thead><tr>
+            <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #ddd;">Invoice</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #ddd;">Client</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #ddd;">Total</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:2px solid #ddd;">Due</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+      try {
+        await transport.sendMail({
+          from: `${fromName} <${gmailUser}>`,
+          to: recipient,
+          subject: `${sent.length} invoice${sent.length > 1 ? "s" : ""} sent automatically`,
+          html,
+        });
+        emailed += 1;
+      } catch (err) {
+        console.warn("[auto-issue] auto-send confirmation email failed:", err);
+      }
+    }
   }
 
-  return NextResponse.json({ ok: true, drafted: created.length, emailed });
+  return NextResponse.json({
+    ok: true,
+    drafted: created.length,
+    auto_sent: autoSent.length,
+    emailed,
+  });
 }
