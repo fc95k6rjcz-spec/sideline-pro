@@ -93,7 +93,7 @@ const heroSlides: HeroSlide[] = [
   { src: "/hero/qc-centre-pass.png", alt: "Netball player passing from the centre circle", focus: "center 40%" },
   { src: "/hero/sf-huddle-sky.png", alt: "Netball team huddle holding a ball against the sky", focus: "45% 50%" },
   { src: "/hero/qc-shot-at-goal.png", alt: "Netball players reaching for a shot at goal", focus: "center 30%" },
-  { src: "/hero/sf-three-girls.jpg", alt: "Three junior netballers watching from the sideline", focus: "center 55%" },
+  { src: "/hero/sf-three-girls.png", alt: "Three junior netballers watching from the sideline", focus: "center 55%" },
   { src: "/hero/sf-shooting.jpg", alt: "Netball goal shooter lining up a shot", focus: "center 45%" },
   { src: "/hero/sf-team-court.png", alt: "Netball team posing on an outdoor court", focus: "center 40%" },
 ]
