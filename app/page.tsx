@@ -2,6 +2,7 @@ import Image from "next/image"
 import { Poppins } from "next/font/google"
 import { Check } from "lucide-react"
 import { ContactForm } from "@/components/contact-form"
+import { HeroCarousel, type HeroSlide } from "./components/HeroCarousel"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -87,6 +88,16 @@ function Navbar() {
 /* ──────────────────────────────────────────────────────────
    Hero — navy, copy left, angled photo right
    ────────────────────────────────────────────────────────── */
+const heroSlides: HeroSlide[] = [
+  { src: "/hero/qc-hands-in.png", alt: "Junior netball team hands in before a game", focus: "center 35%" },
+  { src: "/hero/qc-centre-pass.png", alt: "Netball player passing from the centre circle", focus: "center 40%" },
+  { src: "/hero/sf-huddle-sky.png", alt: "Netball team huddle holding a ball against the sky", focus: "center 50%" },
+  { src: "/hero/qc-shot-at-goal.png", alt: "Netball players reaching for a shot at goal", focus: "center 30%" },
+  { src: "/hero/sf-three-girls.jpg", alt: "Three junior netballers watching from the sideline", focus: "center 55%" },
+  { src: "/hero/sf-shooting.jpg", alt: "Netball goal shooter lining up a shot", focus: "center 45%" },
+  { src: "/hero/sf-team-court.png", alt: "Netball team posing on an outdoor court", focus: "center 40%" },
+]
+
 const heroProof = ["Works with PlayHQ", "iOS & Android apps", "Every code, every club"]
 
 function Hero() {
@@ -135,17 +146,11 @@ function Hero() {
         </div>
       </div>
 
-      {/* photo — straight edge on phones, angled left edge pinned right on desktop */}
-      <div className="relative min-h-[340px] lg:absolute lg:bottom-0 lg:right-0 lg:top-[88px] lg:min-h-0 lg:w-[56%] lg:[clip-path:polygon(14%_0,100%_0,100%_100%,0_100%)]">
-        <Image
-          src="/hero-netball.png"
-          alt="Junior netball players mid-pass in the centre circle on an outdoor court"
-          fill
-          priority
-          sizes="(max-width: 1024px) 100vw, 56vw"
-          className="object-cover"
-        />
-      </div>
+      {/* photos — straight edge on phones, angled left edge pinned right on desktop */}
+      <HeroCarousel
+        slides={heroSlides}
+        className="min-h-[340px] lg:absolute lg:bottom-0 lg:right-0 lg:top-[88px] lg:min-h-0 lg:w-[56%] lg:[clip-path:polygon(14%_0,100%_0,100%_100%,0_100%)]"
+      />
     </section>
   )
 }
