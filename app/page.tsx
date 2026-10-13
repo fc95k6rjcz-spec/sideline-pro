@@ -139,7 +139,7 @@ function Hero() {
       <div className="relative min-h-[340px] lg:absolute lg:bottom-0 lg:right-0 lg:top-[88px] lg:min-h-0 lg:w-[56%] lg:[clip-path:polygon(14%_0,100%_0,100%_100%,0_100%)]">
         <Image
           src="/hero-netball.png"
-          alt="Junior netball game on an indoor court"
+          alt="Junior netball players mid-pass in the centre circle on an outdoor court"
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 56vw"
