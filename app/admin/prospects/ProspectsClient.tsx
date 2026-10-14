@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ProposalPanel } from "./ProposalPanel";
 
 type Prospect = {
   id: string;
@@ -858,6 +859,12 @@ function EditDrawer({
                 </button>
               </div>
             </Field>
+          </Section>
+
+          <Section title="Proposal">
+            {/* Create → mark sent → share the link; the club accepts on the
+                public page and the prospect flips to Won. See ProposalPanel. */}
+            <ProposalPanel prospectId={prospect.id} clubName={prospect.club_name} />
           </Section>
 
           <Section title="Notes">
