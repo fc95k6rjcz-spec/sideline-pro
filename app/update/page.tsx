@@ -332,17 +332,12 @@ function Dimes() {
 
 /* ── Apps ───────────────────────────────────────────────── */
 const sports = ["Soccer", "Netball", "AFL", "Rugby League", "Rugby Union", "Cricket", "Basketball", "Hockey", "Touch", "Futsal"]
-const phones = [
-  { src: "/update/app-club-white.png", alt: "Club dashboard app screen", raised: false },
-  { src: "/update/app-lineup-white.png", alt: "Coach line-up builder app screen", raised: true },
-  { src: "/update/app-player-white.png", alt: "Player profile app screen", raised: false },
-]
 
 function Apps() {
   return (
     <section id="apps" className="scroll-mt-[84px] overflow-hidden bg-[#00BFAE] px-5 pt-[72px] text-[#001025] sm:px-7 lg:pt-[100px]">
-      <div className={`${container} grid items-end gap-10 [grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))]`}>
-        <div className="pb-[60px]">
+      <div className={container}>
+        <div className="max-w-[640px]">
           <p className={`${eyebrow} opacity-70`}>iOS &amp; Android</p>
           <h2 className={`${h2} mt-2.5`} style={{ ...display, ...h2Size }}>
             Your club.
@@ -361,21 +356,16 @@ function Apps() {
             ))}
           </div>
         </div>
-        <div className="grid w-full max-w-[620px] grid-cols-3 items-end gap-3.5 justify-self-center">
-          {phones.map((p) => (
-            <Image
-              key={p.src}
-              src={p.src}
-              alt={p.alt}
-              width={853}
-              height={1484}
-              sizes="(max-width: 640px) 33vw, 200px"
-              className={`block h-auto w-full shadow-[0_-20px_50px_rgba(0,16,37,0.25)] ${
-                p.raised ? "mb-10 rounded-[22px]" : "rounded-t-[22px]"
-              }`}
-            />
-          ))}
-        </div>
+        {/* Four-phone showcase render, background knocked out so the phones
+            and their shadows sit straight on the teal. */}
+        <Image
+          src="/update/app-screens-showcase.png"
+          alt="SidelinePro app screens: club dashboard, coach line-up builder, player profile and convenor tools"
+          width={1760}
+          height={884}
+          sizes="(max-width: 1280px) 100vw, 1240px"
+          className="mt-10 block h-auto w-full lg:mt-6"
+        />
       </div>
     </section>
   )
