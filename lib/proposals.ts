@@ -1,5 +1,3 @@
-import { randomBytes } from "node:crypto";
-
 /**
  * Proposals a club can read and accept online.
  *
@@ -85,9 +83,18 @@ export function isProposalStatus(v: unknown): v is ProposalStatus {
   return typeof v === "string" && (PROPOSAL_STATUSES as readonly string[]).includes(v);
 }
 
-/** 24 URL-safe characters; the link is the only secret. */
+/**
+ * 24 URL-safe characters; the link is the only secret. Web Crypto rather
+ * than node:crypto because this module is shared with the client bundle
+ * (the admin panel and the public accept form import its helpers), and the
+ * production build fails on a `node:` import reached from the browser.
+ */
 export function newProposalToken(): string {
-  return randomBytes(18).toString("base64url");
+  const bytes = new Uint8Array(18);
+  globalThis.crypto.getRandomValues(bytes);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 export function toPublicProposal(row: ProposalRow): PublicProposal {
