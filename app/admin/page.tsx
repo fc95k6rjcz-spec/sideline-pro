@@ -60,6 +60,25 @@ export default async function AdminDashboardPage() {
         </a>
 
         <a
+          href="/admin/crm"
+          className="group rounded-[20px] border border-black/10 bg-white p-[26px] transition duration-300 hover:-translate-y-[3px] hover:border-gold/60 hover:shadow-[0_14px_38px_rgba(0,0,0,0.09)]"
+        >
+          <div className="text-xs font-semibold uppercase tracking-wider text-gold">
+            Prospecting CRM
+          </div>
+          <div className="mt-2.5 text-[21px] font-semibold tracking-[-0.01em]">
+            Associations &amp; clubs
+          </div>
+          <p className="mt-2 text-sm text-[#6e6e73]">
+            Map clubs by association, find the right committee members, track
+            every conversation and follow-up, and build mailing lists.
+          </p>
+          <div className="mt-4 text-sm font-semibold text-gold group-hover:underline">
+            Open →
+          </div>
+        </a>
+
+        <a
           href="/admin/prospects"
           className="group rounded-[20px] border border-black/10 bg-white p-[26px] transition duration-300 hover:-translate-y-[3px] hover:border-gold/60 hover:shadow-[0_14px_38px_rgba(0,0,0,0.09)]"
         >

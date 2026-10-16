@@ -1,6 +1,6 @@
 # Sideline Pro — Admin Setup
 
-This site has a private `/admin` area for invoice generation and receipt uploads. Two accounts are authorised: Justin and Rowan. Anyone else who tries to sign in will be bounced. The public coming-soon page at `/` is unaffected.
+This site has a private `/admin` area for invoice generation, receipt uploads and the prospecting CRM (`/admin/crm` — see [docs/CRM.md](docs/CRM.md)). Two accounts are authorised: Justin and Rowan. Anyone else who tries to sign in will be bounced. The public coming-soon page at `/` is unaffected.
 
 ## What was added
 
@@ -95,6 +95,10 @@ Visit http://localhost:3000/admin — you'll be redirected to `/login`. Sign in 
 ## How receipts work
 
 `/admin/receipts` lets each user drag-and-drop files. Uploads go to Vercel Blob under `receipts/<user-email>/<timestamp>-<filename>`. The list view shows only the current user's uploads. Each blob is public-readable via its URL (anyone with the URL can view it) — if you need private blobs, switch `access: "public"` to `"private"` in `app/api/receipts/upload/route.ts` and we'll add signed-URL fetching.
+
+## How the CRM works
+
+`/admin/crm` maps clubs by association, tracks committee members, conversations and follow-ups, imports research spreadsheets and builds de-duplicated mailing lists. Its tables (`crm_*`) are created by `sql/crm_schema.sql` and seeded from the old `prospects` table by `sql/crm_seed_from_prospects.sql` (both already applied to `SidelinePro_Website`). It needs no extra environment variables — it uses `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` like the other admin APIs. Full design: [docs/CRM.md](docs/CRM.md).
 
 ## Updating the allowlist later
 
