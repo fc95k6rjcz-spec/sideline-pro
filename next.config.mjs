@@ -14,11 +14,11 @@ const nextConfig = {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
   // Short links for ads and social bios:
-  //   /demo        → the live Harbor View multi-sport demo club
+  //   /demo        → the Harbor View demo club homepage (pick a sport)
   //   /book-a-demo → the homepage's demo request form
   async redirects() {
     return [
-      { source: "/demo", destination: "https://harbor-view-demo.vercel.app/demo", permanent: false },
+      { source: "/demo", destination: "https://harbor-view-demo.vercel.app/", permanent: false },
       { source: "/book-a-demo", destination: "/#contact", permanent: false },
     ]
   },
