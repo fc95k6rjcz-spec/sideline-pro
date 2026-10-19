@@ -13,6 +13,14 @@ const nextConfig = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
+  // Short link for ads and social bios: sidelinepro.com.au/demo lands on
+  // the homepage's demo request form.
+  async redirects() {
+    return [
+      { source: "/demo", destination: "/#contact", permanent: false },
+      { source: "/book-a-demo", destination: "/#contact", permanent: false },
+    ]
+  },
 }
 
 export default nextConfig
