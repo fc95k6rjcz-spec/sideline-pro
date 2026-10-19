@@ -13,14 +13,21 @@ const nextConfig = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
-  // Short links for ads and social bios:
-  //   /demo        → the Harbor View demo club homepage (pick a sport)
-  //   /book-a-demo → the homepage's demo request form
-  async redirects() {
+  // sidelinepro.com.au/demo shows the Harbor View demo club in place: the
+  // demo app (harbor-view-demo repo) is built with basePath "/demo", and
+  // everything under /demo here is fetched from that deployment, so the
+  // address bar stays on sidelinepro.com.au. HARBOR_VIEW_ORIGIN overrides
+  // the target for local testing.
+  async rewrites() {
+    const demo = process.env.HARBOR_VIEW_ORIGIN || "https://harbor-view-demo.vercel.app"
     return [
-      { source: "/demo", destination: "https://harbor-view-demo.vercel.app/", permanent: false },
-      { source: "/book-a-demo", destination: "/#contact", permanent: false },
+      { source: "/demo", destination: `${demo}/demo` },
+      { source: "/demo/:path*", destination: `${demo}/demo/:path*` },
     ]
+  },
+  // /book-a-demo → the homepage's demo request form.
+  async redirects() {
+    return [{ source: "/book-a-demo", destination: "/#contact", permanent: false }]
   },
 }
 
