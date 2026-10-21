@@ -137,6 +137,18 @@ export default function ProspectsClient() {
   const [creating, setCreating] = useState(false);
   const [newClubName, setNewClubName] = useState("");
   const [editing, setEditing] = useState<Prospect | null>(null);
+  /**
+   * Board by default, sheet on demand.
+   *
+   * The sheet is a genuinely good editor — click any cell, it saves — but it
+   * is a bad way to WORK a pipeline: nineteen rows of equal weight, the
+   * clubs you are actually talking to buried in alphabetical order between
+   * ones you have never contacted, and the quote you just wrote eleven
+   * columns to the right (Justin, 21 Oct 2026: "it's currently like kill me
+   * now"). The board answers "who am I chasing today" first and keeps the
+   * sheet one tap away for bulk edits.
+   */
+  const [view, setView] = useState<"board" | "sheet">("board");
 
   const load = useCallback(async () => {
     try {
@@ -195,6 +207,61 @@ export default function ProspectsClient() {
       return true;
     });
   }, [prospects, filter, search]);
+
+  /**
+   * Pipeline order, not alphabetical.
+   *
+   * A club with a quote out is the most interesting thing on this screen and
+   * belongs at the top; a club nobody has contacted belongs at the bottom.
+   * Within a band, whoever needs chasing soonest comes first.
+   */
+  const ordered = useMemo(() => {
+    const statusRank: Record<string, number> = {
+      "Proposal sent": 0,
+      "Meeting booked": 1,
+      Interested: 2,
+      Contacted: 3,
+      Won: 4,
+      New: 5,
+      Lost: 6,
+      "Not a fit": 6,
+    };
+    const followRank: Record<FollowupState, number> = {
+      overdue: 0,
+      today: 1,
+      upcoming: 2,
+      future: 3,
+      none: 4,
+    };
+    return [...filtered].sort((a, b) => {
+      /* A live quote outranks everything, including status. */
+      const qa = proposals[a.id] ? 0 : 1;
+      const qb = proposals[b.id] ? 0 : 1;
+      if (qa !== qb) return qa - qb;
+      const sa = statusRank[a.status ?? "New"] ?? 5;
+      const sb = statusRank[b.status ?? "New"] ?? 5;
+      if (sa !== sb) return sa - sb;
+      const fa = followRank[followupState(a.follow_up_date)];
+      const fb = followRank[followupState(b.follow_up_date)];
+      if (fa !== fb) return fa - fb;
+      return (a.club_name || "").localeCompare(b.club_name || "");
+    });
+  }, [filtered, proposals]);
+
+  /** The clubs actually in a conversation — the board's first section. */
+  const inPlay = useMemo(
+    () =>
+      ordered.filter(
+        (p) =>
+          Boolean(proposals[p.id]) ||
+          ["Contacted", "Interested", "Meeting booked", "Proposal sent"].includes(p.status ?? ""),
+      ),
+    [ordered, proposals],
+  );
+  const everyoneElse = useMemo(
+    () => ordered.filter((p) => !inPlay.includes(p)),
+    [ordered, inPlay],
+  );
 
   const stats = useMemo(() => {
     return {
@@ -373,6 +440,22 @@ export default function ProspectsClient() {
               <option value="lost">Lost / not a fit</option>
             </select>
           </label>
+          <div className="flex overflow-hidden rounded-md border border-black/10">
+            {(["board", "sheet"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                className={
+                  view === v
+                    ? "bg-gold px-3 py-2 text-xs font-bold text-white"
+                    : "px-3 py-2 text-xs text-[#6e6e73] hover:text-gold"
+                }
+              >
+                {v === "board" ? "Board" : "Sheet"}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             onClick={load}
@@ -400,7 +483,7 @@ export default function ProspectsClient() {
               ? "No prospects yet. Add the first one above."
               : "Nothing matches the filter / search."}
           </div>
-        ) : (
+        ) : view === "sheet" ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1700px] text-xs">
               <thead className="bg-[#f5f5f7] text-[10px] uppercase tracking-wider text-[#86868b]">
@@ -589,13 +672,45 @@ export default function ProspectsClient() {
               </tbody>
             </table>
           </div>
+        ) : (
+          <div className="space-y-8 p-5">
+            {inPlay.length > 0 ? (
+              <section>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-[13px] font-bold uppercase tracking-wider text-[#1d1d1f]">In play</h2>
+                  <span className="text-[11px] text-[#86868b]">
+                    {inPlay.length} {inPlay.length === 1 ? "club" : "clubs"} you are talking to
+                  </span>
+                </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {inPlay.map((p) => (
+                    <ProspectCard key={p.id} p={p} summary={proposals[p.id]} onEdit={() => setEditing(p)} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {everyoneElse.length > 0 ? (
+              <section>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-[13px] font-bold uppercase tracking-wider text-[#86868b]">Not started</h2>
+                  <span className="text-[11px] text-[#86868b]">{everyoneElse.length} to approach</span>
+                </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {everyoneElse.map((p) => (
+                    <ProspectCard key={p.id} p={p} summary={proposals[p.id]} onEdit={() => setEditing(p)} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
         )}
       </div>
 
       <p className="text-xs text-[#86868b]">
-        Tip: click the gold <span className="text-gold">✎ Edit</span> button on
-        any row for the full edit panel, or click a single cell for a quick
-        change.
+        {view === "sheet"
+          ? "Tip: click the gold ✎ Edit button on any row for the full edit panel, or click a single cell for a quick change."
+          : "Board shows who you are talking to first. Switch to Sheet for bulk edits — every cell there saves as you type."}
       </p>
 
       {editing && (
@@ -996,6 +1111,129 @@ const drawerInputClass =
 
 function Th({ children }: { children?: React.ReactNode }) {
   return <th className="whitespace-nowrap px-3 py-3 text-left">{children}</th>;
+}
+
+/**
+ * One club, as a card you can act on.
+ *
+ * Modelled on the Dimes programs grid, which works because every card
+ * answers the same three questions in the same places: what is this, what
+ * state is it in, and what is the one button. Here that is the club, the
+ * quote, and whoever you ring next.
+ *
+ * Everything on the card is either a fact a salesperson needs in the first
+ * two seconds or something they can click. No column of empty cells.
+ */
+function ProspectCard({
+  p,
+  summary,
+  onEdit,
+}: {
+  p: Prospect;
+  summary?: ProposalSummary;
+  onEdit: () => void;
+}) {
+  const fState = followupState(p.follow_up_date);
+  const accent =
+    fState === "overdue"
+      ? "border-t-[3px] border-t-[#C8332B]"
+      : fState === "today"
+        ? "border-t-[3px] border-t-[#E0A82E]"
+        : summary
+          ? "border-t-[3px] border-t-gold"
+          : "border-t-[3px] border-t-transparent";
+
+  const phone = (p.treasurer_phone || "").replace(/[^0-9+]/g, "");
+
+  return (
+    <div className={`flex flex-col rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition hover:shadow-md ${accent}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#86868b]">
+            {p.approx_players ? p.approx_players.split("(")[0]!.trim() : "Size unknown"}
+          </p>
+          <h3 className="mt-0.5 text-[19px] font-bold leading-tight [overflow-wrap:break-word]">{p.club_name}</h3>
+        </div>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${statusColor(p.status)}`}>
+          {p.status ?? "New"}
+        </span>
+      </div>
+
+      {/* The quote is the headline fact when there is one. */}
+      <div className="mt-3">
+        <QuoteCell summary={summary} />
+      </div>
+
+      {p.next_action ? (
+        <p className="mt-3 rounded-lg bg-[#fdf6e9] px-3 py-2 text-[12px] font-semibold leading-snug text-[#8A6418]">
+          Next: {p.next_action}
+        </p>
+      ) : null}
+
+      {fState !== "none" ? (
+        <p
+          className={`mt-2 text-[11px] font-bold ${
+            fState === "overdue" ? "text-[#C8332B]" : fState === "today" ? "text-[#8A6418]" : "text-[#86868b]"
+          }`}
+        >
+          {fState === "overdue" ? "⚑ Follow-up overdue" : fState === "today" ? "⚑ Follow up today" : `Follow up ${p.follow_up_date}`}
+        </p>
+      ) : null}
+
+      <dl className="mt-3 space-y-1 text-[12px] text-[#3a3a3c]">
+        {p.treasurer_name ? (
+          <div className="flex gap-1.5">
+            <dt className="shrink-0 text-[#86868b]">Contact</dt>
+            <dd className="min-w-0 font-semibold [overflow-wrap:break-word]">{p.treasurer_name}</dd>
+          </div>
+        ) : null}
+        {p.club_website ? (
+          <div className="flex gap-1.5">
+            <dt className="shrink-0 text-[#86868b]">Site</dt>
+            <dd className="min-w-0 truncate">
+              <a
+                href={p.club_website.startsWith("http") ? p.club_website : `https://${p.club_website}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-gold underline"
+              >
+                {p.club_website.replace(/^https?:\/\//, "")}
+              </a>
+              {p.website_quality ? <span className="ml-1 text-[#86868b]">· {p.website_quality} quality</span> : null}
+            </dd>
+          </div>
+        ) : null}
+      </dl>
+
+      {/* Buttons sit at the bottom of every card regardless of content
+          length, so a grid of cards has one consistent action row. */}
+      <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
+        <button
+          type="button"
+          onClick={onEdit}
+          className="rounded-lg border border-gold/40 bg-gold/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-gold hover:bg-gold/20"
+        >
+          Open
+        </button>
+        {p.treasurer_email ? (
+          <a
+            href={`mailto:${p.treasurer_email}`}
+            className="rounded-lg border border-black/10 px-3 py-1.5 text-[11px] font-semibold text-[#3a3a3c] hover:border-gold hover:text-gold"
+          >
+            Email
+          </a>
+        ) : null}
+        {phone.length >= 8 ? (
+          <a
+            href={`tel:${phone}`}
+            className="rounded-lg border border-black/10 px-3 py-1.5 text-[11px] font-semibold text-[#3a3a3c] hover:border-gold hover:text-gold"
+          >
+            Call
+          </a>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 /**
