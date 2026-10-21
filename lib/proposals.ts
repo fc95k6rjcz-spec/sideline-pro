@@ -107,6 +107,10 @@ export type PublicProposal = Pick<
   | "accepted_name"
   | "accepted_role"
   | "declined_at"
+  /* So the page can tell a club where their money is: nothing yet, a debit
+     in flight, or done. Never the Stripe ids — those stay server-side. */
+  | "payment_status"
+  | "paid_at"
 >;
 
 export const PROPOSAL_STATUSES: readonly ProposalStatus[] = ["draft", "sent", "viewed", "accepted", "declined"];
@@ -147,6 +151,8 @@ export function toPublicProposal(row: ProposalRow): PublicProposal {
     accepted_name: row.accepted_name,
     accepted_role: row.accepted_role,
     declined_at: row.declined_at,
+    payment_status: row.payment_status,
+    paid_at: row.paid_at,
   };
 }
 
