@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { formatAud } from "@/lib/proposals";
 import { ProposalPanel } from "./ProposalPanel";
 
@@ -41,8 +41,46 @@ type Prospect = {
   date_emailed: string | null;   // YYYY-MM-DD
   correspondence: string | null; // free-text log
   follow_up_date: string | null; // YYYY-MM-DD — set means "needs follow-up"
+  region: string | null;
+  /** Path under /public (public/prospect-logos). */
+  logo_url: string | null;
+  /** "dark" when the logo is white and needs a dark tile. */
+  logo_bg: string | null;
+  brand_color: string | null;
+  brand_color_2: string | null;
   created_at: string;
   updated_at: string;
+};
+
+/** Lead contact from the NSW contacts research sheet. See /api/prospects/list. */
+type ContactLead = {
+  role: string | null;
+  contact_name: string | null;
+  email: string | null;
+  mobile: string | null;
+  source_sheet: string;
+};
+type ContactSummary = { count: number; lead: ContactLead | null };
+
+/** One row of the research sheet, as stored in prospect_contacts. */
+type SheetContact = ContactLead & {
+  id: string;
+  greeting: string | null;
+  campaign_segment: string | null;
+  buying_role: string | null;
+  mailbox_type: string | null;
+  evidence: string | null;
+  source_url: string | null;
+  contact_quality: string | null;
+  consent_assessment: string | null;
+  opt_out_status: string | null;
+  notes: string | null;
+  published_phone_contact: string | null;
+  phone_attribution: string | null;
+  mobile_source_url: string | null;
+  mobile_checked: string | null;
+  email_status: string | null;
+  next_check: string | null;
 };
 
 const STATUS_OPTIONS = [
@@ -129,6 +167,8 @@ export default function ProspectsClient() {
   const [prospects, setProspects] = useState<Prospect[]>([]);
   /** The live quote per prospect, keyed by prospect id. See QuoteCell. */
   const [proposals, setProposals] = useState<Record<string, ProposalSummary>>({});
+  /** Research-sheet contacts per prospect: how many, and who to lead with. */
+  const [contacts, setContacts] = useState<Record<string, ContactSummary>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
@@ -155,8 +195,13 @@ export default function ProspectsClient() {
       setLoading(true);
       const res = await fetch("/api/prospects/list", { cache: "no-store" });
       if (!res.ok) throw new Error(`List failed (${res.status})`);
-      const data = (await res.json()) as { prospects: Prospect[]; proposals?: Record<string, ProposalSummary> };
+      const data = (await res.json()) as {
+        prospects: Prospect[];
+        proposals?: Record<string, ProposalSummary>;
+        contacts?: Record<string, ContactSummary>;
+      };
       setProposals(data.proposals ?? {});
+      setContacts(data.contacts ?? {});
       setProspects(data.prospects);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load prospects");
@@ -201,12 +246,16 @@ export default function ProspectsClient() {
           " " +
           (p.correspondence || "") +
           " " +
-          (p.club_website || "");
+          (p.club_website || "") +
+          " " +
+          (p.region || "") +
+          " " +
+          (contacts[p.id]?.lead?.contact_name || "");
         if (!hay.toLowerCase().includes(q)) return false;
       }
       return true;
     });
-  }, [prospects, filter, search]);
+  }, [prospects, filter, search, contacts]);
 
   /**
    * Pipeline order, not alphabetical.
@@ -684,7 +733,7 @@ export default function ProspectsClient() {
                 </div>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {inPlay.map((p) => (
-                    <ProspectCard key={p.id} p={p} summary={proposals[p.id]} onEdit={() => setEditing(p)} />
+                    <ProspectCard key={p.id} p={p} summary={proposals[p.id]} contacts={contacts[p.id]} onEdit={() => setEditing(p)} />
                   ))}
                 </div>
               </section>
@@ -698,7 +747,7 @@ export default function ProspectsClient() {
                 </div>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {everyoneElse.map((p) => (
-                    <ProspectCard key={p.id} p={p} summary={proposals[p.id]} onEdit={() => setEditing(p)} />
+                    <ProspectCard key={p.id} p={p} summary={proposals[p.id]} contacts={contacts[p.id]} onEdit={() => setEditing(p)} />
                   ))}
                 </div>
               </section>
@@ -794,7 +843,13 @@ function EditDrawer({
             <p className="text-[10px] uppercase tracking-[0.25em] text-gold">
               Edit prospect
             </p>
-            <h2 className="mt-1 text-xl font-bold">{prospect.club_name}</h2>
+            <div className="mt-1 flex items-center gap-3">
+              <ClubBadge p={prospect} size={44} />
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold leading-tight">{prospect.club_name}</h2>
+                {prospect.region ? <p className="text-[12px] text-[#86868b]">{prospect.region}</p> : null}
+              </div>
+            </div>
           </div>
           <button
             type="button"
@@ -892,6 +947,10 @@ function EditDrawer({
                 onChange={(e) => set("treasurer_email", e.target.value)}
               />
             </Field>
+          </Section>
+
+          <Section title="Contacts from the research sheet">
+            <SheetContacts prospectId={prospect.id} />
           </Section>
 
           <Section title="Sales pipeline">
@@ -1127,10 +1186,12 @@ function Th({ children }: { children?: React.ReactNode }) {
 function ProspectCard({
   p,
   summary,
+  contacts,
   onEdit,
 }: {
   p: Prospect;
   summary?: ProposalSummary;
+  contacts?: ContactSummary;
   onEdit: () => void;
 }) {
   const fState = followupState(p.follow_up_date);
@@ -1143,20 +1204,33 @@ function ProspectCard({
           ? "border-t-[3px] border-t-gold"
           : "border-t-[3px] border-t-transparent";
 
-  const phone = (p.treasurer_phone || "").replace(/[^0-9+]/g, "");
+  // The treasurer is on the prospect row for the original Northern Beaches
+  // list; clubs from the NSW research sheet may only have a president or a
+  // club inbox, so fall back to the sheet's lead contact.
+  const lead = contacts?.lead ?? null;
+  const contactName = p.treasurer_name || (lead ? [lead.contact_name, lead.role ? `(${lead.role})` : ""].filter(Boolean).join(" ") : "");
+  const email = p.treasurer_email && p.treasurer_email.includes("@") && !p.treasurer_email.includes(" ") ? p.treasurer_email : lead?.email ?? null;
+  const phone = (p.treasurer_phone || lead?.mobile || "").replace(/[^0-9+]/g, "");
+  const [c1, c2] = clubColours(p);
 
   return (
-    <div className={`flex flex-col rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition hover:shadow-md ${accent}`}>
-      <div className="flex items-start justify-between gap-3">
+    <div className={`flex flex-col overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm transition hover:shadow-md ${accent}`}>
+      {/* Club colours across the top so the card is recognisable at a glance. */}
+      <div className="h-14 shrink-0" style={{ background: `linear-gradient(120deg, ${c1} 0%, ${c1} 55%, ${c2} 100%)` }} />
+      <div className="-mt-9 flex flex-1 flex-col px-5 pb-5">
+      <div className="flex items-end justify-between gap-3">
+        <ClubBadge p={p} size={64} ring />
+        <span className={`mb-1 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${statusColor(p.status)}`}>
+          {p.status ?? "New"}
+        </span>
+      </div>
+      <div className="mt-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-wider text-[#86868b]">
-            {p.approx_players ? p.approx_players.split("(")[0]!.trim() : "Size unknown"}
+            {[p.approx_players ? p.approx_players.split("(")[0]!.trim() : null, p.region].filter(Boolean).join(" · ") || "Size unknown"}
           </p>
           <h3 className="mt-0.5 text-[19px] font-bold leading-tight [overflow-wrap:break-word]">{p.club_name}</h3>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${statusColor(p.status)}`}>
-          {p.status ?? "New"}
-        </span>
       </div>
 
       {/* The quote is the headline fact when there is one. */}
@@ -1181,10 +1255,16 @@ function ProspectCard({
       ) : null}
 
       <dl className="mt-3 space-y-1 text-[12px] text-[#3a3a3c]">
-        {p.treasurer_name ? (
+        {contactName ? (
           <div className="flex gap-1.5">
             <dt className="shrink-0 text-[#86868b]">Contact</dt>
-            <dd className="min-w-0 font-semibold [overflow-wrap:break-word]">{p.treasurer_name}</dd>
+            <dd className="min-w-0 font-semibold [overflow-wrap:break-word]">{contactName}</dd>
+          </div>
+        ) : null}
+        {contacts && contacts.count > 0 ? (
+          <div className="flex gap-1.5">
+            <dt className="shrink-0 text-[#86868b]">People</dt>
+            <dd className="min-w-0">{contacts.count} in the research sheet · Open to see all</dd>
           </div>
         ) : null}
         {p.club_website ? (
@@ -1215,9 +1295,9 @@ function ProspectCard({
         >
           Open
         </button>
-        {p.treasurer_email ? (
+        {email ? (
           <a
-            href={`mailto:${p.treasurer_email}`}
+            href={`mailto:${email}`}
             className="rounded-lg border border-black/10 px-3 py-1.5 text-[11px] font-semibold text-[#3a3a3c] hover:border-gold hover:text-gold"
           >
             Email
@@ -1232,6 +1312,192 @@ function ProspectCard({
           </a>
         ) : null}
       </div>
+      </div>
+    </div>
+  );
+}
+
+/** A muted colour pair for clubs with no logo yet, stable per club name. */
+const FALLBACK_COLOURS: [string, string][] = [
+  ["#3d5a80", "#98c1d9"], ["#6b4e71", "#c9a7c7"], ["#2f6f62", "#8fc1a9"], ["#8a5a44", "#d9b08c"],
+  ["#4a5568", "#a0aec0"], ["#7a4b5a", "#d6a2ad"], ["#2c5f8a", "#7fb3d5"], ["#5f6b3a", "#b5c18e"],
+];
+
+function clubColours(p: Prospect): [string, string] {
+  if (p.brand_color) return [p.brand_color, p.brand_color_2 || p.brand_color];
+  if (p.logo_url && p.logo_bg === "dark") return ["#16233d", "#24324f"];
+  let h = 0;
+  for (const ch of p.club_name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return FALLBACK_COLOURS[h % FALLBACK_COLOURS.length]!;
+}
+
+function initials(name: string): string {
+  const words = name
+    .replace(/\(.*?\)/g, "")
+    .split(/\s+/)
+    .filter((w) => w && !/^(netball|club|sports?|inc|the|of|&|p&c|nc)$/i.test(w));
+  return (words.length ? words : name.split(/\s+/)).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("");
+}
+
+/** The club's logo on a tile, or its initials in the club's colours. */
+function ClubBadge({ p, size, ring = false }: { p: Prospect; size: number; ring?: boolean }) {
+  const [c1] = clubColours(p);
+  const dark = p.logo_bg === "dark";
+  const frame = `grid shrink-0 place-items-center overflow-hidden rounded-2xl ${ring ? "border-4 border-white shadow-md" : "border border-black/10"}`;
+  if (p.logo_url) {
+    return (
+      <span className={frame} style={{ width: size, height: size, background: dark ? "#0e1a30" : "#ffffff" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- small static logos, no optimisation needed */}
+        <img src={p.logo_url} alt={`${p.club_name} logo`} className="h-full w-full object-contain p-1.5" />
+      </span>
+    );
+  }
+  return (
+    <span className={frame + " font-black text-white"} style={{ width: size, height: size, background: c1, fontSize: size * 0.34 }}>
+      {initials(p.club_name)}
+    </span>
+  );
+}
+
+/**
+ * Everyone the NSW contacts research sheet found for this club, with every
+ * column the sheet holds: who they are, how to reach them, where it was
+ * published, and how far to trust it.
+ */
+function SheetContacts({ prospectId }: { prospectId: string }) {
+  const [rows, setRows] = useState<SheetContact[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    setRows(null);
+    fetch(`/api/prospects/${prospectId}/contacts`, { cache: "no-store" })
+      .then(async (r) => {
+        const j = (await r.json()) as { contacts?: SheetContact[]; error?: string };
+        if (!r.ok) throw new Error(j.error ?? `Contacts failed (${r.status})`);
+        if (live) setRows(j.contacts ?? []);
+      })
+      .catch((e: unknown) => live && setError(e instanceof Error ? e.message : "Contacts failed"));
+    return () => {
+      live = false;
+    };
+  }, [prospectId]);
+
+  if (error) return <p className="text-[12px] text-[#C8332B]">{error}</p>;
+  if (!rows) return <p className="text-[12px] text-[#86868b]">Loading contacts…</p>;
+  if (rows.length === 0) return <p className="text-[12px] text-[#86868b]">No one from the research sheet for this club.</p>;
+
+  const groups: [string, string, SheetContact[]][] = [
+    ["contacts", "Campaign contacts", rows.filter((r) => r.source_sheet === "contacts")],
+    ["research_gap", "Named, but no email found", rows.filter((r) => r.source_sheet === "research_gap")],
+    ["other_phone", "Other published club phones", rows.filter((r) => r.source_sheet === "other_phone")],
+  ];
+
+  return (
+    <div className="space-y-5">
+      {groups.map(([key, title, list]) =>
+        list.length === 0 ? null : (
+          <div key={key}>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#86868b]">
+              {title} · {list.length}
+            </p>
+            <div className="space-y-3">
+              {list.map((c) => (
+                <SheetContactCard key={c.id} c={c} />
+              ))}
+            </div>
+          </div>
+        ),
+      )}
+    </div>
+  );
+}
+
+function SheetContactCard({ c }: { c: SheetContact }) {
+  const tel = (c.mobile ?? "").replace(/[^0-9+]/g, "");
+  const facts: [string, string | null][] = [
+    ["Greeting", c.greeting],
+    ["Campaign", c.campaign_segment],
+    ["Buying role", c.buying_role],
+    ["Mailbox", c.mailbox_type],
+    ["Evidence", c.evidence],
+    ["Quality", c.contact_quality],
+    ["Consent", c.consent_assessment],
+    ["Opt-out", c.opt_out_status],
+    ["Phone listed for", c.published_phone_contact],
+    ["Phone attribution", c.phone_attribution],
+    ["Mobile checked", c.mobile_checked],
+    ["Email status", c.email_status],
+    ["Next check", c.next_check],
+  ];
+  return (
+    <div className="rounded-xl border border-black/10 bg-[#fafafa] p-3.5">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-gold">{c.role ?? "Contact"}</p>
+          <p className="text-[14px] font-bold [overflow-wrap:break-word]">{c.contact_name ?? "—"}</p>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {c.email ? (
+            <a href={`mailto:${c.email}`} className="rounded-lg border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold hover:border-gold hover:text-gold">
+              Email
+            </a>
+          ) : null}
+          {tel.length >= 8 ? (
+            <a href={`tel:${tel}`} className="rounded-lg border border-black/10 bg-white px-2.5 py-1 text-[11px] font-semibold hover:border-gold hover:text-gold">
+              Call
+            </a>
+          ) : null}
+        </div>
+      </div>
+      <dl className="mt-2 grid gap-x-4 gap-y-1 text-[12px] sm:grid-cols-[auto_1fr]">
+        {c.email ? (
+          <>
+            <dt className="text-[#86868b]">Email</dt>
+            <dd className="min-w-0 [overflow-wrap:anywhere]">{c.email}</dd>
+          </>
+        ) : null}
+        {c.mobile ? (
+          <>
+            <dt className="text-[#86868b]">Mobile</dt>
+            <dd>{c.mobile}</dd>
+          </>
+        ) : null}
+        {facts.map(([label, v]) =>
+          v ? (
+            <Fragment key={label}>
+              <dt className="text-[#86868b]">{label}</dt>
+              <dd className="min-w-0 [overflow-wrap:anywhere]">{v}</dd>
+            </Fragment>
+          ) : null,
+        )}
+        {c.notes ? (
+          <>
+            <dt className="text-[#86868b]">Notes</dt>
+            <dd className="min-w-0 text-[#8A6418] [overflow-wrap:anywhere]">{c.notes}</dd>
+          </>
+        ) : null}
+        {c.source_url ? (
+          <>
+            <dt className="text-[#86868b]">Source</dt>
+            <dd className="min-w-0 truncate">
+              <a href={c.source_url} target="_blank" rel="noreferrer" className="text-gold underline">
+                {c.source_url.replace(/^https?:\/\//, "")}
+              </a>
+            </dd>
+          </>
+        ) : null}
+        {c.mobile_source_url && c.mobile_source_url !== c.source_url ? (
+          <>
+            <dt className="text-[#86868b]">Mobile source</dt>
+            <dd className="min-w-0 truncate">
+              <a href={c.mobile_source_url} target="_blank" rel="noreferrer" className="text-gold underline">
+                {c.mobile_source_url.replace(/^https?:\/\//, "")}
+              </a>
+            </dd>
+          </>
+        ) : null}
+      </dl>
     </div>
   );
 }

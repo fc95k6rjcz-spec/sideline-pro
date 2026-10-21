@@ -16,7 +16,7 @@ export async function GET() {
 
   try {
     const admin = createAdminClient();
-    const [{ data, error }, { data: proposalRows, error: proposalError }] = await Promise.all([
+    const [{ data, error }, { data: proposalRows, error: proposalError }, { data: contactRows, error: contactsError }] = await Promise.all([
       admin.from("prospects").select("*").order("club_name", { ascending: true }),
       /**
        * The quote each club is holding, folded into the same response.
@@ -42,6 +42,13 @@ export async function GET() {
         .select("*")
         .not("prospect_id", "is", null)
         .order("created_at", { ascending: false }),
+      /* Just enough of each club's research-sheet contacts for the card:
+         who to email or call when no treasurer is on the prospect row.
+         The drawer loads the full rows from /api/prospects/[id]/contacts. */
+      admin
+        .from("prospect_contacts")
+        .select("prospect_id, source_sheet, role, contact_name, email, mobile")
+        .order("created_at", { ascending: true }),
     ]);
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -73,9 +80,31 @@ export async function GET() {
       };
     }
 
+    if (contactsError) {
+      console.error("[prospects/list] contacts read failed", contactsError.message);
+    }
+
+    /* Lead contact per club, in the order a sales email would go: whoever
+       holds the money first, then the president, then the feature owners,
+       then the club inbox. A name without an email (research gap) only
+       counts when there is nothing better. */
+    const ROLE_ORDER = ["treasurer", "president", "umpire", "grading", "coaching", "club inbox", "club contact"];
+    const rank = (c: { role: string | null; email: string | null; source_sheet: string }) => {
+      const role = (c.role ?? "").toLowerCase();
+      const i = ROLE_ORDER.findIndex((r) => role.startsWith(r));
+      return (c.email ? 0 : 100) + (c.source_sheet === "contacts" ? 0 : 10) + (i === -1 ? ROLE_ORDER.length : i);
+    };
+    const contactsByProspect: Record<string, { count: number; lead: Record<string, unknown> | null }> = {};
+    for (const c of (contactRows ?? []) as Array<{ prospect_id: string; source_sheet: string; role: string | null; contact_name: string | null; email: string | null; mobile: string | null }>) {
+      const entry = (contactsByProspect[c.prospect_id] ??= { count: 0, lead: null });
+      entry.count += 1;
+      if (!entry.lead || rank(c) < rank(entry.lead as typeof c)) entry.lead = c;
+    }
+
     return NextResponse.json({
       prospects: data ?? [],
       proposals: proposalByProspect,
+      contacts: contactsByProspect,
       ...(proposalError ? { proposalsError: proposalError.message } : {}),
     });
   } catch (err) {
