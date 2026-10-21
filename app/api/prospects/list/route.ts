@@ -16,7 +16,7 @@ export async function GET() {
 
   try {
     const admin = createAdminClient();
-    const [{ data, error }, { data: proposalRows }] = await Promise.all([
+    const [{ data, error }, { data: proposalRows, error: proposalError }] = await Promise.all([
       admin.from("prospects").select("*").order("club_name", { ascending: true }),
       /**
        * The quote each club is holding, folded into the same response.
@@ -30,14 +30,30 @@ export async function GET() {
        * Newest first, and the map keeps the first it sees, so a club with
        * several proposals shows its most recent.
        */
+      /* `select("*")` rather than a column list ON PURPOSE. Naming
+         payment_status here made this whole query fail with a 400 on any
+         database where sql/proposal_payments.sql had not been applied yet —
+         and because the error was swallowed below, every club silently
+         showed "—" in the Quote column. The pipeline looked empty when it
+         was not. A column list couples a feature that has nothing to do
+         with Stripe to a Stripe migration; `*` does not. */
       admin
         .from("proposals")
-        .select("prospect_id, token, status, sent_at, view_count, valid_until, accepted_at, payment_status, pricing")
+        .select("*")
         .not("prospect_id", "is", null)
         .order("created_at", { ascending: false }),
     ]);
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    /* Loud, not silent. A broken proposals read must not masquerade as "no
+       club has been quoted" — that is a lie the pipeline cannot afford, and
+       it is exactly what happened the first time this shipped. The prospects
+       list still renders; the Quote column just has nothing to show, and the
+       reason is in the logs and in the response. */
+    if (proposalError) {
+      console.error("[prospects/list] proposals read failed", proposalError.message);
     }
 
     const proposalByProspect: Record<string, unknown> = {};
@@ -57,7 +73,11 @@ export async function GET() {
       };
     }
 
-    return NextResponse.json({ prospects: data ?? [], proposals: proposalByProspect });
+    return NextResponse.json({
+      prospects: data ?? [],
+      proposals: proposalByProspect,
+      ...(proposalError ? { proposalsError: proposalError.message } : {}),
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "List failed";
     return NextResponse.json({ error: message }, { status: 500 });
