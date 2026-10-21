@@ -1066,13 +1066,16 @@ function QuoteCell({ summary }: { summary?: ProposalSummary }) {
         {label}
       </span>
       {money ? <span className="whitespace-nowrap text-[10px] text-[#6e6e73]">{money}</span> : null}
+      {/* A draft is admin-only on the public route, so this is a genuine
+          preview of what the club will see — not a dead link, and not
+          something anyone else can reach. */}
       <a
         href={`/proposal/${summary.token}`}
         target="_blank"
         rel="noreferrer"
         className="whitespace-nowrap text-[10px] font-semibold text-gold underline"
       >
-        Open quote
+        {summary.status === "draft" ? "Preview quote" : "Open quote"}
       </a>
     </div>
   );
