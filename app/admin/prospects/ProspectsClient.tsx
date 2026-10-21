@@ -1,7 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatAud } from "@/lib/proposals";
 import { ProposalPanel } from "./ProposalPanel";
+
+/**
+ * What the pipeline needs to know about a club's quote at a glance.
+ *
+ * Deliberately not the whole proposal: the table wants one badge, and the
+ * full thing is a click away in the drawer.
+ */
+type ProposalSummary = {
+  token: string;
+  status: "draft" | "sent" | "viewed" | "accepted" | "declined";
+  sent_at: string | null;
+  view_count: number;
+  valid_until: string | null;
+  accepted_at: string | null;
+  payment_status: "unpaid" | "processing" | "paid" | "failed";
+  total_cents: number;
+};
 
 type Prospect = {
   id: string;
@@ -109,6 +127,8 @@ function fmtDate(s: string | null): string {
 
 export default function ProspectsClient() {
   const [prospects, setProspects] = useState<Prospect[]>([]);
+  /** The live quote per prospect, keyed by prospect id. See QuoteCell. */
+  const [proposals, setProposals] = useState<Record<string, ProposalSummary>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
@@ -123,7 +143,8 @@ export default function ProspectsClient() {
       setLoading(true);
       const res = await fetch("/api/prospects/list", { cache: "no-store" });
       if (!res.ok) throw new Error(`List failed (${res.status})`);
-      const data = (await res.json()) as { prospects: Prospect[] };
+      const data = (await res.json()) as { prospects: Prospect[]; proposals?: Record<string, ProposalSummary> };
+      setProposals(data.proposals ?? {});
       setProspects(data.prospects);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load prospects");
@@ -387,6 +408,7 @@ export default function ProspectsClient() {
                   <Th>Actions</Th>
                   <Th>Follow up</Th>
                   <Th>Club</Th>
+                  <Th>Quote</Th>
                   <Th>Website</Th>
                   <Th>Site quality</Th>
                   <Th>Site function</Th>
@@ -450,6 +472,9 @@ export default function ProspectsClient() {
                         onSave={(v) => saveField(p.id, "club_name", v)}
                         bold
                       />
+                    </Td>
+                    <Td>
+                      <QuoteCell summary={proposals[p.id]} />
                     </Td>
                     <Td>
                       <EditCell
@@ -971,6 +996,86 @@ const drawerInputClass =
 
 function Th({ children }: { children?: React.ReactNode }) {
   return <th className="whitespace-nowrap px-3 py-3 text-left">{children}</th>;
+}
+
+/**
+ * The club's quote, as one badge.
+ *
+ * Before this, a proposal was only visible once you opened a prospect's
+ * drawer — so the pipeline screen could not answer the first question anyone
+ * asks it: who have we actually quoted? Eighteen clubs all reading "New"
+ * with no sign of a live quote looks like a list where nothing is happening.
+ *
+ * The states are deliberately distinct, because they mean different things
+ * to whoever is working the list:
+ *   Draft    — written, NOT sent. Nobody outside has seen it.
+ *   Sent     — gone out, not opened. Chase.
+ *   Viewed   — opened, and how many times. Opened four times and still
+ *              silent is a different conversation from never opened.
+ *   Accepted — signed. Then whether the money has actually arrived, which
+ *              is not the same thing: a direct debit takes about three
+ *              business days and can still fail.
+ *   Expired  — past its valid-until and still unaccepted.
+ */
+function QuoteCell({ summary }: { summary?: ProposalSummary }) {
+  if (!summary) return <span className="text-[#c7c7cc]">—</span>;
+
+  const money = summary.total_cents > 0 ? formatAud(summary.total_cents) : null;
+  const expired =
+    summary.status !== "accepted" &&
+    summary.status !== "declined" &&
+    Boolean(summary.valid_until) &&
+    new Date(`${summary.valid_until}T23:59:59`) < new Date();
+
+  let label: string;
+  let tone: string;
+  if (summary.status === "accepted") {
+    if (summary.payment_status === "paid") {
+      label = "Accepted · paid";
+      tone = "border-[#10b3a3]/40 bg-[#e6fbf8] text-[#0b6b60]";
+    } else if (summary.payment_status === "processing") {
+      label = "Accepted · payment in flight";
+      tone = "border-amber-300 bg-amber-50 text-amber-800";
+    } else if (summary.payment_status === "failed") {
+      label = "Accepted · payment failed";
+      tone = "border-[#C8332B]/40 bg-[#fdeceb] text-[#8c1d18]";
+    } else {
+      label = "Accepted · unpaid";
+      tone = "border-amber-300 bg-amber-50 text-amber-800";
+    }
+  } else if (summary.status === "declined") {
+    label = "Declined";
+    tone = "border-black/10 bg-[#f5f5f7] text-[#6e6e73]";
+  } else if (expired) {
+    label = "Expired";
+    tone = "border-[#C8332B]/40 bg-[#fdeceb] text-[#8c1d18]";
+  } else if (summary.status === "viewed") {
+    label = `Viewed${summary.view_count > 1 ? ` ×${summary.view_count}` : ""}`;
+    tone = "border-[#10b3a3]/40 bg-[#e6fbf8] text-[#0b6b60]";
+  } else if (summary.status === "sent") {
+    label = "Sent · not opened";
+    tone = "border-amber-300 bg-amber-50 text-amber-800";
+  } else {
+    label = "Draft · not sent";
+    tone = "border-black/15 bg-white text-[#6e6e73]";
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <span className={`inline-block whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-bold ${tone}`}>
+        {label}
+      </span>
+      {money ? <span className="whitespace-nowrap text-[10px] text-[#6e6e73]">{money}</span> : null}
+      <a
+        href={`/proposal/${summary.token}`}
+        target="_blank"
+        rel="noreferrer"
+        className="whitespace-nowrap text-[10px] font-semibold text-gold underline"
+      >
+        Open quote
+      </a>
+    </div>
+  );
 }
 
 function Td({ children }: { children?: React.ReactNode }) {
