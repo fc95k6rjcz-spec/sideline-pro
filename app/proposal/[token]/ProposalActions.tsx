@@ -29,6 +29,8 @@ export function ProposalActions({ proposal: initial, expired }: { proposal: Publ
   const [error, setError] = useState<string | null>(null);
   const [declining, setDeclining] = useState(false);
   const [reason, setReason] = useState("");
+  const [payBusy, setPayBusy] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   useEffect(() => {
     void fetch(`/api/proposals/public/${encodeURIComponent(initial.token)}`, { cache: "no-store" }).catch(() => {});
@@ -52,6 +54,37 @@ export function ProposalActions({ proposal: initial, expired }: { proposal: Publ
       setError(err instanceof Error ? err.message : "Could not record your acceptance");
     } finally {
       setBusy(false);
+    }
+  }
+
+  /**
+   * Hand off to Stripe to set up payment.
+   *
+   * Deliberately a separate, explicit press rather than something that
+   * fires the moment a club accepts. The person authorised to accept on
+   * behalf of a committee is very often NOT the person holding the bank
+   * details — springing a payment screen on them means they abandon it and
+   * nobody knows whether the club is going ahead. Accepting is recorded
+   * either way, and the treasurer can open this same link later and finish.
+   */
+  async function startPayment() {
+    setPayBusy(true);
+    setPayError(null);
+    try {
+      const res = await fetch(`/api/proposals/public/${encodeURIComponent(proposal.token)}/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const j = (await res.json()) as { url?: string; alreadyPaid?: boolean; error?: string };
+      if (j.alreadyPaid) {
+        setProposal({ ...proposal, payment_status: "paid" });
+        return;
+      }
+      if (!res.ok || !j.url) throw new Error(j.error || `Could not open the payment page (${res.status})`);
+      window.location.href = j.url;
+    } catch (err) {
+      setPayError(err instanceof Error ? err.message : "Could not open the payment page");
+      setPayBusy(false);
     }
   }
 
@@ -92,6 +125,44 @@ export function ProposalActions({ proposal: initial, expired }: { proposal: Publ
               Thank you. Justin will be in touch within a business day to confirm next steps and the start date. A copy
               of this page is your record of what was agreed.
             </p>
+
+            {proposal.payment_status === "paid" ? (
+              <p className="mt-4 rounded-xl bg-white/70 px-4 py-3 text-sm font-semibold text-[#0b6b60]">
+                Payment received{proposal.paid_at ? ` on ${formatProposalDate(proposal.paid_at)}` : ""}. Nothing further to do.
+              </p>
+            ) : proposal.payment_status === "processing" ? (
+              /* A signed direct debit mandate, money in flight. Saying
+                 "received" here would be a lie for about three business
+                 days, and saying nothing makes the page look broken. */
+              <p className="mt-4 rounded-xl bg-white/70 px-4 py-3 text-sm leading-relaxed text-[#3a3a3c]">
+                <b>Payment is on its way.</b> Direct debits take about three business days to clear. We will email you
+                when it lands, and we will let you know if anything goes wrong.
+              </p>
+            ) : (
+              <div className="mt-5 border-t border-[#10b3a3]/30 pt-5">
+                <h3 className="text-base font-bold">One more step — set up payment</h3>
+                <p className="mt-1 text-sm leading-relaxed text-[#3a3a3c]">
+                  Pay by card or direct debit from the club account. If that is someone else at the club, send them this
+                  same link — your acceptance is already recorded and will not need doing again.
+                </p>
+                {payError ? (
+                  <p role="alert" className="mt-3 rounded-lg bg-[#fdeceb] px-3 py-2 text-sm font-semibold text-[#8c1d18]">
+                    {payError}
+                  </p>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={startPayment}
+                  disabled={payBusy}
+                  className="mt-4 inline-flex min-h-[46px] items-center justify-center rounded-xl bg-[#10b3a3] px-6 text-[15px] font-bold text-white transition hover:bg-[#0d9a8c] disabled:opacity-60"
+                >
+                  {payBusy ? "Opening secure payment…" : "Set up payment"}
+                </button>
+                <p className="mt-2 text-xs text-[#6e6e73]">
+                  Payment is handled by Stripe. Card details never touch this site.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>

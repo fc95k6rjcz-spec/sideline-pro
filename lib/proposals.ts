@@ -54,7 +54,39 @@ export type ProposalRow = {
   created_by_email: string | null;
   created_at: string;
   updated_at: string;
+
+  /**
+   * Payment, kept SEPARATE from acceptance on purpose.
+   *
+   * A committee accepting is the legal record of who agreed and to what,
+   * and it has to stand whether or not the money then arrives. BECS direct
+   * debit signs a mandate today and can fail three business days later, so
+   * one column could never honestly mean both.
+   */
+  stripe_customer_id: string | null;
+  stripe_session_id: string | null;
+  stripe_subscription_id: string | null;
+  /**
+   * `processing` is the one that matters: a mandate is signed and the funds
+   * are in flight. Treating it as paid is how a club gets a welcome email
+   * for a debit that later bounces.
+   */
+  payment_status: PaymentStatus;
+  payment_method_kind: string | null;
+  paid_at: string | null;
+  payment_failed_at: string | null;
+  payment_failure_reason: string | null;
+  /** What Stripe actually took, not what the quote said. */
+  amount_paid_cents: number | null;
 };
+
+export type PaymentStatus = "unpaid" | "processing" | "paid" | "failed";
+
+const PAYMENT_STATUSES: PaymentStatus[] = ["unpaid", "processing", "paid", "failed"];
+
+export function isPaymentStatus(v: unknown): v is PaymentStatus {
+  return typeof v === "string" && (PAYMENT_STATUSES as string[]).includes(v);
+}
 
 /** What the public page may see — no prospect id, no IP, no agent. */
 export type PublicProposal = Pick<
@@ -75,6 +107,10 @@ export type PublicProposal = Pick<
   | "accepted_name"
   | "accepted_role"
   | "declined_at"
+  /* So the page can tell a club where their money is: nothing yet, a debit
+     in flight, or done. Never the Stripe ids — those stay server-side. */
+  | "payment_status"
+  | "paid_at"
 >;
 
 export const PROPOSAL_STATUSES: readonly ProposalStatus[] = ["draft", "sent", "viewed", "accepted", "declined"];
@@ -115,6 +151,8 @@ export function toPublicProposal(row: ProposalRow): PublicProposal {
     accepted_name: row.accepted_name,
     accepted_role: row.accepted_role,
     declined_at: row.declined_at,
+    payment_status: row.payment_status,
+    paid_at: row.paid_at,
   };
 }
 
@@ -161,6 +199,11 @@ export function normaliseProposalRow(raw: Record<string, unknown>): ProposalRow 
     pricing: parsePricing(raw.pricing),
     status: isProposalStatus(raw.status) ? raw.status : "draft",
     view_count: Number(raw.view_count ?? 0) || 0,
+    /* Defaults so a row read before sql/proposal_payments.sql is applied
+       still parses — the columns are simply absent, not wrong. */
+    payment_status: isPaymentStatus(raw.payment_status) ? raw.payment_status : "unpaid",
+    amount_paid_cents:
+      raw.amount_paid_cents == null ? null : Number(raw.amount_paid_cents) || 0,
   };
 }
 
