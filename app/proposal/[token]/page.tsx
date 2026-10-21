@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { isAllowedEmail } from "@/lib/auth";
 import {
   formatAud,
   formatProposalDate,
@@ -16,13 +18,42 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ token: string }> };
 
+/** Signed in AND on the admin allowlist — the only people who may see a draft. */
+async function viewerIsAdmin(): Promise<boolean> {
+  try {
+    const sb = await createClient();
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+    return Boolean(user && isAllowedEmail(user.email));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A draft is invisible to the public and visible to us.
+ *
+ * The token is the only secret on this page, so a draft must never render
+ * for whoever holds the link — half-written prices and terms are not a
+ * document anyone should be able to find. But hiding it from US made the
+ * quote unreviewable: the pipeline offered a link to the thing you had just
+ * written and it 404ed, with no way to see what a club would see before
+ * pressing send (Justin, 21 Oct 2026: "I should be able to click view
+ * proposal or quote and then go into the quote you built before I send
+ * it").
+ *
+ * So the gate is the ADMIN SESSION, not the token. Signed in and on the
+ * allowlist: you see the draft, with a banner saying it is one. Anyone
+ * else: 404, exactly as before.
+ */
 async function loadProposal(token: string) {
   if (!token || token.length < 12) return null;
   const admin = createAdminClient();
   const { data } = await admin.from("proposals").select("*").eq("token", token).maybeSingle();
   if (!data) return null;
   const row = normaliseProposalRow(data as Record<string, unknown>);
-  if (row.status === "draft") return null;
+  if (row.status === "draft" && !(await viewerIsAdmin())) return null;
   return row;
 }
 
@@ -46,6 +77,7 @@ export default async function ProposalPage({ params }: Props) {
   const { token } = await params;
   const row = await loadProposal(token);
   if (!row) notFound();
+  const isDraft = row.status === "draft";
   const proposal = toPublicProposal(row);
   const expired = proposal.status !== "accepted" && proposalExpired(proposal.valid_until);
   const total = proposal.pricing.reduce((n, l) => n + l.amount_cents, 0);
@@ -54,6 +86,14 @@ export default async function ProposalPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f]">
+      {/* Only an admin ever reaches this branch — see loadProposal. The point
+          is that it should be impossible to mistake a preview for the live
+          page and think a club has already received it. */}
+      {isDraft ? (
+        <div className="bg-[#8c1d18] px-6 py-3 text-center text-sm font-bold text-white">
+          DRAFT — not sent. Only you can see this. The club gets nothing until you press Send in Prospects.
+        </div>
+      ) : null}
       <header className="bg-[#0b1b33] text-white">
         <div className="mx-auto flex max-w-[880px] items-center justify-between gap-4 px-6 py-5">
           <Image src="/logo-horizontal-light.svg" alt="Sideline Pro" width={168} height={40} className="h-9 w-auto" priority />
