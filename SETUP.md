@@ -41,7 +41,7 @@ Add these to `.env.local` for development, and to the Vercel project settings (P
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
 SUPABASE_SERVICE_ROLE_KEY=sb_secret_XXXXXXXX
-ADMIN_EMAILS=jcaruana888@gmail.com,rowan111@gmail.com
+ADMIN_EMAILS=jcaruana888@gmail.com,rowan@sidelinepro.com.au
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_XXXXXXXX
 
 # Resend — used by /api/invoices/send to email a generated invoice
@@ -61,7 +61,7 @@ RESEND_REPLY_TO=rowan@sidelinepro.com.au
 
 ### 1. Supabase
 
-Done — project `SidelinePro_Website` lives at `https://lvfybixzumlmiqckbbtj.supabase.co`. Two users created in Auth: `jcaruana888@gmail.com`, `rowan111@gmail.com`, both auto-confirmed.
+Done — project `SidelinePro_Website` lives at `https://lvfybixzumlmiqckbbtj.supabase.co`. Two users created in Auth: `jcaruana888@gmail.com`, `rowan111@gmail.com` (moved to `rowan@sidelinepro.com.au` on 22 Oct 2026), both auto-confirmed.
 
 ### 2. Vercel Blob
 

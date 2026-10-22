@@ -10,7 +10,7 @@
  */
 const FALLBACK_ALLOWLIST = [
   "jcaruana888@gmail.com",
-  "rowan111@gmail.com",
+  "rowan@sidelinepro.com.au",
 ];
 
 export function getAllowlist(): string[] {
