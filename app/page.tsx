@@ -1,547 +1,59 @@
 import Image from "next/image"
-import { Poppins } from "next/font/google"
-import { Check } from "lucide-react"
+import { ArrowUpRight, ArrowRight, Check, ClipboardList, Flag, Users, Workflow } from "lucide-react"
 import { ContactForm } from "@/components/contact-form"
-import { HeroCarousel, type HeroSlide } from "./components/HeroCarousel"
+import styles from "./home.module.css"
+import { MobileNav } from "./components/MobileNav"
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-})
-
-/* ──────────────────────────────────────────────────────────
-   Theme tokens — navy ground, teal accent
-   ────────────────────────────────────────────────────────── */
-const TEAL_ON_NAVY = "#2dd4bf"
-
-const tealBtn =
-  "inline-flex items-center justify-center rounded-lg bg-[#10b3a3] font-medium text-white transition-colors duration-200 hover:bg-[#0d9a8c]"
-
-/* Shared section rhythm. Sections size to their content with the same
-   vertical padding, so the page reads as one continuous flow rather than a
-   stack of full-screen slides with dead space between them. */
-const sectionPad = "px-7 py-20 lg:py-24"
-const container = "mx-auto w-full max-w-[1120px]"
-const h2Style = {
-  fontSize: "clamp(30px,3.4vw,42px)",
-  lineHeight: 1.15,
-  letterSpacing: "-0.02em",
-} as const
-
-/* ──────────────────────────────────────────────────────────
-   Lockup — SidelinePro primary stacked logo (S mark over wordmark),
-   transparent dark-background artwork cropped to the drawing (832:690).
-   ────────────────────────────────────────────────────────── */
-function Lockup({ height = 68 }: { height?: number }) {
-  return (
-    <Image
-      src="/logo-stacked-dark-tight.svg"
-      alt="SidelinePro"
-      width={Math.round(height * (832 / 690))}
-      height={height}
-      priority
-    />
-  )
-}
-
-/* ──────────────────────────────────────────────────────────
-   Nav — 88px fixed, translucent navy + backdrop blur
-   ────────────────────────────────────────────────────────── */
-const navLinks = [
-  ["Features", "#features"],
-  ["Solutions", "#solutions"],
-  ["Apps", "#apps"],
-  ["Contact", "#contact"],
+const links = [["The platform", "#platform"], ["Who it’s for", "#people"], ["Seaforth story", "#seaforth"]]
+const features = [
+  { id: "grading", icon: ClipboardList, tag: "01 / INTELLIGENT GRADING & TEAM FORMATION", title: "A better season starts with better team decisions.", body: "Bring check-in, on-court scores and coach assessments into one grading workflow. Give your committee the context to build balanced teams, with people making the final call.", points: ["Digital grading and player check-in", "Coach insights alongside grading evidence", "Connected team formation"], image: "/app-lineup-white.png", alt: "Existing SidelinePro mobile line-up screen", caption: "From team formation to the weekly line-up.", note: "SidelinePro coach line-up view." },
+  { id: "umpires", icon: Flag, tag: "02 / UMPIRE ROSTERING", title: "Put your officials in the picture.", body: "Build the roster around availability, accreditations and fair rotation. Keep assignments, confirmations and late changes together, with support for junior umpire development.", points: ["Availability-led allocations", "Confirmations and cancellation management", "Junior umpire mentoring and feedback"] },
+  { id: "development", icon: Users, tag: "03 / COACHING & DEVELOPMENT", title: "Connect what coaches see with what players need next.", body: "Give coaches a hub for their squad, line-ups and structured assessments. Keep feedback and development history connected to the evidence your grading committee uses next season.", points: ["Coach assessments and season feedback", "Player development history", "Line-ups, positions and availability"] },
+  { id: "playhq", icon: Workflow, tag: "04 / PLAYHQ WORKFLOWS", title: "Work with the systems your club already uses.", body: "Connect your club’s weekly work with PlayHQ. Bring fixtures and ladders into the club experience, and use team-building workflows to reduce repeated data entry.", points: ["PlayHQ fixture and ladder sync", "Team-building and reconciliation workflows", "Club and team information together"] },
 ]
-
-function Navbar() {
-  return (
-    <nav className="fixed inset-x-0 top-0 z-50 h-[88px] border-b border-white/[0.08] bg-[#0e1a30]/85 backdrop-blur-lg backdrop-saturate-150">
-      <div className="mx-auto flex h-full max-w-[1180px] items-center justify-between px-5 sm:px-7">
-        <a href="#top" aria-label="SidelinePro home">
-          <Lockup height={68} />
-        </a>
-        <div className="flex items-center gap-5 sm:gap-8">
-          {/* Anchor links hide on phones (they would overflow); the demo
-              button stays so the primary action is always one tap away. */}
-          <div className="hidden items-center gap-7 md:flex">
-            {navLinks.map(([label, href]) => (
-              <a
-                key={label}
-                href={href}
-                className="text-[15px] font-medium text-[#e6edf7] transition-colors duration-200 hover:text-[#2dd4bf]"
-              >
-                {label}
-              </a>
-            ))}
-          </div>
-          <a href="#contact" className={`${tealBtn} px-4 py-2 text-[14px] sm:px-5 sm:py-2.5`}>
-            Book a demo
-          </a>
-        </div>
-      </div>
-    </nav>
-  )
-}
-
-/* ──────────────────────────────────────────────────────────
-   Hero — navy, copy left, angled photo right
-   ────────────────────────────────────────────────────────── */
-const heroSlides: HeroSlide[] = [
-  { src: "/hero/qc-hands-in.png", alt: "Junior netball team hands in before a game", focus: "center 40%" },
-  { src: "/hero/qc-centre-pass.png", alt: "Netball player passing from the centre circle", focus: "center 40%" },
-  { src: "/hero/sf-huddle-sky.png", alt: "Netball team huddle holding a ball against the sky", focus: "45% 50%" },
-  { src: "/hero/qc-shot-at-goal.png", alt: "Netball players reaching for a shot at goal", focus: "center 30%" },
-  { src: "/hero/sf-three-girls.png", alt: "Three junior netballers watching from the sideline", focus: "center 55%" },
-  { src: "/hero/sf-shooting.jpg", alt: "Netball goal shooter lining up a shot", focus: "center 45%" },
-  { src: "/hero/sf-team-court.png", alt: "Netball team posing on an outdoor court", focus: "center 40%" },
-]
-
-const heroProof = ["Works with PlayHQ", "iOS & Android apps", "Every code, every club"]
-
-function Hero() {
-  return (
-    <section id="top" className="relative overflow-hidden bg-[#0e1a30] pt-[88px]">
-      <div className="relative z-20 mx-auto flex max-w-[1180px] items-center px-7 py-16 lg:min-h-[min(calc(100vh-88px),720px)] lg:py-16">
-        <div className="lg:max-w-[560px]">
-          <h1
-            className="font-bold text-white"
-            style={{
-              fontSize: "clamp(40px,4.4vw,64px)",
-              lineHeight: 1.12,
-              letterSpacing: "-0.025em",
-            }}
-          >
-            Less admin.
-            <br />
-            More time.
-            <br />
-            Better club sport.
-          </h1>
-          <p className="mt-6 max-w-[480px] text-[18px] leading-[1.55] text-[#a5b3c7]">
-            SidelinePro is club management software for Australian community sport.
-            Registrations, fixtures, umpire rostering, grading and comms in one place,
-            built for the volunteers who make club sport happen.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-x-[34px] gap-y-5">
-            <a href="#contact" className={`${tealBtn} px-8 py-[14px] text-[17px]`}>
-              Book a demo
-            </a>
-            <a
-              href="#features"
-              className="border-b-2 border-[#2dd4bf] pb-0.5 text-[17px] font-medium text-[#2dd4bf] transition-opacity hover:opacity-75"
-            >
-              See what you get back
-            </a>
-          </div>
-          <ul className="mt-10 flex max-w-[440px] flex-wrap gap-x-6 gap-y-2 text-[14px] text-[#8fa0b8]">
-            {heroProof.map((item) => (
-              <li key={item} className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-[#2dd4bf]" strokeWidth={3} />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* photos — straight edge on phones, angled left edge pinned right on desktop */}
-      <HeroCarousel
-        slides={heroSlides}
-        className="min-h-[340px] lg:absolute lg:bottom-0 lg:right-0 lg:top-[88px] lg:min-h-0 lg:w-[56%] lg:[clip-path:polygon(14%_0,100%_0,100%_100%,0_100%)]"
-      />
-    </section>
-  )
-}
-
-/* ──────────────────────────────────────────────────────────
-   Features / ROI table
-   ────────────────────────────────────────────────────────── */
-const roster = [
-  {
-    task: "Umpire & ref rostering",
-    old: "Phone calls and a shared spreadsheet, week after week",
-    now: "Auto-allocated from who is available",
-    save: "~10 hrs a week",
-  },
-  {
-    task: "Building teams in PlayHQ",
-    old: "Typed in by hand, one player at a time",
-    now: "Built and pushed across for you",
-    save: "Hours a season",
-  },
-  {
-    task: "Player grading",
-    old: "Paper forms, manual collating",
-    now: "In-app digital grading, automatically collated",
-    save: "Hours a season",
-  },
-  {
-    task: "Registrations",
-    old: "Paper forms, then chasing the payments",
-    now: "Self-serve sign-up, all in one list",
-    save: "Days a season",
-  },
-  {
-    task: "Fixtures & ladders",
-    old: "Copied over from the association by hand",
-    now: "Synced live, always correct",
-    save: "Hours a week",
-  },
-  {
-    task: "Club & team comms",
-    old: "A dozen group chats, emails and texts",
-    now: "One place everyone actually sees",
-    save: "Hours a week",
-  },
-  {
-    task: "Website updates",
-    old: "Chasing the one tech-savvy parent",
-    now: "Looks after itself",
-    save: "Hours a month",
-  },
-]
-
-const COLS = "grid-cols-[1.1fr_1.35fr_1.55fr_1fr]"
-
-function FeaturesTable() {
-  return (
-    <section id="features" className={`relative scroll-mt-[88px] overflow-hidden bg-white ${sectionPad}`}>
-      {/* decorative teal blob */}
-      <div
-        className="pointer-events-none absolute -right-[120px] -top-[140px] h-[620px] w-[620px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(16,179,163,0.07), rgba(16,179,163,0) 70%)",
-        }}
-        aria-hidden
-      />
-      <div className={`relative ${container}`}>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#10b3a3]">
-          Features
-        </p>
-        <h2 className="mt-2 font-bold text-[#16233d]" style={h2Style}>
-          What SidelinePro gives back
-        </h2>
-        <p className="mt-3 max-w-[600px] text-[16px] leading-[1.55] text-[#5b6b7c]">
-          Every hour a committee spends on admin is an hour not spent on the club. Here is where
-          that time goes today, and where it comes back.
-        </p>
-
-        <div className="mt-8 overflow-x-auto rounded-xl shadow-[0_6px_24px_rgba(22,35,61,0.06)]">
-          <div className="min-w-[720px]">
-            {/* header */}
-            <div className={`grid ${COLS} gap-5 bg-[#eef2f4] px-7 py-[15px]`}>
-              {["Task", "The old way", "With SidelinePro", "Time back"].map((h, i) => (
-                <span
-                  key={h}
-                  className={`text-[11.5px] font-semibold uppercase tracking-[0.09em] text-[#7a8798] ${
-                    i === 3 ? "text-right" : ""
-                  }`}
-                >
-                  {h}
-                </span>
-              ))}
-            </div>
-            {/* rows — highlight follows the cursor */}
-            {roster.map((r) => (
-              <div
-                key={r.task}
-                className={`grid ${COLS} items-center gap-5 border-b border-l-4 border-[#16233d]/[0.06] border-l-transparent py-3 pl-6 pr-7 transition-colors duration-150 hover:border-l-[#10b3a3] hover:bg-[#eaf7f3]`}
-              >
-                <span className="text-[15.5px] font-semibold text-[#16233d]">{r.task}</span>
-                <span className="text-[14px] leading-[1.45] text-[#8a95a3]">{r.old}</span>
-                <span className="flex items-baseline gap-[9px] text-[14px] leading-[1.45] text-[#3d4a5c]">
-                  <Check className="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-[#10b3a3]" strokeWidth={3} />
-                  <span>{r.now}</span>
-                </span>
-                <span className="text-right text-[14px] font-semibold text-[#10b3a3]">{r.save}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* add-it-up band */}
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-6 rounded-xl bg-[#16233d] px-8 py-5">
-          <p
-            className="font-semibold text-white"
-            style={{ fontSize: "clamp(18px,2vw,22px)", letterSpacing: "-0.01em" }}
-          >
-            Add it up: most clubs win back{" "}
-            <span style={{ color: TEAL_ON_NAVY }}>a full working day, every single week.</span>
-          </p>
-          <a href="#contact" className={`${tealBtn} whitespace-nowrap px-6 py-[11px] text-[15px]`}>
-            Book a demo
-          </a>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ──────────────────────────────────────────────────────────
-   Solutions — navy, card grid + sport chips
-   ────────────────────────────────────────────────────────── */
-const tiles = [
-  {
-    kicker: "Website & apps",
-    title: "A club site that looks after itself",
-    body: "A tidy website plus iOS & Android apps that update on their own. No club webmaster, no late-night HTML.",
-  },
-  {
-    kicker: "Fixtures & ladders",
-    title: "Always right, never copied",
-    body: "Synced straight from your association, so the draw and the ladder are always up to date.",
-  },
-  {
-    kicker: "Umpires & refs",
-    title: "Match-day rostering",
-    body: "Sort umpires and refs in minutes, not a whole Sunday of phone calls.",
-  },
-  {
-    kicker: "Teams & players",
-    title: "One tidy list",
-    body: "Registrations, profiles and who is available, all in one place.",
-  },
-  {
-    kicker: "Messages",
-    title: "One place to talk",
-    body: "Club, team and parent messages that actually get seen.",
-  },
-  {
-    kicker: "PlayHQ helper",
-    title: "Teams built for you",
-    body: "A helper that answers committee questions and builds your teams into PlayHQ.",
-  },
-]
-
-const sports = [
-  "Soccer",
-  "Netball",
-  "AFL",
-  "Rugby League",
-  "Rugby Union",
-  "Cricket",
-  "Basketball",
-  "Hockey",
-  "Touch",
-  "Futsal",
-]
-
-function Solutions() {
-  return (
-    <section id="solutions" className={`scroll-mt-[88px] bg-[#121f38] ${sectionPad}`}>
-      <div className={container}>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#2dd4bf]">
-          Solutions
-        </p>
-        <h2 className="mt-2 font-bold text-white" style={h2Style}>
-          Everything your club needs
-        </h2>
-        <p className="mt-3 max-w-[560px] text-[16px] leading-[1.55] text-[#a5b3c7]">
-          One login instead of the spreadsheets, the group chats and the Sunday-night guesswork.
-        </p>
-
-        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {tiles.map((t) => (
-            <div
-              key={t.kicker}
-              className="rounded-xl border border-white/[0.08] bg-[#16233d] px-7 py-[30px] transition-[transform,box-shadow] duration-[350ms] ease-[cubic-bezier(.2,.6,.2,1)] hover:-translate-y-1 hover:shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
-            >
-              <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#2dd4bf]">
-                {t.kicker}
-              </p>
-              <h3
-                className="mt-2.5 text-[20px] font-semibold leading-[1.25] text-white"
-                style={{ letterSpacing: "-0.01em" }}
-              >
-                {t.title}
-              </h3>
-              <p className="mt-2 text-[14.5px] leading-[1.55] text-[#a5b3c7]">{t.body}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 flex flex-wrap items-center gap-2.5">
-          <span className="mr-2 text-[14px] font-semibold text-white">Every code:</span>
-          {sports.map((sp) => (
-            <span
-              key={sp}
-              className="rounded-full border border-white/[0.14] bg-white/[0.05] px-4 py-[7px] text-[13.5px] font-medium text-[#d5deeb]"
-            >
-              {sp}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ──────────────────────────────────────────────────────────
-   Mobile apps — white, centred showcase
-   ────────────────────────────────────────────────────────── */
-
-function MobileApps() {
-  return (
-    <section id="apps" className={`scroll-mt-[88px] overflow-hidden bg-white ${sectionPad}`}>
-      <div className={`${container} text-center`}>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#10b3a3]">
-          Mobile apps
-        </p>
-        <h2 className="mt-2 font-bold text-[#16233d]" style={h2Style}>
-          Your club. In your pocket.
-        </h2>
-        <p className="mx-auto mt-3 max-w-[560px] text-[16px] leading-[1.55] text-[#5b6b7c]">
-          Native iOS &amp; Android apps for players, parents, coaches and officials, so everyone
-          stays on top of game day.
-        </p>
-
-        {/* Four phones — single showcase render. */}
-        <div className="mx-auto mt-14 max-w-[1020px]">
-          <Image
-            src="/app-screens-showcase.png"
-            alt="SidelinePro app screens: club dashboard, coach line-up builder, player profile and convenor tools"
-            width={1774}
-            height={887}
-            sizes="(max-width: 1080px) 94vw, 1020px"
-            className="block h-auto w-full"
-          />
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ──────────────────────────────────────────────────────────
-   Contact — navy, what-happens-next + existing ContactForm
-   ────────────────────────────────────────────────────────── */
-const nextSteps = [
-  { title: "Tell us about your club", body: "A few details on the form is plenty." },
-  { title: "We reply within one business day", body: "A real person, not an auto-responder." },
-  { title: "See it with your club in mind", body: "A walkthrough built around your teams, your codes and your admin." },
-]
-
-function Contact() {
-  return (
-    <section id="contact" className={`scroll-mt-[88px] bg-[#121f38] ${sectionPad}`}>
-      <div className={`${container} grid items-start gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16`}>
-        <div>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#2dd4bf]">
-            Contact
-          </p>
-          <h2 className="mt-2 font-bold text-white" style={h2Style}>
-            Tell us about your club
-          </h2>
-          <p className="mt-3 max-w-[420px] text-[16px] leading-[1.55] text-[#a5b3c7]">
-            Book a demo or just ask a question. Here is what happens next.
-          </p>
-
-          <ol className="mt-8 flex flex-col gap-5">
-            {nextSteps.map((s, i) => (
-              <li key={s.title} className="flex gap-4">
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#2dd4bf]/40 bg-[#2dd4bf]/10 text-[13px] font-semibold text-[#2dd4bf]">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="text-[15.5px] font-semibold text-white">{s.title}</p>
-                  <p className="mt-0.5 text-[14.5px] leading-[1.5] text-[#a5b3c7]">{s.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-
-          <div className="mt-9 border-t border-white/[0.08] pt-6">
-            <p className="text-[15px] text-[#e6edf7]">Sydney, Australia</p>
-            <a
-              href="mailto:rowan@sidelinepro.com.au"
-              className="mt-1 inline-block text-[15px] font-medium text-[#2dd4bf] hover:opacity-75"
-            >
-              rowan@sidelinepro.com.au
-            </a>
-            <p className="mt-4 text-[12.5px] text-[#7b8aa0]">Sideline Pro Pty Ltd · ACN 697 721 627</p>
-          </div>
-        </div>
-
-        {/* Existing ContactForm — wired to /api/contact. Wrapped in a light card
-            so its labels/inputs stay legible against the navy section. */}
-        <div className="rounded-xl bg-white p-6 shadow-[0_12px_34px_rgba(0,0,0,0.35)] sm:p-8">
-          <ContactForm />
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ──────────────────────────────────────────────────────────
-   Footer — deep navy, link columns
-   ────────────────────────────────────────────────────────── */
-const footCols: { head: string; links: [string, string][] }[] = [
-  {
-    head: "Explore",
-    links: [
-      ["Features", "#features"],
-      ["Solutions", "#solutions"],
-      ["Apps", "#apps"],
-      ["Contact", "#contact"],
-    ],
-  },
-  {
-    head: "Get in touch",
-    links: [
-      ["rowan@sidelinepro.com.au", "mailto:rowan@sidelinepro.com.au"],
-      ["Book a demo", "#contact"],
-    ],
-  },
-]
-
-function Footer() {
-  return (
-    <footer className="bg-[#0a1426] px-7 pb-[26px] pt-12">
-      <div className={container}>
-        <div className="grid gap-6 border-b border-white/[0.12] pb-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr]">
-          <div>
-            <Lockup height={88} />
-            <p className="mt-3 max-w-[230px] text-[13px] leading-[1.55] text-[#8fa0b8]">
-              Designed in Sydney, for Australian community clubs.
-            </p>
-          </div>
-          {footCols.map((c) => (
-            <div key={c.head}>
-              <p className="mb-2.5 text-[12.5px] font-semibold text-white">{c.head}</p>
-              {c.links.map(([label, href]) => (
-                <a
-                  key={label}
-                  href={href}
-                  className="mb-[7px] block text-[12.5px] text-[#8fa0b8] transition-colors hover:text-[#2dd4bf]"
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
-          ))}
-        </div>
-        <p className="pt-[18px] text-[12px] text-[#6c7d96]">
-          Copyright © {new Date().getFullYear()} Sideline Pro Pty Ltd · ACN 697 721 627. All rights
-          reserved.
-        </p>
-      </div>
-    </footer>
-  )
-}
 
 export default function Home() {
-  return (
-    <div className={`${poppins.className} min-h-screen bg-[#0e1a30] text-[#f2f6fb]`}>
-      <Navbar />
-      <main>
-        <Hero />
-        <FeaturesTable />
-        <Solutions />
-        <MobileApps />
-        <Contact />
-      </main>
-      <Footer />
-    </div>
-  )
+  return <div className={styles.site} id="top">
+    <a className={styles.skip} href="#main">Skip to content</a>
+    <header className={styles.header}><div className={styles.nav}>
+      <a href="#top" aria-label="SidelinePro home"><Image src="/logo-horizontal-dark.svg" alt="SidelinePro" width={174} height={48} priority className={styles.logo}/></a>
+      <nav aria-label="Main navigation" className={styles.desktopNav}>{links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
+      <a className={styles.button} href="#contact">Book a demo <ArrowUpRight size={16}/></a>
+      <MobileNav className={styles.mobileNav}/>
+    </div></header>
+    <main id="main">
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}><p className={styles.eyebrow}><span/> 100% AUSTRALIAN OWNED & OPERATED</p>
+          <h1>The operating system for <em>community sport.</em></h1>
+          <p className={styles.intro}>Delivered through your club’s own bespoke app. Your name, your colours and the workflows that connect your teams, umpires, coaches and families — from grading day to the final whistle.</p>
+          <div className={styles.actions}><a className={styles.button} href="#contact">See your club’s app <ArrowUpRight size={18}/></a><a className={styles.textLink} href="#platform">Explore the platform <ArrowRight size={17}/></a></div>
+          <div className={styles.heroNotes}><span><Check size={15}/> PlayHQ workflows</span><span><Check size={15}/> Connected player development</span></div>
+        </div>
+        <div className={styles.heroVisual}><Image src="/hero/sf-huddle-sky.png" alt="Community netball players coming together in a team huddle" fill priority sizes="(max-width: 760px) 100vw, 48vw" className={styles.heroPhoto}/><div className={styles.photoLabel}>FOR THE PEOPLE WHO<br/>MAKE CLUB SPORT HAPPEN.</div><div className={styles.photoBottom}><span>ONE CLUB. ALL CONNECTED.</span><ArrowUpRight size={24}/></div></div>
+      </section>
+      <div className={styles.pathStrip}><span>ONE CONNECTED SEASON</span><a href="#grading">Grade & form teams</a><ArrowRight/><a href="#umpires">Roster officials</a><ArrowRight/><a href="#development">Develop players</a><ArrowRight/><a href="#playhq">Connect PlayHQ</a></div>
+      <section id="platform" className={`${styles.section} ${styles.platform}`}>
+        <div className={styles.sectionHead}><p className={styles.eyebrow}>THE SIDELINEPRO DIFFERENCE</p><h2>The work behind the weekend.<br/><span>Finally, connected.</span></h2><p>Grading isn’t separate from development. Umpires aren’t an afterthought. And your club doesn’t operate in isolation from its association. Your software should reflect that.</p></div>
+        {features.map((f,i)=><article id={f.id} key={f.id} className={`${styles.feature} ${i===0?styles.featureLead:""}`}>
+          <div className={styles.featureCopy}><p className={styles.eyebrow}><f.icon size={18}/>{f.tag}</p><h3>{f.title}</h3><p>{f.body}</p><ul>{f.points.map(p=><li key={p}><Check size={16}/>{p}</li>)}</ul><a className={styles.darkLink} href="#contact">Explore this in your demo <ArrowUpRight size={16}/></a></div>
+          {f.image?<figure className={styles.phoneFigure}><Image src={f.image} alt={f.alt!} width={420} height={820} sizes="(max-width:760px) 70vw, 300px"/><figcaption>{f.caption}<small>{f.note}</small></figcaption></figure>:<div className={styles.workflow} aria-label={`${f.title} workflow`}><f.icon size={36} strokeWidth={1.3}/><span>{i===1?"THE RIGHT OFFICIAL. THE RIGHT GAME.":i===2?"A SEASON OF CONNECTED INSIGHT.":"YOUR CLUB + YOUR ASSOCIATION."}</span>{(i===1?["Availability & accreditation", "Allocation & confirmation", "Game day & mentor feedback"]:i===2?["Coach observation", "Assessment & development history", "Informed grading decisions"]:["PlayHQ fixtures & ladders", "Your club’s connected hub", "Teams & reconciliation"]).map((s,j)=><div key={s}><b>0{j+1}</b>{s}{j<2&&<ArrowRight size={16}/>}</div>)}<small>Connected workflow · SidelinePro</small></div>}
+        </article>)}
+      </section>
+      <section id="people" className={`${styles.section} ${styles.people}`}><p className={styles.eyebrow}>ONE CLUB. EVERY ROLE.</p><h2>Your club. Your brand.<br/>Your own bespoke app.</h2><p className={styles.bespokeIntro}>Give your community an app that feels unmistakably yours. Built around your club’s identity and the way your people run their season.</p><div className={styles.roles}>{[["Committees & convenors","Keep grading, team formation, officials and club communications together."],["Coaches & managers","Know your squad, plan line-ups and record the feedback that helps players develop."],["Players & parents","Find team news, fixtures and availability in one club experience."],["Umpires & mentors","Stay across assignments and confirmations, with feedback for junior development."]].map(([title,body])=><div key={title}><h3>{title}</h3><p>{body}</p></div>)}</div><figure className={styles.appGallery}><Image src="/app-screens-showcase.png" alt="Existing SidelinePro product gallery showing club home, coach line-up, player profile and convenor tools" width={1774} height={887} sizes="(max-width:1200px) 100vw, 1120px"/><figcaption>Your club, coach, player and convenor experiences — together in SidelinePro.</figcaption></figure></section>
+      <section id="payments" className={`${styles.section} ${styles.platform}`}>
+        <div className={styles.sectionHead}><div><p className={styles.eyebrow}>PAYMENTS & PAYMENT TRACKING</p><h2>Connect the payment<br/>to the club paperwork.</h2></div><p>Integrate Visa and Mastercard payments through Stripe, with payment tracking connected to supported club workflows.</p></div>
+        <div className={styles.steps}>
+          <div><span>01 / COLLECT</span><h3>A familiar way to pay</h3><p>Let families pay by card through Stripe as part of a supported program registration.</p></div>
+          <div><span>02 / MATCH</span><h3>Keep the paid list in step</h3><p>For connected registrations, confirmed Stripe payments update the matching registration and retain a payment reference.</p></div>
+          <div><span>03 / REVIEW</span><h3>A clearer payment trail</h3><p>See recorded payments against registrations. Full refunds update automatically where supported; unmatched payments and partial refunds need review.</p></div>
+        </div>
+        <p className={styles.paymentNote}>Payment tracking is available for supported workflows. We’ll walk through your club’s collection and reconciliation requirements in the demo.</p>
+        <a className={styles.darkLink} href="#contact">Discuss your club’s payments <ArrowUpRight size={16}/></a>
+      </section>
+      <section id="seaforth" className={`${styles.section} ${styles.caseStudy}`}><div className={styles.caseImage}><Image src="/seaforth-netball-site-thumb.png" alt="Seaforth Netball Club website" width={1000} height={720} sizes="(max-width:760px) 100vw, 48vw"/></div><div><p className={styles.eyebrow}>IN PRACTICE / SEAFORTH NETBALL CLUB</p><h2>Built around<br/>real club life.</h2><p>Seaforth’s platform brings together the work of coaches, managers, umpires and the committee — from grading-day check-in to the weekly draw.</p><dl><div><dt>Grading with context</dt><dd>Coach assessments inform the grading committee’s view of each player.</dd></div><div><dt>A supported umpire pathway</dt><dd>Assignments, confirmations and junior mentor feedback in the same platform.</dd></div><div><dt>A connected weekly draw</dt><dd>PlayHQ fixture imports and ladders sit alongside club tools.</dd></div></dl><a className={styles.textLink} href="#contact">Walk through the Seaforth workflows <ArrowUpRight size={17}/></a></div></section>
+      <section className={`${styles.section} ${styles.start}`}><p className={styles.eyebrow}>A PRACTICAL FIRST STEP</p><h2>Start with your club.<br/>Build the right plan together.</h2><div className={styles.steps}>{[["Show us your season","Tell us where the work piles up: grading, rostering, coaching or PlayHQ."],["See the relevant workflows","We’ll walk through the product with your club’s roles and priorities in mind."],["Agree the next steps","Discuss scope, setup, pricing and timing before making a decision."]].map(([title,body],i)=><div key={title}><span>0{i+1}</span><h3>{title}</h3><p>{body}</p></div>)}</div></section>
+      <section id="contact" className={`${styles.section} ${styles.contact}`}><div><p className={styles.eyebrow}>LET’S TALK CLUB SPORT</p><h2>Your club has its own rhythm.<br/><span>Let’s find your fit.</span></h2><p>Request a guided demo of the workflows that matter to you. This is a conversation about your club, with time for questions.</p><ul><li><Check size={17}/> Grading and team formation</li><li><Check size={17}/> Umpire rostering and development</li><li><Check size={17}/> Coaching, families and PlayHQ</li></ul><a href="mailto:rowan@sidelinepro.com.au">Prefer email? rowan@sidelinepro.com.au ↗</a></div><div className={styles.formCard}><h3>Request your club demo</h3><p>Tell us a little about your club. We’ll be in touch to arrange a walkthrough.</p><ContactForm/></div></section>
+    </main>
+    <footer className={styles.footer}><div><Image src="/logo-horizontal-dark.svg" alt="SidelinePro" width={174} height={48}/><p>100% Australian owned and operated.<br/>Built around Australian community sport.</p></div><div>{links.map(([label,href])=><a key={href} href={href}>{label}</a>)}<a href="#contact">Book a demo</a></div><small>© {new Date().getFullYear()} Sideline Pro Pty Ltd · ACN 697 721 627</small></footer>
+  </div>
 }

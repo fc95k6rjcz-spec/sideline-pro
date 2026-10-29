@@ -5,10 +5,12 @@ import { useState } from "react"
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState("")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsSubmitting(true)
+    setError("")
 
     const formData = new FormData(e.currentTarget)
     const data = {
@@ -29,9 +31,11 @@ export function ContactForm() {
 
       if (response.ok) {
         setIsSubmitted(true)
+      } else {
+        setError("Your request could not be sent. Please try again or email rowan@sidelinepro.com.au.")
       }
-    } catch (error) {
-      console.error("Form submission error:", error)
+    } catch {
+      setError("We couldn’t connect. Please try again or email rowan@sidelinepro.com.au.")
     } finally {
       setIsSubmitting(false)
     }
@@ -45,14 +49,14 @@ export function ContactForm() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="mb-2 text-xl font-bold text-[#1d1d1f]">Thank you!</h3>
+        <h3 className="mb-2 text-xl font-bold text-[#1d1d1f]">Demo request received</h3>
         <p className="text-[#6e6e73]">{"We'll be in touch within one business day."}</p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form method="post" action="/api/contact" onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className="mb-2 block text-sm font-medium text-[#1d1d1f]">
@@ -61,6 +65,7 @@ export function ContactForm() {
           <input
             type="text"
             id="name"
+            autoComplete="name"
             name="name"
             required
             className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
@@ -74,6 +79,7 @@ export function ContactForm() {
           <input
             type="text"
             id="club"
+            autoComplete="organization"
             name="club"
             required
             className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
@@ -89,6 +95,7 @@ export function ContactForm() {
           <input
             type="email"
             id="email"
+            autoComplete="email"
             name="email"
             required
             className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
@@ -97,7 +104,7 @@ export function ContactForm() {
         </div>
         <div>
           <label htmlFor="phone" className="mb-2 block text-sm font-medium text-[#1d1d1f]">
-            Phone
+            Phone (optional)
           </label>
           <input
             type="tel"
@@ -105,12 +112,13 @@ export function ContactForm() {
             name="phone"
             className="w-full rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
             placeholder="04XX XXX XXX"
+            autoComplete="tel"
           />
         </div>
       </div>
       <div>
         <label htmlFor="players" className="mb-2 block text-sm font-medium text-[#1d1d1f]">
-          Number of teams in your club
+          Number of teams (optional)
         </label>
         <input
           type="text"
@@ -122,22 +130,24 @@ export function ContactForm() {
       </div>
       <div>
         <label htmlFor="message" className="mb-2 block text-sm font-medium text-[#1d1d1f]">
-          What are you hoping to solve?
+          What would you like to see? (optional)
         </label>
         <textarea
           id="message"
           name="message"
           rows={4}
           className="w-full resize-none rounded-[10px] border border-black/15 bg-white px-4 py-3 text-[#1d1d1f] placeholder-[#86868b] transition-colors focus:border-[#10b3a3] focus:outline-none focus:ring-1 focus:ring-[#10b3a3]/30"
-          placeholder="Tell us about your club's biggest challenges..."
+          placeholder="Grading, umpire rostering, coaching, PlayHQ…"
         />
       </div>
+      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      <p className="text-xs text-slate-500">We’ll use these details to respond to your enquiry.</p>
       <button
         type="submit"
         disabled={isSubmitting}
         className="mt-2 w-full rounded-full bg-[#10b3a3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#0d9a8c] disabled:opacity-50"
       >
-        {isSubmitting ? "Sending..." : "Submit"}
+        {isSubmitting ? "Sending..." : "Request a demo"}
       </button>
     </form>
   )
