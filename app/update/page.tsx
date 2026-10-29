@@ -1,3 +1,4 @@
+import { PhoneScreenshot } from "../components/PhoneScreenshot"
 import type { Metadata } from "next"
 import Image from "next/image"
 import { Barlow_Condensed } from "next/font/google"
@@ -356,16 +357,10 @@ function Apps() {
             ))}
           </div>
         </div>
-        {/* Four-phone showcase render, background knocked out so the phones
-            and their shadows sit straight on the teal. */}
-        <Image
-          src="/update/app-screens-showcase.png"
-          alt="SidelinePro app screens: club dashboard, coach line-up builder, player profile and convenor tools"
-          width={1760}
-          height={884}
-          sizes="(max-width: 1280px) 100vw, 1240px"
-          className="mt-10 block h-auto w-full lg:mt-6"
-        />
+        <figure className="mx-auto mt-10 w-fit text-center">
+          <PhoneScreenshot />
+          <figcaption className="mt-4 text-xs">Current line-up interface. Image edited for privacy with numbered demo players.</figcaption>
+        </figure>
       </div>
     </section>
   )
