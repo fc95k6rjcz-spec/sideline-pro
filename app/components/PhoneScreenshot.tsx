@@ -1,9 +1,8 @@
 import Image from "next/image"
 import styles from "../home.module.css"
 
-/** Phone hardware is presentation only; the image contains anonymised demo data. */
 export function PhoneScreenshot() {
-  return <div className={styles.phoneFrame}>
-    <Image src="/lineup-demo-anonymised.png" alt="Current light-themed coach line-up interface with anonymous Player 01 to Player 08 demo labels" width={867} height={1815} sizes="(max-width: 760px) 60vw, 280px" />
+  return <div className={styles.productRender}>
+    <Image src="/lineup-studio-render.png" alt="Studio render based on the current SidelinePro line-up app on an angled phone, with anonymous demo players" width={1536} height={1152} sizes="(max-width:760px) 90vw, 600px" />
   </div>
 }

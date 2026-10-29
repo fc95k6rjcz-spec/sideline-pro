@@ -359,7 +359,7 @@ function Apps() {
         </div>
         <figure className="mx-auto mt-10 w-fit text-center">
           <PhoneScreenshot />
-          <figcaption className="mt-4 text-xs">Current line-up interface. Image edited for privacy with numbered demo players.</figcaption>
+          <figcaption className="mt-4 text-xs">Product render based on the current line-up app. Demo player labels.</figcaption>
         </figure>
       </div>
     </section>
