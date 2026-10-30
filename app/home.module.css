@@ -776,7 +776,7 @@
 .commsIntro h2{font-size:44px;line-height:1.12;letter-spacing:-.035em;margin:20px 0 24px}
 .commsIntro h2 span{color:#237b70}
 .commsIntro>div>p:not(.eyebrow){font-size:15px;line-height:1.9;color:#64736f;margin:0 0 25px}
-.commsIntro .primary{display:inline-flex;align-items:center;gap:18px;font-size:12px}
+.commsIntro .button{display:inline-flex;align-items:center;gap:18px;font-size:12px}
 .chatRender{margin:0;overflow:hidden;border-radius:14px;background:#0e1a30}
 .chatRender img{display:block;width:100%;height:auto}
 .chatRender figcaption{padding:17px 22px;font-size:12px;line-height:1.7;color:#c7d8e3}
