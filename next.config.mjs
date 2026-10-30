@@ -20,7 +20,12 @@ const nextConfig = {
   // address bar stays on sidelinepro.com.au. HARBOR_VIEW_ORIGIN overrides
   // the target for local testing.
   async rewrites() {
-    const demo = process.env.HARBOR_VIEW_ORIGIN || "https://harbor-view-demo.vercel.app"
+    // Keep this review branch connected to the matching demo preview.
+    // Main/production continues using the live demo origin.
+    const reviewDemo = process.env.VERCEL_ENV === "preview" && process.env.VERCEL_GIT_COMMIT_REF === "feature/coach-report-showcase"
+      ? "https://harbor-view-demo-git-feature-u-4f58cb-fc95k6rjcz-specs-projects.vercel.app"
+      : "https://harbor-view-demo.vercel.app"
+    const demo = process.env.HARBOR_VIEW_ORIGIN || reviewDemo
     return [
       { source: "/demo", destination: `${demo}/demo` },
       { source: "/demo/:path*", destination: `${demo}/demo/:path*` },
