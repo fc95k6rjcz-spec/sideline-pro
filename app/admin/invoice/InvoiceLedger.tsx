@@ -27,6 +27,8 @@ export type InvoiceRow = {
   email_sent_at: string | null;
   reminder_sent_at?: string | null;
   reminder_count?: number | null;
+  voided_at?: string | null;
+  void_reason?: string | null;
   created_by_email: string;
   created_at: string;
   updated_at: string;
@@ -64,7 +66,7 @@ function daysUntilDue(inv: InvoiceRow) {
 }
 
 function isOverdue(inv: InvoiceRow) {
-  if (inv.paid) return false;
+  if (inv.paid || inv.voided_at) return false;
   const due = new Date(`${inv.due_date}T00:00:00`);
   return due.getTime() < Date.now();
 }
@@ -121,7 +123,7 @@ function downloadCsv(rows: InvoiceRow[]) {
         (r.gst_cents / 100).toFixed(2),
         (r.total_cents / 100).toFixed(2),
         r.currency,
-        r.paid ? "Paid" : isOverdue(r) ? "Overdue" : "Unpaid",
+        r.voided_at ? "Void" : r.paid ? "Paid" : isOverdue(r) ? "Overdue" : "Unpaid",
         r.paid_date ?? "",
         r.pdf_url ?? "",
         r.created_by_email,
@@ -175,12 +177,15 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
   const filtered = useMemo(() => {
     if (filter === "all") return invoices;
     if (filter === "paid") return invoices.filter((i) => i.paid);
-    if (filter === "unpaid") return invoices.filter((i) => !i.paid);
+    if (filter === "unpaid") return invoices.filter((i) => !i.paid && !i.voided_at);
     return invoices.filter(isOverdue);
   }, [invoices, filter]);
 
   const totals = useMemo(() => {
-    const invoiced = invoices.reduce((acc, i) => acc + i.total_cents, 0);
+    // A void invoice stays in the list for the record but is never money owed.
+    const invoiced = invoices
+      .filter((i) => !i.voided_at)
+      .reduce((acc, i) => acc + i.total_cents, 0);
     const received = invoices
       .filter((i) => i.paid)
       .reduce((acc, i) => acc + i.total_cents, 0);
@@ -223,6 +228,38 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function voidInvoice(inv: InvoiceRow) {
+    const reason = prompt(
+      `Void ${inv.invoice_number}?\n\nIt stays in the ledger as VOID, drops out of outstanding and GST, and can't be sent or reminded.\n\nReason (shown in the ledger):`,
+      "Issued in error",
+    );
+    if (reason === null) return;
+    setBusyId(inv.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          voided_at: new Date().toISOString(),
+          void_reason: reason.trim() || null,
+          auto_issue: false,
+        }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Update failed (${res.status})`);
+      }
+      setNotice(`${inv.invoice_number} voided`);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not void");
     } finally {
       setBusyId(null);
     }
@@ -367,7 +404,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
           >
             <option value="all">All ({invoices.length})</option>
             <option value="unpaid">
-              Unpaid ({invoices.filter((i) => !i.paid).length})
+              Unpaid ({invoices.filter((i) => !i.paid && !i.voided_at).length})
             </option>
             <option value="paid">
               Paid ({invoices.filter((i) => i.paid).length})
@@ -453,7 +490,14 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                       className="border-t border-black/10 hover:bg-[#fafafa]"
                     >
                       <td className="px-3 py-3">
-                        {inv.paid ? (
+                        {inv.voided_at ? (
+                          <span
+                            className="rounded-md border border-black/10 bg-[#f5f5f7] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#86868b]"
+                            title={inv.void_reason ?? "Void"}
+                          >
+                            Void
+                          </span>
+                        ) : inv.paid ? (
                           <button
                             type="button"
                             onClick={() => togglePaid(inv)}
@@ -506,11 +550,25 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                       <td className="px-3 py-3 text-[#6e6e73]">
                         {formatDate(inv.due_date)}
                       </td>
-                      <td className="px-3 py-3 text-right font-semibold text-[#1d1d1f]">
+                      <td
+                        className={
+                          "px-3 py-3 text-right font-semibold " +
+                          (inv.voided_at ? "text-[#86868b] line-through" : "text-[#1d1d1f]")
+                        }
+                      >
                         {formatMoney(inv.total_cents, inv.currency)}
                       </td>
                       <td className="px-3 py-3">
-                        {inv.paid ? (
+                        {inv.voided_at ? (
+                          <span className="text-xs text-[#86868b]" title={inv.void_reason ?? undefined}>
+                            Void {formatDate(inv.voided_at.slice(0, 10))}
+                            {inv.void_reason && (
+                              <span className="mt-0.5 block max-w-[220px] truncate text-[10px]">
+                                {inv.void_reason}
+                              </span>
+                            )}
+                          </span>
+                        ) : inv.paid ? (
                           <span className="text-xs text-[#1B7A47]">
                             Paid {formatDate(inv.paid_date)}
                           </span>
@@ -521,7 +579,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                         ) : (
                           <span className="text-xs text-[#86868b]">Awaiting</span>
                         )}
-                        {!inv.paid && inv.reminder_sent_at && (
+                        {!inv.paid && !inv.voided_at && inv.reminder_sent_at && (
                           <div className="mt-0.5 text-[10px] text-[#9A6A1A]">
                             Reminded {formatDate(inv.reminder_sent_at.slice(0, 10))}
                             {(inv.reminder_count ?? 0) > 1 ? ` ×${inv.reminder_count}` : ""}
@@ -576,7 +634,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                           >
                             {inv.auto_issue ? "Auto ✓" : "Auto-issue"}
                           </button>
-                          {!inv.paid && !inv.is_draft && inv.email_sent_at && (() => {
+                          {!inv.paid && !inv.voided_at && !inv.is_draft && inv.email_sent_at && (() => {
                             const d = daysUntilDue(inv);
                             const past = d < 0;
                             const label = past
@@ -613,7 +671,7 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                           <button
                             type="button"
                             onClick={() => handleSend(inv)}
-                            disabled={busyId === inv.id || !inv.pdf_url}
+                            disabled={busyId === inv.id || !inv.pdf_url || !!inv.voided_at}
                             className="text-xs text-gold hover:underline disabled:cursor-not-allowed disabled:opacity-40"
                             title={
                               !inv.pdf_url
@@ -625,6 +683,17 @@ export default function InvoiceLedger({ refreshSignal = 0 }: Props) {
                           >
                             {inv.email_sent_at ? "Resend" : "Send"}
                           </button>
+                          {!inv.paid && !inv.voided_at && !inv.is_draft && (
+                            <button
+                              type="button"
+                              onClick={() => voidInvoice(inv)}
+                              disabled={busyId === inv.id}
+                              className="text-xs text-[#86868b] hover:text-[#C8332B] disabled:opacity-50"
+                              title="Cancel this invoice but keep its number on record"
+                            >
+                              Void
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => handleDelete(inv)}

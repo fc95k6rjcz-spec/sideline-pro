@@ -10,7 +10,7 @@ export const runtime = "nodejs";
  * Returns the totals the Expenses dashboard needs to project a real
  * forward-looking bank balance and a BAS-quarter GST snapshot.
  *
- *   outstanding_cents       — sum of total_cents on unpaid (paid=false) invoices
+ *   outstanding_cents       — sum of total_cents on unpaid (paid=false) invoices, voided ones excluded
  *   outstanding_count       — how many unpaid invoices
  *   q_label                 — e.g. "Q4 FY26 · Apr–Jun 2026"
  *   q_gst_collected_cents   — sum of gst_cents on invoices issued in this Q whose paid_date is in this Q
@@ -62,7 +62,8 @@ export async function GET() {
   const { data: unpaid, error: unpaidErr } = await admin
     .from("invoices")
     .select("id,total_cents,gst_cents,due_date,client_name,invoice_number")
-    .eq("paid", false);
+    .eq("paid", false)
+    .is("voided_at", null);
   if (unpaidErr) {
     return NextResponse.json({ error: unpaidErr.message }, { status: 500 });
   }
@@ -71,6 +72,7 @@ export async function GET() {
   const { data: issuedInQ } = await admin
     .from("invoices")
     .select("total_cents,gst_cents,issue_date")
+    .is("voided_at", null)
     .gte("issue_date", q.startIso)
     .lte("issue_date", q.endIso);
 

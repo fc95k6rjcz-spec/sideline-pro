@@ -39,6 +39,8 @@ function addDaysISO(iso: string, days: number): string {
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
+const DEFAULT_TERMS_DAYS = 14;
+
 function rollDescription(desc: string | null, issueIso: string): string | null {
   if (!desc) return desc;
   const d = new Date(`${issueIso}T00:00:00`);
@@ -102,6 +104,7 @@ export async function GET(request: NextRequest) {
       "id,prefix,invoice_number,client_name,client_sub_org,client_email,issue_date,due_date,next_invoice_date,subtotal_cents,gst_cents,total_cents,currency,description,created_by_email,auto_send",
     )
     .eq("auto_issue", true)
+    .is("voided_at", null)
     .not("next_invoice_date", "is", null)
     .lte("next_invoice_date", today);
   if (error) {
@@ -114,7 +117,11 @@ export async function GET(request: NextRequest) {
   for (const a of (anchors ?? []) as Anchor[]) {
     const issue = a.next_invoice_date as string;
     const year = new Date(`${issue}T00:00:00`).getFullYear();
-    const termsDays = Math.max(0, daysBetween(a.issue_date, a.due_date));
+    // Copy the anchor's payment terms. An anchor that was due on receipt was a
+    // one-off (SNC-2026-016), not the client's terms, so recurring invoices
+    // fall back to the standard 14 days rather than being due the day they land.
+    const anchorTerms = Math.max(0, daysBetween(a.issue_date, a.due_date));
+    const termsDays = anchorTerms > 0 ? anchorTerms : DEFAULT_TERMS_DAYS;
     const due = addDaysISO(issue, termsDays);
 
     // Next sequence for this prefix+year, straight from the ledger.
