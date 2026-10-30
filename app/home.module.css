@@ -753,3 +753,10 @@
 @media(prefers-reduced-motion:reduce){.coachSourceCallout{transition:none}}
 
 .coachSourceCallout[data-visible=true] .coachSourceArrow{display:block}
+
+.paymentBrands{display:flex;flex-wrap:wrap;gap:18px;margin:28px 0}
+.paymentBrands>span{display:flex;align-items:center;gap:12px;padding:14px 20px;border:1px solid #d6dfda;border-radius:10px;background:#fff;font-size:12px;font-weight:500}
+.paymentBrands img{width:52px;height:32px;object-fit:contain}
+.accountingConnections{padding:22px 0;border-top:1px solid #d6dfda;margin-bottom:18px}
+.accountingConnections h3{font-size:19px;margin:0 0 10px}.accountingConnections p{font-size:14px;color:#64736f;line-height:1.8;max-width:850px}
+@media(max-width:760px){.paymentBrands{gap:10px}.paymentBrands>span{padding:12px;font-size:11px}.paymentBrands img{width:42px;height:28px}}
