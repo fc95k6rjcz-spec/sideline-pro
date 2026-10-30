@@ -10,6 +10,7 @@ export function MobileNav({ className }: { className: string }) {
     <nav aria-label="Mobile navigation">
       <a href="#platform" onClick={close}>The platform</a>
       <a href="#people" onClick={close}>Who it’s for</a>
+      <a href="#communications" onClick={close}>Communications</a>
       <a href="#seaforth" onClick={close}>Seaforth story</a>
     </nav>
   </details>
