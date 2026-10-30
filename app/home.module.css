@@ -829,3 +829,9 @@
 .assessmentCard{line-height:1.5;margin:24px 24px 0;padding:16px}
 .playerSummary{padding:14px 0}.skillSummary{padding:12px 0 8px}.skillSummary>div:first-child>strong{margin:5px 0 10px}.skillRow{margin:8px 0}.shootingSummary{padding:10px 14px}.shootingSummary strong{font-size:28px}.assessmentFooter{padding-top:12px}.evidenceFlow{padding:18px 10px}
 @media(max-width:760px){.assessmentCard{margin:24px 20px 0;padding:18px}.evidenceFlow{padding:20px 10px}}
+
+.clubDesigns{background:#f0f3ef}
+.designHeading{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-bottom:36px}
+.designHeading h2{margin-bottom:0}.designHeading>div>p:not(.eyebrow){color:#64736f;font-size:14px;line-height:1.8;max-width:460px;margin:0 0 20px}
+.designConcept{margin:0;border-radius:18px;overflow:hidden;background:#171819;box-shadow:0 20px 55px #0e1a3012}.designConcept img{display:block;width:100%;height:auto}.designConcept figcaption{padding:20px 24px;display:flex;justify-content:space-between;gap:20px;align-items:center;color:#e3eaf1;font-size:13px}.designConcept figcaption strong{font-weight:500}.designConcept figcaption span{font-size:10px;color:#9fb4c4}
+@media(max-width:760px){.designHeading{grid-template-columns:1fr;gap:22px;margin-bottom:28px}.designHeading>div>p:not(.eyebrow){font-size:14px}.designConcept{border-radius:12px}.designConcept figcaption{display:grid;gap:6px;padding:17px 20px}.designConcept figcaption span{font-size:10px}}
