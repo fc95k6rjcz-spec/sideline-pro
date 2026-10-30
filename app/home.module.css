@@ -849,3 +849,89 @@
 .gameReport{padding:15px;border-radius:10px;border:1px solid #dce6e8;background:#f8faf9}.reportTitle{display:flex;align-items:start;gap:12px;justify-content:space-between;padding-bottom:13px;border-bottom:1px solid #dce6e0}.reportTitle strong{font-size:12px;line-height:1.5}.reportTitle span{font-size:9px;white-space:nowrap;color:#156f5d;background:#e2f4eb;border-radius:15px;padding:3px 7px}.gameReport h5{font-size:10px;font-weight:600;color:#195d50;margin:15px 0 6px}.gameReport p{font-size:11px;line-height:1.8;color:#526e7a;margin:0}.gameReport small{font-size:9px;color:#7a8f97;display:block;margin-top:7px}.evidenceCaveat{font-size:9px;line-height:1.7;color:#6c828c;margin:13px 0 0}
 .comparisonTable table{width:100%;border-collapse:collapse;font-size:10px;text-align:left}.comparisonTable caption{text-align:left;font-size:9px;color:#5c7c86;margin-bottom:10px}.comparisonTable th,.comparisonTable td{padding:10px 5px;border-bottom:1px solid #e4ecec}.comparisonTable thead{color:#347b6e;background:#eef6f1}.comparisonTable th{font-weight:500}.comparisonTable td{color:#247261;text-align:center}.comparisonTable td span{font-size:8px;color:#81959b;white-space:nowrap}.comparisonTable thead th:not(:first-child){text-align:center}.compareNote{border-left:2px solid #3da28c;padding:12px 14px;background:#eff7f2;margin-top:15px}.compareNote strong{font-size:11px}.compareNote p{font-size:10px;line-height:1.7;color:#58756d;margin:7px 0 0}
 @media(max-width:760px){.evidenceTabs{gap:8px}.evidenceTabs button{font-size:10px}.matrixRow{font-size:10px;padding:11px 0;gap:6px}.ratingDots i{width:9px}.reportToolbar{flex-wrap:wrap}.reportToolbar label{flex-basis:100%}.reportToolbar button{padding:9px 12px}.comparisonTable th,.comparisonTable td{padding:10px 3px}.comparisonTable{font-size:9px}.skillDescriptors li{font-size:10px}}
+
+/* Our approach: "We don't generalise. We specialise." */
+.manifesto{
+  display:grid;
+  grid-template-columns:1fr 1.25fr;
+  gap:80px;
+  border-bottom:1px solid #dbe3df}
+.manifestoHead{
+  position:sticky;
+  top:120px;
+  align-self:start}
+.manifesto h2{
+  font-size:clamp(36px,4vw,58px);
+  line-height:1.08;
+  letter-spacing:-.05em}
+.manifesto h2 span{
+  color:#19786e}
+.manifestoLead{
+  font-size:19px;
+  font-weight:600;
+  line-height:1.5;
+  max-width:360px}
+.manifestoBody>p{
+  color:#3f4f4b;
+  font-size:16px;
+  max-width:620px;
+  margin:0 0 16px}
+.sportCards{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin:34px 0}
+.sportCards article{
+  background:white;
+  border:1px solid #dbe3df;
+  border-top:3px solid var(--teal);
+  border-radius:10px;
+  padding:20px}
+.sportCards span{
+  font-size:10px;
+  letter-spacing:.16em;
+  font-weight:600;
+  color:#19786e}
+.sportCards p{
+  margin:10px 0 0;
+  color:#4c5c58;
+  font-size:14px;
+  line-height:1.6}
+.manifestoBody>p.manifestoPull{
+  font-size:21px;
+  font-weight:600;
+  line-height:1.45;
+  letter-spacing:-.02em;
+  color:var(--navy);
+  border-left:3px solid var(--teal);
+  padding-left:20px;
+  margin:10px 0 30px}
+.manifestoOwn{
+  list-style:none;
+  padding:0;
+  margin:0 0 30px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 22px;
+  font-weight:600}
+.manifestoOwn li{
+  display:flex;
+  gap:8px;
+  align-items:center}
+.manifestoOwn svg{
+  color:#19786e}
+.manifestoBody>p.manifestoSign{
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#648078;
+  margin-bottom:6px}
+.manifestoBody>p.manifestoClose{
+  font-size:18px;
+  font-weight:600;
+  color:var(--navy)}
+@media(max-width:1000px){
+  .manifesto{grid-template-columns:1fr;gap:30px}
+  .manifestoHead{position:static}
+  .sportCards{grid-template-columns:1fr}
+}
