@@ -760,3 +760,13 @@
 .accountingConnections{padding:22px 0;border-top:1px solid #d6dfda;margin-bottom:18px}
 .accountingConnections h3{font-size:19px;margin:0 0 10px}.accountingConnections p{font-size:14px;color:#64736f;line-height:1.8;max-width:850px}
 @media(max-width:760px){.paymentBrands{gap:10px}.paymentBrands>span{padding:12px;font-size:11px}.paymentBrands img{width:42px;height:28px}}
+
+.umpireRender{margin:0;overflow:hidden;border-radius:12px;background:#0e1a30;color:#fff;box-shadow:0 18px 45px #11203916}
+.umpireRender>a{display:block;color:inherit;text-decoration:none}
+.umpireRender img{display:block;width:100%;height:auto;aspect-ratio:1536/1024;object-fit:cover}
+.umpireRender>a>span{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 22px;background:#173346;color:#70cebf;font-size:12px;font-weight:600}
+.umpireRender>a:hover>span{background:#204557}
+.umpireRender>a:focus-visible{outline:3px solid #70cebf;outline-offset:-4px}
+.umpireRender figcaption{padding:17px 22px 20px;font-size:12px;line-height:1.7;color:#cfdae3}
+.umpireRender small{display:block;margin-top:6px;font-size:10px;color:#91a9ba}
+@media(max-width:760px){.umpireRender>a>span{padding:16px 18px}.umpireRender figcaption{padding:15px 18px;font-size:11px}}
