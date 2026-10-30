@@ -728,3 +728,10 @@
 .modelOutcome a{flex-shrink:0;font-size:12px}
 @media(max-width:1000px){.modelOutcome{display:block}.modelOutcome a{margin-top:20px}}
 @media(max-width:760px){.developmentModel{padding:26px 22px}.developmentModel h4{font-size:26px}.modelIntro{font-size:14px}.modelSteps{grid-template-columns:1fr;gap:28px}.modelSteps li{padding:0 0 20px;border-bottom:1px solid #cddcd3}.modelSteps li:last-child{padding-bottom:0;border:0}.modelSteps li>svg{right:0;top:auto;bottom:-11px;background:#edf2ee;transform:rotate(90deg)}.modelSteps h5{font-size:20px}}
+
+.sharedCriteria{margin-top:26px;padding:22px 24px;border-left:3px solid #267a70;background:#ffffffa6;border-radius:0 10px 10px 0}
+.sharedCriteria h5{font-size:17px;line-height:1.4;margin:0 0 10px}
+.sharedCriteria p{font-size:13px;line-height:1.85;color:#64736f;margin:0}
+.sharedCriteria a{color:#146d63;text-underline-offset:3px}
+.sharedCriteria a:focus-visible{outline:2px solid #146d63;outline-offset:3px}
+@media(max-width:760px){.sharedCriteria{padding:18px}.sharedCriteria h5{font-size:16px}}
