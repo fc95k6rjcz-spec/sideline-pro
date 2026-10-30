@@ -191,6 +191,13 @@ export async function POST(request: NextRequest) {
   const totalFormatted = formatMoney(invoice.total_cents, invoice.currency);
   const dueFormatted = formatDate(invoice.due_date);
 
+  if (invoice.voided_at) {
+    return NextResponse.json(
+      { error: `${invoice.invoice_number} is void — nothing sent.` },
+      { status: 400 },
+    );
+  }
+
   if (mode === "reminder" && invoice.paid) {
     return NextResponse.json(
       { error: `${invoice.invoice_number} is already marked paid — no reminder sent.` },

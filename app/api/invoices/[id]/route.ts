@@ -26,6 +26,8 @@ const PATCHABLE = [
   "paid_date",
   "auto_issue",
   "is_draft",
+  "voided_at",
+  "void_reason",
 ] as const;
 
 export async function GET(_request: NextRequest, ctx: Params) {
