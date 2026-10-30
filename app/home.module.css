@@ -660,7 +660,8 @@
 
 .bespokeShowcase{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:80px;text-align:left;margin:50px auto 65px;max-width:950px}
 .appPhoto{margin:0 auto;width:340px;max-width:100%;border-radius:12px;overflow:hidden;background:#192b3b;box-shadow:0 20px 45px #0003}
-.appPhoto img{display:block;width:100%;height:auto}
+/* Crop the white screenshot edge from the supplied photo. */
+.appPhoto img{display:block;width:calc(100% + 3px);max-width:none;height:auto;margin-left:-3px;margin-top:-3px}
 .appPhoto figcaption{padding:13px 16px;font-size:10px;color:#b9cad8;line-height:1.6}
 .bespokeDetail h3{font-size:clamp(28px,3vw,40px);line-height:1.18;letter-spacing:-.035em;font-weight:600;margin:20px 0}
 .bespokeDetail>p:not(.eyebrow){color:#b9cad8;font-size:14px;line-height:1.85}
