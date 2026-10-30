@@ -42,8 +42,8 @@ export default function Home() {
       </section>
       <section id="people" className={`${styles.section} ${styles.people}`}><p className={styles.eyebrow}>ONE CLUB. EVERY ROLE.</p><h2>Your club. Your brand.<br/>Your own bespoke app.</h2><p className={styles.bespokeIntro}>Give your community an app that feels unmistakably yours. Built around your club’s identity and the way your people run their season.</p><div className={styles.bespokeShowcase}>
         <figure className={styles.appPhoto}>
-          <Image src="/seaforth-own-app-focused.png" alt="Seaforth Netball’s own club app icon on a member’s iPhone home screen" width={1240} height={2010} sizes="(max-width:760px) 85vw, 360px" />
-          <figcaption>Seaforth’s own club app. Photo edited to remove selected unrelated apps.</figcaption>
+          <Image src="/seaforth-app-notification.png" alt="Seaforth Netball’s own app and a court-change notification on an iPhone" width={1050} height={1348} sizes="(max-width:760px) 85vw, 360px" />
+          <figcaption>Seaforth’s own club app, with a court-change notification.</figcaption>
         </figure>
         <div className={styles.bespokeDetail}>
           <p className={styles.eyebrow}>A REAL CLUB. ITS OWN APP.</p>
