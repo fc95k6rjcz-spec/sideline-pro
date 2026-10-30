@@ -677,3 +677,14 @@
 .phoneFigure figcaption{max-width:none;padding:18px 24px 22px;color:#f2f6fb;font-size:16px;font-weight:500;text-align:left;line-height:1.45}
 .phoneFigure small{display:block;color:#9fb4c4;font-size:10px;line-height:1.6;margin-top:7px}
 @media(max-width:760px){.phoneFigure{padding:0;display:block}.phoneFigure figcaption{padding:16px 20px 20px;font-size:15px;text-align:left}.phoneFigure small{margin-top:6px}}
+
+.coachVideo{margin:0;background:#0e1a30;color:#f2f6fb;border-radius:12px;overflow:hidden;padding:22px}
+.coachVideoHeader{display:flex;justify-content:space-between;gap:14px;font-size:9px;letter-spacing:.12em;color:#70cebf;margin-bottom:18px}
+.coachVideo video{display:block;width:100%;max-width:310px;height:auto;margin:0 auto;border:1px solid #ffffff25;border-radius:10px;background:#eaf0f6;aspect-ratio:664/1340}
+.coachVideo figcaption{font-size:14px;line-height:1.6;margin:18px 0 0;font-weight:500}
+.coachVideo small{display:block;font-size:10px;color:#9fb4c4;margin-top:6px;font-weight:400}
+.coachVideo details{border-top:1px solid #ffffff25;margin-top:18px;padding-top:14px;font-size:12px;color:#b9cad8}
+.coachVideo summary{cursor:pointer;color:#70cebf}
+.coachVideo details p{font-size:12px;line-height:1.8;margin:12px 0 0}
+.coachVideo summary:focus-visible,.coachVideo video:focus-visible{outline:3px solid #70cebf;outline-offset:4px}
+@media(max-width:760px){.coachVideo{padding:20px}.coachVideo video{max-width:300px}.coachVideoHeader{font-size:8px}}
