@@ -12,8 +12,8 @@ const poppins = Poppins({
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'SidelinePro | Club management for Australian community sport',
-  description: 'Club management software for Australian community sport. Registrations, fixtures and ladders, umpire rostering, player grading and club comms in one place, with native iOS and Android apps and a PlayHQ helper.',
+  title: 'SidelinePro | The operating system for Australian community sport',
+  description: 'Connect grading, team formation, umpire rostering, coaching and player development with PlayHQ workflows. Built around Australian community sport.',
   icons: {
     icon: [
       {
@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`scroll-smooth bg-white ${poppins.variable}`}>
+    <html lang="en-AU" className={`scroll-smooth bg-white ${poppins.variable}`}>
       <body className={`${poppins.className} font-sans antialiased bg-white text-[#1d1d1f]`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
