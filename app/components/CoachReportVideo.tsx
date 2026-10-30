@@ -11,7 +11,7 @@ export function CoachReportVideo() {
   const [guideVisible, setGuideVisible] = useState(false)
   const updateGuide = () => {
     const time = video.current?.currentTime ?? 0
-    setGuideVisible(time >= 3 && time < 19)
+    setGuideVisible(time >= 3 && time < 30)
   }
   async function viewGuide() {
     if (!video.current) return
