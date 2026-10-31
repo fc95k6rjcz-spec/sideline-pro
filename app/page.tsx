@@ -1,44 +1,99 @@
 import Image from "next/image"
-import { ArrowUpRight, ArrowRight, Check, ClipboardList, Flag, Users, Workflow } from "lucide-react"
+import { ArrowUpRight, ArrowRight, Check, ClipboardList, Clock, Flag, MessagesSquare, Sparkles, Users, Wallet } from "lucide-react"
 import { ContactForm } from "@/components/contact-form"
 import styles from "./home.module.css"
-import { MobileNav } from "./components/MobileNav"
-import { PhoneScreenshot } from "./components/PhoneScreenshot"
 import { GradingStory } from "./components/GradingStory"
-import { CoachReportVideo } from "./components/CoachReportVideo"
+import { SiteFooter, SiteHeader } from "./components/SiteChrome"
 
-const links = [["Our approach", "#approach"], ["The platform", "#platform"], ["Who it’s for", "#people"], ["Communications", "#communications"], ["Seaforth story", "#seaforth"]]
+// Order follows a club president's questions: what is it → what does my club
+// get → does it work anywhere real → what's in it → why you. The deep grading
+// material (development model, coach report walkthrough) lives on /grading.
 const sports = [
   { name: "Netball", body: "We know the difference between a Goal Attack and a Goal Keeper. We understand umpire allocations, grading, team selections and the unique challenges of running a netball club." },
   { name: "Basketball", body: "It’s referees, not umpires. A point guard has different responsibilities from a centre. Coaching, player development and game-day operations should reflect those differences." },
   { name: "Soccer", body: "There’s another language, another set of positions and another way clubs operate." },
 ]
-const features = [
-  { id: "grading", demoHref: "/demo/demo-center/grading", demoLabel: "Try the grading demo", icon: ClipboardList, tag: "01 / INTELLIGENT GRADING & TEAM FORMATION", title: "A better season starts with better team decisions.", body: "Bring coach reports, game evidence and courtside assessments into the same player picture. Use skill guidance and position context to inform grading, then carry that evidence into Team Builder. Your committee makes the final call.", points: ["Shared competency guidance and courtside scores", "GA / GS shooting averages and position context", "Coach reports connected to Team Builder"], image: "/lineup-studio-render.png", alt: "Existing SidelinePro mobile line-up screen", caption: "Your weekly line-up, wherever you are.", note: "Product render based on the current app. Demo player labels." },
-  { id: "umpires", demoHref: "/demo/demo-center/umpires", demoLabel: "Try the umpire rostering demo", icon: Flag, tag: "02 / UMPIRE ROSTERING", title: "Put your officials in the picture.", body: "Build the roster around availability, accreditations and fair rotation. Keep assignments, confirmations and late changes together, with support for junior umpire development.", points: ["Availability-led allocations", "Confirmations and cancellation management", "Junior umpire mentoring and feedback"] },
-  { id: "development", demoHref: "/demo/demo-center/lineups", demoLabel: "Try the interactive line-up demo", icon: Users, tag: "03 / COACHING & DEVELOPMENT", title: "Develop the player. Plan the next game.", body: "Give feedback the context of the player’s role. Connect skill ratings, preferred positions and development notes with weekly line-ups, so the season’s observations stay useful when the next team is formed.", points: ["Clear skill ratings and development notes", "Position preferences alongside coach context", "Weekly line-ups in your club’s own app"] },
-  { id: "playhq", demoHref: "/demo/demo-center", demoLabel: "Explore the interactive demos", icon: Workflow, tag: "04 / PLAYHQ WORKFLOWS", title: "Work with the systems your club already uses.", body: "Connect your club’s weekly work with PlayHQ. Bring fixtures and ladders into the club experience, and use team-building workflows to reduce repeated data entry.", points: ["PlayHQ fixture and ladder sync", "Team-building and reconciliation workflows", "Club and team information together"] },
+const connected = ["Registrations", "Payments", "Officials", "Coaching", "Teams", "Club communications", "PlayHQ fixtures & ladders"]
+const outcomes = [
+  { icon: Clock, title: "Less administration.", body: "Automate time-consuming jobs such as umpire rostering, registrations, payments and team management. Give volunteers more time for the things they actually signed up to do." },
+  { icon: ClipboardList, title: "Better player development.", body: "Equip coaches with tools for assessments, feedback, team selection and player development, helping them make more informed decisions throughout the season." },
+  { icon: Users, title: "A better club experience.", body: "Bring your community together through your own branded website and app, with easier communication and access to everything members need." },
 ]
 
 export default function Home() {
   return <div className={styles.site} id="top">
     <a className={styles.skip} href="#main">Skip to content</a>
-    <header className={styles.header}><div className={styles.nav}>
-      <a href="#top" aria-label="SidelinePro home"><Image src="/logo-horizontal-dark.svg" alt="SidelinePro" width={174} height={48} priority className={styles.logo}/></a>
-      <nav aria-label="Main navigation" className={styles.desktopNav}>{links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
-      <a className={styles.button} href="#contact">Book a demo <ArrowUpRight size={16}/></a>
-      <MobileNav className={styles.mobileNav}/>
-    </div></header>
+    <SiteHeader/>
     <main id="main">
       <section className={styles.hero}>
         <div className={styles.heroCopy}><p className={styles.eyebrow}><span/> 100% AUSTRALIAN OWNED & OPERATED</p>
           <h1>Built for your sport.<br/><em>Made for your club.</em></h1>
-          <p className={styles.intro}>Your sport isn’t generic. Your software shouldn’t be. SidelinePro is built around the intricacies of your game, in your club’s own app, with your branding, your colours, your teams and your people.</p>
-          <div className={styles.actions}><a className={styles.button} href="#contact">See your club’s app <ArrowUpRight size={18}/></a><a className={styles.textLink} href="#platform">Explore the platform <ArrowRight size={17}/></a></div>
-          <div className={styles.heroNotes}><span><Check size={15}/> Netball &amp; basketball</span><span><Check size={15}/> Your club’s own app</span></div>
+          <p className={styles.intro}>Your club’s own branded website and mobile app, connected to powerful management tools that automate time-consuming admin, support coaching and player development, and make club life easier for everyone.</p>
+          <p className={styles.heroTagline}>Designed around the unique way your sport works.</p>
+          <div className={styles.actions}><a className={styles.button} href="#platform">See how it works <ArrowRight size={18}/></a><a className={styles.textLink} href="#contact">Book a demo <ArrowUpRight size={17}/></a></div>
+          <div className={styles.heroNotes}><span><Check size={15}/> Purpose-built for netball and basketball clubs.</span></div>
         </div>
         <div className={styles.heroVisual}><Image src="/hero/sf-huddle-sky.png" alt="Community netball players coming together in a team huddle" fill priority sizes="(max-width: 760px) 100vw, 48vw" className={styles.heroPhoto}/><div className={styles.photoLabel}>FOR THE PEOPLE WHO<br/>MAKE CLUB SPORT HAPPEN.</div><div className={styles.photoBottom}><span>ONE CLUB. ALL CONNECTED.</span><ArrowUpRight size={24}/></div></div>
       </section>
+
+      <section id="platform" className={`${styles.section} ${styles.people}`} aria-labelledby="platform-title">
+        <p className={styles.eyebrow}>THE SIDELINEPRO PLATFORM</p>
+        <h2 id="platform-title">One platform.<br/>Your whole club.</h2>
+        <p className={styles.bespokeIntro}>Your website, mobile app and club management tools working together, all carrying your club’s name, badge and colours.</p>
+        <div className={styles.platformShowcase}>
+          <figure className={styles.platformSite}><Image src="/seaforth-home-render.jpg" alt="Seaforth Netball Club’s website with a Go Seaforth hero and club navigation" width={1600} height={790} sizes="(max-width:760px) 100vw, 60vw"/><figcaption><strong>Your club website</strong><span>Seaforth Netball Club · visual render</span></figcaption></figure>
+          <figure className={styles.appPhoto}><Image src="/seaforth-app-notification.png" alt="Seaforth Netball’s own app and a court-change notification on an iPhone" width={1050} height={1348} sizes="(max-width:760px) 85vw, 300px"/><figcaption><strong>Your club’s own app</strong> Seaforth’s app, with a court-change notification.</figcaption></figure>
+        </div>
+        <p className={styles.platformConnected}>Behind the scenes, everything is connected:</p>
+        <ul className={styles.connectedChips}>{connected.map(c=><li key={c}><Check size={14}/>{c}</li>)}</ul>
+      </section>
+
+      <section id="outcomes" className={`${styles.section} ${styles.outcomes}`} aria-labelledby="outcomes-title">
+        <p className={styles.eyebrow}>THE SIDELINEPRO PROMISE · A BETTER WAY TO RUN YOUR CLUB</p>
+        <h2 id="outcomes-title">Less time running the club.<br/><span>More time making it better.</span></h2>
+        <div className={styles.outcomeGrid}>{outcomes.map(o=><article key={o.title}><o.icon size={26}/><h3>{o.title}</h3><p>{o.body}</p></article>)}</div>
+      </section>
+
+      <section id="seaforth" className={`${styles.section} ${styles.proof}`} aria-labelledby="seaforth-title">
+        <div className={styles.proofStat}>
+          <p className={styles.eyebrow}>REAL CLUB. REAL RESULTS.</p>
+          <h2 id="seaforth-title"><strong>10 hours</strong>of volunteer time saved every week, on umpire rostering alone.</h2>
+          <p>Seaforth Netball Club runs its season on SidelinePro. The umpire rostering team has handed availability, allocations, confirmations and late changes to the platform, and gets those hours back every week: time it can now put into developing its officials.</p>
+          <p>And that’s before the paperwork. Account reconciliation and matching player payments for club events are where Seaforth’s treasurer and organisers see the biggest savings of all.</p>
+          <small>Based on time savings reported by Seaforth Netball Club’s umpire rostering team.</small>
+        </div>
+        <dl className={styles.proofList}>
+          <div><dt>Umpire rostering</dt><dd>Assignments, confirmations and junior mentor feedback in one place.</dd></div>
+          <div><dt>Payments & reconciliation</dt><dd>Player payments matched to registrations and events, without the spreadsheet chase.</dd></div>
+          <div><dt>Grading with context</dt><dd>Coach assessments inform the grading committee’s view of each player.</dd></div>
+          <div><dt>A connected weekly draw</dt><dd>PlayHQ fixtures and ladders alongside the club’s own app.</dd></div>
+        </dl>
+      </section>
+
+      <section id="features" className={`${styles.section} ${styles.platform}`} aria-labelledby="features-title">
+        <div className={styles.sectionHead}><p className={styles.eyebrow}>WHAT’S INSIDE</p><h2 id="features-title">The tools behind<br/><span>a better-run club.</span></h2><p>Each one saves volunteers time. Try them yourself in the interactive demos, with a fictional club and no sign-up.</p></div>
+
+        <article id="grading" className={`${styles.feature} ${styles.featureLead}`}>
+          <div className={styles.featureCopy}><p className={styles.eyebrow}><ClipboardList size={18}/>PLAYER GRADING & DEVELOPMENT</p><h3>Better coaching. Better team decisions.</h3><p>Give coaches and grading committees a clearer picture of every player’s development.</p><p>SidelinePro brings together player assessments, coach feedback, preferred positions and game performance to support more consistent grading and team selection. And because that information stays connected from season to season, coaches spend less time starting from scratch and more time helping players improve.</p><a className={styles.darkLink} href="/grading">Explore player grading and development <ArrowUpRight size={16}/></a></div>
+          <GradingStory/>
+        </article>
+
+        <article id="umpires" className={styles.feature}>
+          <div className={styles.featureCopy}><p className={styles.eyebrow}><Flag size={18}/>UMPIRE ROSTERING</p><h3>Umpire rostering without the weekly headache.</h3><p>Stop spending hours collecting availability, allocating games, chasing confirmations and managing last-minute changes.</p><p>SidelinePro simplifies the entire rostering process. It suggests umpires for open games, sends each one their duty straight to their phone and shows every confirmation as it comes back, helping convenors share games fairly, handle changes and support junior umpires.</p><p className={styles.featurePull}>Less time building rosters. More time developing officials.</p><a className={styles.darkLink} href="/demo/demo-center/umpires">See umpire rostering in action <ArrowUpRight size={16}/></a></div>
+          <figure className={styles.umpireRender}><a href="/demo/demo-center/umpires" aria-label="See umpire rostering in action"><Image src="/umpire-rostering-render.jpg" alt="Product render of the SidelinePro umpire assignments workspace on a desktop display, using fictional club data" width={1536} height={1024} sizes="(max-width:760px) 100vw, 50vw"/></a><figcaption>Assignments, availability and mentor support.<small>Product render · fictional demo data</small></figcaption></figure>
+        </article>
+
+        <article id="communications" className={styles.feature}>
+          <div className={styles.featureCopy}><p className={styles.eyebrow}><MessagesSquare size={18}/>CLUB COMMUNICATIONS</p><h3>One club app. Everyone connected.</h3><p>Replace scattered WhatsApp groups and fragmented communications with a central place for teams, coaches, umpires and committees to stay informed.</p><ul><li><Sparkles size={16}/>AI-assisted checks flag safeguarding concerns for authorised officials to review</li><li><Sparkles size={16}/>A club assistant answers questions about fixtures and club information</li></ul></div>
+          <figure className={styles.chatRender}><Image src="/club-communications-render.jpg" alt="Product render of SidelinePro team conversations and club chat groups on two phones, using fictional names and messages" width={1536} height={1024} sizes="(max-width:760px) 100vw, 50vw"/><figcaption>Your teams. Your club groups. One connected conversation.<small>Product render · fictional conversations</small></figcaption></figure>
+        </article>
+
+        <article id="payments" className={styles.feature}>
+          <div className={styles.featureCopy}><p className={styles.eyebrow}><Wallet size={18}/>REGISTRATIONS & PAYMENTS</p><h3>Registrations and payments, without the paperwork.</h3><p>Make it easy for members to register and pay online. Connected payment records reduce manual matching and give treasurers a clearer picture of what’s been paid.</p><a className={styles.darkLink} href="#contact">Book a demo <ArrowUpRight size={16}/></a></div>
+          <figure className={styles.paymentVisual}><div className={styles.paymentCanvas}><p className={styles.visualLabel}>FROM CARD PAYMENT TO CLUB RECORD</p><div className={styles.cardBrands}><Image src="/payments/visa.svg" alt="Visa" width={64} height={40}/><Image src="/payments/mastercard.svg" alt="Mastercard" width={64} height={40}/></div><div className={styles.paymentConnector}/><div className={styles.stripeNode}><Image src="/payments/stripe.svg" alt="Stripe" width={76} height={40}/><span>Card payment</span></div><div className={styles.paymentConnector}/><div className={styles.registrationNode}><Check size={18}/><div><strong>Connected registration</strong><span>Payment status + reference</span></div></div></div><figcaption>A clearer trail from payment to registration.<small>Card payments through Stripe · supported registration workflows</small></figcaption></figure>
+        </article>
+      </section>
+
       <section id="approach" className={`${styles.section} ${styles.manifesto}`} aria-labelledby="approach-title">
         <div className={styles.manifestoHead}>
           <p className={styles.eyebrow}>OUR APPROACH</p>
@@ -55,72 +110,13 @@ export default function Home() {
           <p className={styles.manifestoSign}>Powered by SidelinePro. Built around your sport.</p>
           <p className={styles.manifestoClose}>Because your club deserves more than a one-size-fits-all solution.</p>
         </div>
+        <figure className={`${styles.designConcept} ${styles.manifestoConcept}`}><Image src="/baseline-basketball-concept.jpg" alt="Baseline Basketball Academy fictional website concept with coral accents, monochrome basketball photography and program navigation" width={1428} height={1100} sizes="(max-width:760px) 100vw, 1180px"/><figcaption><strong>A basketball club with its own identity: Baseline Basketball Academy</strong><span>Fictional design concept · illustrative render, not a live customer website</span></figcaption></figure>
       </section>
-      <div className={styles.pathStrip}><span>ONE CONNECTED SEASON</span><a href="#grading">Grade & form teams</a><ArrowRight/><a href="#umpires">Roster officials</a><ArrowRight/><a href="#development">Develop players</a><ArrowRight/><a href="#playhq">Connect PlayHQ</a></div>
-      <section id="platform" className={`${styles.section} ${styles.platform}`}>
-        <div className={styles.sectionHead}><p className={styles.eyebrow}>SPORT-SPECIFIC DETAIL. ONE CONNECTED CLUB.</p><h2>Know the player.<br/><span>Connect the whole club.</span></h2><p>Not a generic sports app with new labels. Every tool is shaped by the positions, roles and season of your game — and connected to the people who keep your club running.</p></div>
-        {features.map((f,i)=><article id={f.id} key={f.id} className={`${styles.feature} ${i===0?styles.featureLead:""}`}>
-          <div className={styles.featureCopy}><p className={styles.eyebrow}><f.icon size={18}/>{f.tag}</p><h3>{f.title}</h3><p>{f.body}</p><ul>{f.points.map(p=><li key={p}><Check size={16}/>{p}</li>)}</ul><a className={styles.darkLink} href={f.demoHref}>{f.demoLabel} <ArrowUpRight size={16}/></a></div>
-          {i===0?<GradingStory/>:i===1?<figure className={styles.umpireRender}><a href={f.demoHref} aria-label={f.demoLabel}><Image src="/umpire-rostering-render.jpg" alt="Product render of the SidelinePro umpire assignments workspace on a desktop display, using fictional club data" width={1536} height={1024} sizes="(max-width:760px) 100vw, 50vw"/></a><figcaption>Assignments, availability and mentor support.<small>Product render · fictional demo data</small></figcaption></figure>:i===2?<figure className={styles.phoneFigure}><PhoneScreenshot/><figcaption>Your weekly line-up, wherever you are.<small>Product render · fictional demo players</small></figcaption></figure>:<figure className={styles.connectedVisual}>
-            <div className={styles.connectedCanvas}><p className={styles.visualLabel}>ONE FIXTURE. YOUR WHOLE CLUB CONNECTED.</p><div className={styles.fixtureCard}><span>THE WEEKLY DRAW · EXAMPLE</span><strong>Harbor View U13</strong><p>Saturday · 10:30am · Court 6</p><span className={styles.fixtureStatus}><Check size={13}/> Fixture information</span></div><div className={styles.connectionStem}/><div className={styles.clubDestinations}><span>Team &amp; families</span><span>Coaches</span><span>Officials</span></div><p className={styles.connectedFoot}>Fixtures and ladders alongside your club’s daily work.</p></div><figcaption>Association information. One club experience.<small>Workflow illustration · fictional fixture</small></figcaption>
-          </figure>}
-          {i===0&&<>
-            <section className={styles.developmentModel} aria-labelledby="development-model-title">
-              <p className={styles.eyebrow}>THE SIDELINEPRO PLAYER DEVELOPMENT MODEL</p>
-              <h4 id="development-model-title">Every report helps shape the next team.</h4>
-              <p className={styles.modelIntro}>Connect what coaches see throughout the season with grading-day evidence. Then use that player picture to build the best-fit teams for each grade.</p>
-              <details className={styles.sharedCriteria}><summary>Shared criteria. A consistent way to assess every player.</summary><p>For netball, our skill guidance is informed by Netball Australia’s <a href="https://netball.com.au/coaching/resources" target="_blank" rel="noopener noreferrer">Netball Skills Development Framework</a>. Coaches and graders use shared criteria and clear 1–5 skill descriptions, assessed relative to the player’s grade. That gives reports a common language and Team Builder a more consistent picture to work from.</p></details>
-              <ol className={styles.modelSteps}>
-                <li><span>01 / OBSERVE</span><h5>Coach reports</h5><p>Skill ratings, preferred positions and coaching observations give the scores context.</p><ArrowRight aria-hidden="true" size={22}/></li>
-                <li><span>02 / ASSESS</span><h5>Grading reports</h5><p>Courtside assessments and shooting results sit alongside the coach’s season picture.</p><ArrowRight aria-hidden="true" size={22}/></li>
-                <li><span>03 / BUILD</span><h5>Team Builder</h5><p>Use player metrics and position information to shape teams for each grade. People make the final call.</p></li>
-              </ol>
-              <div className={styles.modelOutcome}><p><strong>A development pathway that carries forward.</strong> The next season’s coach reports add to the picture, informing the next round of grading and team formation.</p><a className={styles.darkLink} href="/demo/demo-center/grading">Try grading &amp; team formation <ArrowUpRight size={17}/></a></div>
-            </section>
-          </>}
-          {i===2&&<CoachReportVideo/>}
-        </article>)}
-      </section>
-      <section id="people" className={`${styles.section} ${styles.people}`}><p className={styles.eyebrow}>ONE CLUB. EVERY ROLE.</p><h2>Your club. Your brand.<br/>Your own bespoke app.</h2><p className={styles.bespokeIntro}>Give your community an app that feels unmistakably yours. Built around your club’s identity and the way your people run their season.</p><div className={styles.bespokeShowcase}>
-        <figure className={styles.appPhoto}>
-          <Image src="/seaforth-app-notification.png" alt="Seaforth Netball’s own app and a court-change notification on an iPhone" width={1050} height={1348} sizes="(max-width:760px) 85vw, 360px" />
-          <figcaption>Seaforth’s own club app, with a court-change notification.</figcaption>
-        </figure>
-        <div className={styles.bespokeDetail}>
-          <p className={styles.eyebrow}>A REAL CLUB. ITS OWN APP.</p>
-          <h3>Your badge.<br/>Their home screen.</h3>
-          <p>Seaforth Netball’s app carries its own club name and identity. Bring your members into an experience they recognise: your badge, your colours and your club’s people.</p>
-          <ul><li><Check size={17}/> Your club’s name and app icon</li><li><Check size={17}/> Your colours and identity</li><li><Check size={17}/> Connected tools for your club’s roles</li></ul>
-          <a className={styles.button} href="#contact">Picture your club’s app <ArrowUpRight size={17}/></a>
-        </div>
-      </div><div className={styles.roles}>{[["Committees & convenors","Keep grading, team formation, officials and club communications together."],["Coaches & managers","Know your squad, plan line-ups and record the feedback that helps players develop."],["Players & parents","Find team news, fixtures and availability in one club experience."],["Umpires & mentors","Stay across assignments and confirmations, with feedback for junior development."]].map(([title,body])=><div key={title}><h3>{title}</h3><p>{body}</p></div>)}</div><p className={styles.brandPromise}>Your club’s branding. Your colours. Your teams. Your people.</p></section>
-      <section id="communications" className={`${styles.section} ${styles.communications}`} aria-labelledby="communications-title">
-        <div className={styles.commsIntro}><div><p className={styles.eyebrow}>INTELLIGENT CLUB COMMUNICATIONS</p><h2 id="communications-title">Every team.<br/>Every conversation.<br/><span>One club app.</span></h2><p>Move the conversation out of scattered WhatsApp groups and into your club’s own app. Keep team chats, coaching groups and committee conversations together, with intelligent help close at hand.</p><a className={styles.button} href="#contact">See your club’s communications <ArrowUpRight size={17}/></a></div>
-        <figure className={styles.chatRender}><Image src="/club-communications-render.jpg" alt="Product render of SidelinePro team conversations and club chat groups on two phones, using fictional names and messages" width={1536} height={1024} sizes="(max-width:760px) 100vw, 55vw"/><figcaption>Your teams. Your club groups. One connected conversation.<small>Product render · fictional conversations</small></figcaption></figure></div>
-        <div className={styles.commsBenefits}>
-          <article><span>01 / KEEP EVERYONE CONNECTED</span><h3>Less switching. Less chasing.</h3><p>Find your team conversations, private messages and club groups in one place. Keep coaches, managers, umpires and committee members connected inside your club’s own app.</p></article>
-          <article><span>02 / SUPPORT CLUB OVERSIGHT</span><h3>AI flags concerns. People decide.</h3><p>AI-assisted checks can flag potential bullying, abusive language and safeguarding concerns in team chats for authorised club officials to review and follow up.</p></article>
-          <article><span>03 / GET INTELLIGENT HELP</span><h3>Ask the club. Find the answer.</h3><p>The club assistant helps answer questions about fixtures, club information and your own team, using club knowledge and the member information you’re authorised to access.</p></article>
-        </div><p className={styles.commsNote}>AI-assisted checks support club oversight. Flagged concerns are reviewed by people; the club assistant uses approved chat-derived information rather than reading raw conversations.</p>
-      </section>
-      <section id="payments" className={`${styles.section} ${styles.paymentsSection}`}>
-        <div className={styles.paymentIntro}><div><p className={styles.eyebrow}>PAYMENTS &amp; PAYMENT TRACKING</p><h2>Connect the payment<br/>to the club paperwork.</h2><p>Visa and Mastercard payments through Stripe, with payment references connected to supported registrations.</p><a className={styles.darkLink} href="#contact">Discuss your club’s payments <ArrowUpRight size={16}/></a></div><figure className={styles.paymentVisual}><div className={styles.paymentCanvas}><p className={styles.visualLabel}>FROM CARD PAYMENT TO CLUB RECORD</p><div className={styles.cardBrands}><Image src="/payments/visa.svg" alt="Visa" width={64} height={40}/><Image src="/payments/mastercard.svg" alt="Mastercard" width={64} height={40}/></div><div className={styles.paymentConnector}/><div className={styles.stripeNode}><Image src="/payments/stripe.svg" alt="Stripe" width={76} height={40}/><span>Card payment</span></div><div className={styles.paymentConnector}/><div className={styles.registrationNode}><Check size={18}/><div><strong>Connected registration</strong><span>Payment status + reference</span></div></div></div><figcaption>A clearer trail from payment to registration.<small>Workflow illustration · supported registration workflows</small></figcaption></figure></div>
-        <div className={styles.steps}>
-          <div><span>01 / COLLECT</span><h3>A familiar way to pay</h3><p>Let families pay by card through Stripe as part of a supported program registration.</p></div>
-          <div><span>02 / MATCH</span><h3>Keep the paid list in step</h3><p>For connected registrations, confirmed Stripe payments update the matching registration and retain a payment reference.</p></div>
-          <div><span>03 / REVIEW</span><h3>A clearer payment trail</h3><p>See recorded payments against registrations. Full refunds update automatically where supported; unmatched payments and partial refunds need review.</p></div>
-        </div>
-        <p className={styles.paymentNote}>Payment tracking is available for supported workflows. We’ll walk through your club’s collection and reconciliation requirements in the demo.</p>
-        <div className={styles.accountingConnections}><h3>Your club’s accounting workflow</h3><p>Using <strong>Xero</strong> or <strong>MYOB</strong>? We’ll confirm the supported accounting connection and reconciliation workflow for your club in your demo.</p></div>
-      </section>
-      <section id="club-designs" className={`${styles.section} ${styles.clubDesigns}`} aria-labelledby="club-designs-title">
-        <div className={styles.designHeading}><div><p className={styles.eyebrow}>YOUR IDENTITY. YOUR EXPERIENCE.</p><h2 id="club-designs-title">Your sport.<br/>Your own identity.</h2></div><div><p>Netball and basketball have their own character. Your club does too. Bring your website and app together around the identity your players, families and volunteers already know.</p><a className={styles.darkLink} href="#contact">Picture your club’s website <ArrowUpRight size={16}/></a></div></div>
-        <figure className={styles.designConcept}><Image src="/baseline-basketball-concept.jpg" alt="Baseline Basketball Academy fictional website concept with coral accents, monochrome basketball photography and program navigation" width={1428} height={1100} sizes="(max-width:760px) 100vw, 1180px"/><figcaption><strong>Baseline Basketball Academy</strong><span>Fictional design concept · illustrative render, not a live customer website</span></figcaption></figure>
-      </section>
-      <section id="seaforth" className={`${styles.section} ${styles.caseStudy}`}><figure className={styles.caseImage}><Image src="/seaforth-home-render.jpg" alt="Render of the Seaforth Netball Club website with a Go Seaforth hero and club navigation" width={1600} height={790} sizes="(max-width:760px) 100vw, 48vw"/><figcaption>Seaforth Netball Club website · visual render</figcaption></figure><div><p className={styles.eyebrow}>IN PRACTICE / SEAFORTH NETBALL CLUB</p><h2>Netball detail.<br/>Real club life.</h2><p>Seaforth’s platform brings together the work of coaches, managers, umpires and the committee — from grading-day check-in to the weekly draw.</p><dl><div><dt>Grading with context</dt><dd>Coach assessments inform the grading committee’s view of each player.</dd></div><div><dt>A supported umpire pathway</dt><dd>Assignments, confirmations and junior mentor feedback in the same platform.</dd></div><div><dt>A connected weekly draw</dt><dd>PlayHQ fixture imports and ladders sit alongside club tools.</dd></div></dl><a className={styles.textLink} href="#contact">Walk through the Seaforth workflows <ArrowUpRight size={17}/></a></div></section>
-      <section className={`${styles.section} ${styles.start}`}><p className={styles.eyebrow}>A PRACTICAL FIRST STEP</p><h2>Start with your club.<br/>Build the right plan together.</h2><div className={styles.steps}>{[["Show us your season","Tell us where the work piles up: grading, rostering, coaching or PlayHQ."],["See the relevant workflows","We’ll walk through the product with your club’s roles and priorities in mind."],["Agree the next steps","Discuss scope, setup, pricing and timing before making a decision."]].map(([title,body],i)=><div key={title}><span>0{i+1}</span><h3>{title}</h3><p>{body}</p></div>)}</div></section>
-      <section id="contact" className={`${styles.section} ${styles.contact}`}><div><p className={styles.eyebrow}>LET’S TALK CLUB SPORT</p><h2>Let’s talk about your sport.<br/><span>And the way your club runs.</span></h2><p>Tell us about your netball or basketball club. We’ll show the workflows relevant to your sport, explain what’s available and discuss the right setup for your people.</p><ul><li><Check size={17}/> Grading and team formation</li><li><Check size={17}/> Umpire rostering and development</li><li><Check size={17}/> Coaching, families and PlayHQ</li></ul><a href="mailto:rowan@sidelinepro.com.au">Prefer email? rowan@sidelinepro.com.au ↗</a></div><div className={styles.formCard}><h3>Request your club demo</h3><p>Tell us a little about your club. We’ll be in touch to arrange a walkthrough.</p><ContactForm/></div></section>
+
+      <section className={`${styles.section} ${styles.start}`}><p className={styles.eyebrow}>EASY TO GET STARTED</p><h2>Start with your club.<br/>Build the right plan together.</h2><div className={styles.steps}>{[["Show us your season","Tell us where the work piles up: rostering, registrations, grading or communications."],["See it working for your club","We’ll walk through the platform with your club’s roles and priorities in mind."],["Agree the next steps","Discuss scope, setup, pricing and timing before making a decision. We handle the setup."]].map(([title,body],i)=><div key={title}><span>0{i+1}</span><h3>{title}</h3><p>{body}</p></div>)}</div></section>
+
+      <section id="contact" className={`${styles.section} ${styles.contact}`}><div><p className={styles.eyebrow}>BOOK A DEMO</p><h2>See it working<br/><span>for your club.</span></h2><p>Tell us about your netball or basketball club. We’ll show you the workflows that matter to your committee, coaches and volunteers, and how quickly your club could be up and running.</p><ul><li><Check size={17}/> Your own branded website and app</li><li><Check size={17}/> Umpire rostering, registrations and payments</li><li><Check size={17}/> Player grading and coaching tools</li></ul><a href="mailto:rowan@sidelinepro.com.au">Prefer email? rowan@sidelinepro.com.au ↗</a></div><div className={styles.formCard}><h3>Book your club demo</h3><p>Tell us a little about your club. We’ll be in touch to arrange a walkthrough.</p><ContactForm/></div></section>
     </main>
-    <footer className={styles.footer}><div><Image src="/logo-horizontal-dark.svg" alt="SidelinePro" width={174} height={48}/><p>Powered by SidelinePro. Built around your sport.<br/>100% Australian owned and operated.</p></div><div>{links.map(([label,href])=><a key={href} href={href}>{label}</a>)}<a href="#contact">Book a demo</a></div><small>© {new Date().getFullYear()} Sideline Pro Pty Ltd · ACN 697 721 627</small></footer>
+    <SiteFooter/>
   </div>
 }
