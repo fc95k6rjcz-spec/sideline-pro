@@ -27,7 +27,7 @@ export default function Home() {
     <SiteHeader/>
     <main id="main">
       <section className={styles.hero}>
-        <div className={styles.heroCopy}><p className={styles.eyebrow}><span/> 100% AUSTRALIAN OWNED & OPERATED</p>
+        <div className={styles.heroCopy}><p className={styles.eyebrow}><span className={styles.australianFlag} aria-hidden="true">🇦🇺</span> 100% AUSTRALIAN OWNED & OPERATED</p>
           <h1>Built for your sport.<br/><em>Made for your club.</em></h1>
           <p className={styles.intro}>Your club’s own branded website and mobile app, connected to powerful management tools that automate time-consuming admin, support coaching and player development, and make club life easier for everyone.</p>
           <p className={styles.heroTagline}>Designed around the unique way your sport works.</p>
