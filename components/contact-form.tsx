@@ -147,7 +147,7 @@ export function ContactForm() {
         disabled={isSubmitting}
         className="mt-2 w-full rounded-full bg-[#10b3a3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#0d9a8c] disabled:opacity-50"
       >
-        {isSubmitting ? "Sending..." : "Request a demo"}
+        {isSubmitting ? "Sending..." : "Book a demo"}
       </button>
     </form>
   )

@@ -935,3 +935,41 @@
   .manifestoHead{position:static}
   .sportCards{grid-template-columns:1fr}
 }
+
+/* ── Homepage restructure (Nov 2026): platform → outcomes → proof → features ── */
+.heroTagline{color:#e6f0ee;font-size:15px;font-weight:600;margin:14px 0 0}
+.platformShowcase{display:grid;grid-template-columns:1.7fr 1fr;gap:36px;align-items:center;max-width:1100px;margin:50px auto 40px;text-align:left}
+.platformSite{margin:0;border-radius:14px;overflow:hidden;background:#192b3b;box-shadow:0 20px 45px #0003}
+.platformSite img{display:block;width:100%;height:auto}
+.platformSite figcaption,.platformShowcase .appPhoto figcaption{display:flex;flex-direction:column;gap:3px;padding:13px 16px;font-size:10px;color:#b9cad8;line-height:1.5}
+.platformSite strong,.platformShowcase .appPhoto strong{color:#fff;font-size:13px;font-weight:600}
+.platformShowcase .appPhoto{width:100%;max-width:300px}
+.platformConnected{color:#b9cad8;font-size:15px;margin:0 0 16px}
+.connectedChips{list-style:none;padding:0;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:900px}
+.connectedChips li{display:flex;align-items:center;gap:7px;border:1px solid #ffffff2e;border-radius:999px;padding:7px 14px;font-size:12px;color:#e6f0ee}
+.connectedChips svg{color:var(--teal)}
+.outcomes{background:#fbfcfa}
+.outcomes h2 span{color:#19786e}
+.outcomeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
+.outcomeGrid article{background:white;border:1px solid #dbe3df;border-radius:14px;padding:28px}
+.outcomeGrid svg{color:#19786e}
+.outcomeGrid h3{font-size:21px;letter-spacing:-.02em;margin:16px 0 10px}
+.outcomeGrid p{color:#4c5c58;font-size:14px;line-height:1.75;margin:0}
+.proof{background:var(--navy);color:white;display:grid;grid-template-columns:1.2fr 1fr;gap:70px;align-items:center}
+.proof .eyebrow{color:var(--teal)}
+.proofStat h2{font-size:clamp(22px,2.2vw,30px);line-height:1.3;font-weight:500;letter-spacing:-.02em}
+.proofStat h2 strong{display:block;font-size:clamp(64px,8vw,112px);line-height:1;letter-spacing:-.05em;font-weight:700;color:var(--teal);margin-bottom:10px}
+.proofStat>p:not(.eyebrow){color:#b9cad8;font-size:15px;line-height:1.8;max-width:560px;margin:0 0 14px}
+.proofStat small{display:block;margin-top:14px;font-size:11px;color:#8ea3b5}
+.proofList{margin:0;display:grid;gap:0;border-top:1px solid #ffffff25}
+.proofList>div{padding:18px 0;border-bottom:1px solid #ffffff25}
+.proofList dt{color:var(--teal);font-weight:600;font-size:14px}
+.proofList dd{margin:5px 0 0;color:#b9cad8;font-size:13px;line-height:1.7}
+.featurePull{font-weight:600;color:var(--navy)}
+.featureCopy>p.featurePull{color:var(--navy)}
+.manifestoConcept{grid-column:1/-1;justify-self:center;width:100%;max-width:760px;margin-top:20px}
+@media(max-width:1000px){
+  .platformShowcase{grid-template-columns:1fr;justify-items:center}
+  .outcomeGrid{grid-template-columns:1fr}
+  .proof{grid-template-columns:1fr;gap:30px}
+}
