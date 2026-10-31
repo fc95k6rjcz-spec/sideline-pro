@@ -1206,3 +1206,6 @@
 .manifestoHead{grid-template-columns:1fr;gap:0}.manifestoHead>.eyebrow{grid-column:auto}.manifesto h2{font-size:37px}.manifestoLead{font-size:18px;max-width:none;margin:20px 0 0}.manifestoBody>p{font-size:14px}.sportCards{grid-template-columns:1fr;gap:14px;margin:26px 0 30px}.sportCards article{padding:24px}.sportCards p{font-size:13px}.manifestoBody>p.manifestoPull{font-size:18px}.manifestoOwn{font-size:12px;gap:14px 20px}.start .steps{gap:30px;margin-top:35px}.contact{grid-template-columns:1fr;gap:35px}.formCard{padding:27px 22px;border-radius:16px}
 }
 @media(prefers-reduced-motion:reduce){.site a{transition:none}}
+
+.hero .eyebrow .australianFlag{display:inline-block;width:auto;height:auto;border-radius:0;background:none;font-size:20px;line-height:1;letter-spacing:0;flex-shrink:0}
+@media(max-width:760px){.hero .eyebrow .australianFlag{font-size:18px}}
