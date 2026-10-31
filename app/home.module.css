@@ -1236,3 +1236,22 @@
 .featureCopy>p.featurePull,.manifestoBody>p.manifestoPull{border-color:var(--aqua);color:var(--aqua-ink)}
 .steps span,.sportCards span,.proofList dt{font-weight:700}
 @media(prefers-reduced-motion:no-preference){.button{transition:background .18s}}
+
+/* Website + app shown together before the product detail. */
+.platformPair{grid-template-columns:2.6fr 1fr;gap:28px;max-width:1100px;align-items:stretch;margin-top:50px}
+.platformPair>figure{display:flex;flex-direction:column;margin:0;width:100%;max-width:none;border-radius:18px;overflow:hidden;background:var(--navy);box-shadow:none}
+.platformPair>.platformSite img{display:block;width:100%;height:auto;aspect-ratio:1600/790;object-fit:cover}
+.platformPair>.appPhoto img{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1050/1348;object-fit:cover;margin:0}
+.platformPair>figure figcaption{flex:1;min-height:76px;padding:16px 20px;color:#b9cad7;font-size:10px;line-height:1.7}
+.platformPair>figure figcaption strong{display:block;font-size:12px;color:white;font-weight:700;margin-bottom:3px}
+.platformPair>.bespokeDetail{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:80px;align-items:start;margin-top:20px}
+.platformPair>.bespokeDetail>.eyebrow{grid-column:1;grid-row:1}
+.platformPair>.bespokeDetail h3{grid-column:1;grid-row:2/4;margin-top:14px}
+.platformPair>.bespokeDetail>p:not(.eyebrow){grid-column:2;grid-row:1/3;margin-top:0}
+.platformPair>.bespokeDetail ul{grid-column:2;grid-row:3;margin-top:10px}
+.sportCards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.paymentDetails{border-top:1px solid #d3e4dc;padding-top:18px;margin-top:27px}
+.paymentDetails summary{cursor:pointer;color:var(--aqua-ink);font-size:12px;font-weight:700;list-style:revert}
+.paymentDetails p{font-size:12px;color:#61736f;line-height:1.85;margin:14px 0 0}
+.paymentDetails summary:focus-visible{outline:2px solid var(--aqua-ink);outline-offset:5px}
+@media(max-width:760px){.platformPair{grid-template-columns:1fr;gap:24px;margin-top:35px}.platformPair>.appPhoto{max-width:290px;justify-self:center}.platformPair>.bespokeDetail{display:block;margin-top:8px}.platformPair>.bespokeDetail h3{margin-top:18px}.platformPair>.bespokeDetail>p:not(.eyebrow){margin-top:0}.platformPair>.bespokeDetail ul{margin-top:24px}.sportCards{grid-template-columns:1fr}}
