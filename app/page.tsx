@@ -12,11 +12,10 @@ import { SiteFooter, SiteHeader } from "./components/SiteChrome"
 const sports = [
   { name: "Netball", body: "We know the difference between a Goal Attack and a Goal Keeper. We understand umpire allocations, grading, team selections and the unique challenges of running a netball club." },
   { name: "Basketball", body: "It’s referees, not umpires. A point guard has different responsibilities from a centre. Coaching, player development and game-day operations should reflect those differences." },
-  { name: "Soccer", body: "There’s another language, another set of positions and another way clubs operate." },
 ]
 const connected = ["Registrations", "Payments", "Officials", "Coaching", "Teams", "Club communications", "PlayHQ fixtures & ladders"]
 const outcomes = [
-  { icon: Clock, title: "Less administration.", body: "Automate time-consuming jobs such as umpire rostering, registrations, payments and team management. Give volunteers more time for the things they actually signed up to do." },
+  { icon: Clock, title: "Less administration.", body: "Bring registrations and payments together, match each payment to the right player and program, and simplify jobs such as umpire rostering. Give volunteers more time for the things they actually signed up to do." },
   { icon: ClipboardList, title: "Better player development.", body: "Equip coaches with tools for assessments, feedback, team selection and player development, helping them make more informed decisions throughout the season." },
   { icon: Users, title: "A better club experience.", body: "Bring your community together through your own branded website and app, with easier communication and access to everything members need." },
 ]
@@ -41,7 +40,8 @@ export default function Home() {
         <p className={styles.eyebrow}>THE SIDELINEPRO PLATFORM</p>
         <h2 id="platform-title">One platform.<br/>Your whole club.</h2>
         <p className={styles.bespokeIntro}>Your website, mobile app and club management tools working together, all carrying your club’s name, badge and colours.</p>
-        <div className={styles.bespokeShowcase}>
+        <div className={`${styles.bespokeShowcase} ${styles.platformPair}`}>
+          <figure className={styles.platformSite}><Image src="/seaforth-home-render.jpg" alt="Seaforth Netball Club’s own branded website with a Go Seaforth hero and club navigation" width={1600} height={790} sizes="(max-width:760px) 100vw, 75vw"/><figcaption><strong>Your club’s own website</strong><span>Seaforth Netball Club · visual render</span></figcaption></figure>
           <figure className={styles.appPhoto}><Image src="/seaforth-app-notification.png" alt="Seaforth Netball’s own app and a court-change notification on an iPhone" width={1050} height={1348} sizes="(max-width:760px) 85vw, 300px"/><figcaption><strong>Your club’s own app</strong> Seaforth’s app, with a court-change notification.</figcaption></figure>
           <div className={styles.bespokeDetail}>
             <p className={styles.eyebrow}>A REAL CLUB. ITS OWN APP.</p>
@@ -82,6 +82,16 @@ export default function Home() {
       <section id="features" className={`${styles.section} ${styles.platform}`} aria-labelledby="features-title">
         <div className={styles.sectionHead}><p className={styles.eyebrow}>WHAT’S INSIDE</p><h2 id="features-title">The tools behind<br/><span>a better-run club.</span></h2><p>Each one saves volunteers time. Try them yourself in the interactive demos, with a fictional club and no sign-up.</p></div>
 
+        <article id="payments" className={styles.feature}>
+          <div className={styles.featureCopy}><p className={styles.eyebrow}><Wallet size={18}/>REGISTRATIONS, PAYMENTS &amp; PLAYER RECONCILIATION</p><h3>Know who’s paid.<br/>And what they’ve paid for.</h3><p>Move from bank transfers, spreadsheets and chasing receipts to online registration and card payments on your club’s own website.</p><p>For connected program registrations, confirmed Stripe payments are matched to the player and program. Your treasurer can see who has paid for what, and which registrations still need attention.</p><ul><li><Check size={16}/>The player, program and payment in one record</li><li><Check size={16}/>A clear view of paid and outstanding registrations</li><li><Check size={16}/>Less manual matching. Fewer payments to chase.</li></ul><p className={styles.featurePull}>A clearer payment trail, from the family to the club.</p><a className={styles.darkLink} href="#contact">Book a demo <ArrowUpRight size={16}/></a><details className={styles.paymentDetails}><summary>How payment matching works</summary><p>For supported program registrations, Stripe payment confirmations update the matching player’s paid status and retain a payment reference. Full refunds update automatically where supported; unmatched payments and partial refunds need review.</p><p>Payment-to-player matching covers connected registrations and programs. Bank-statement reconciliation is a separate accounting workflow.</p><p><strong>Coming soon:</strong> Xero and MYOB sync, and API access for your club’s other systems.</p></details></div>
+          <figure className={styles.programFlow}>
+            <Image src="/baseline-basketball-concept.jpg" alt="Baseline Basketball Academy fictional club website with Term 4 registrations open and a Register now button" width={1428} height={1100} sizes="(max-width:760px) 100vw, 50vw"/>
+            <ol aria-label="How a registration is reconciled">{[["Program","Term 4 registrations open"],["Register & pay","Card payment through Stripe"],["Matched to player","Paid status + payment reference"],["Your books","Xero & MYOB sync · coming soon"]].map(([t,d],i)=><li key={t} className={i===3?styles.flowSoon:undefined}><span>0{i+1}</span><strong>{t}</strong><small>{d}</small></li>)}</ol>
+            <figcaption>From a program on your club’s website to a payment matched to the right player.<small>Baseline Basketball Academy · fictional design concept, not a live customer website</small></figcaption>
+          </figure>
+          <PaymentAnalytics/>
+        </article>
+
         <article id="grading" className={`${styles.feature} ${styles.featureLead}`}>
           <div className={styles.featureCopy}><p className={styles.eyebrow}><ClipboardList size={18}/>PLAYER GRADING & DEVELOPMENT</p><h3>Better coaching. Better team decisions.</h3><p>Give coaches and grading committees a clearer picture of every player’s development.</p><p>SidelinePro brings together player assessments, coach feedback, preferred positions and game performance to support more consistent grading and team selection. And because that information stays connected from season to season, coaches spend less time starting from scratch and more time helping players improve.</p><a className={styles.darkLink} href="/grading">Explore player grading and development <ArrowUpRight size={16}/></a></div>
           <GradingStory/>
@@ -97,15 +107,7 @@ export default function Home() {
           <figure className={styles.chatRender}><Image src="/club-communications-render.jpg" alt="Product render of SidelinePro team conversations and club chat groups on two phones, using fictional names and messages" width={1536} height={1024} sizes="(max-width:760px) 100vw, 50vw"/><figcaption>Your teams. Your club groups. One connected conversation.<small>Product render · fictional conversations</small></figcaption></figure>
         </article>
 
-        <article id="payments" className={styles.feature}>
-          <div className={styles.featureCopy}><p className={styles.eyebrow}><Wallet size={18}/>REGISTRATIONS, PAYMENTS & RECONCILIATION</p><h3>From program to payment to player. Reconciled automatically.</h3><p>Families register for a program on your club’s own website and pay by card. The moment Stripe confirms the payment, SidelinePro marks that player as paid for that program, so your treasurer can see exactly who has paid for what, without matching bank lines to a spreadsheet.</p><ul><li><Check size={16}/>Program registration and payment on your club’s website</li><li><Check size={16}/>Secure Stripe webhooks reconcile every payment to the player and program</li><li><Check size={16}/>Full refunds update the player’s record automatically</li><li><Clock size={16}/><span><strong>Coming soon:</strong> Xero and MYOB sync, and API access for your club’s other systems</span></li></ul><a className={styles.darkLink} href="#contact">Book a demo <ArrowUpRight size={16}/></a></div>
-          <figure className={styles.programFlow}>
-            <Image src="/baseline-basketball-concept.jpg" alt="Baseline Basketball Academy fictional club website with Term 4 registrations open and a Register now button" width={1428} height={1100} sizes="(max-width:760px) 100vw, 50vw"/>
-            <ol aria-label="How a registration is reconciled">{[["Program","Term 4 registrations open"],["Register & pay","Card payment through Stripe"],["Reconciled","Webhook marks the player paid"],["Your books","Xero & MYOB sync · coming soon"]].map(([t,d],i)=><li key={t} className={i===3?styles.flowSoon:undefined}><span>0{i+1}</span><strong>{t}</strong><small>{d}</small></li>)}</ol>
-            <figcaption>A program on the club’s own website, through to a reconciled player record.<small>Baseline Basketball Academy · fictional design concept, not a live customer website</small></figcaption>
-          </figure>
-          <PaymentAnalytics/>
-        </article>
+
       </section>
 
       <section id="approach" className={`${styles.section} ${styles.manifesto}`} aria-labelledby="approach-title">
