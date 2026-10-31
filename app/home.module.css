@@ -994,3 +994,48 @@
 .programFlow figcaption small{display:block;margin-top:5px;font-size:10px;color:#93a0b4}
 .featureCopy li span strong{color:var(--navy)}
 @media(max-width:760px){.programFlow ol{grid-template-columns:1fr 1fr}}
+
+/* Payment analytics panel (fictional data). */
+.paFigure{grid-column:1/-1;margin:10px 0 0;border-radius:16px;overflow:hidden;background:var(--navy);box-shadow:0 20px 50px #0a122018}
+.paPanel{margin:18px;background:white;border-radius:12px;padding:22px;color:var(--navy)}
+.paTop{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:end}
+.paTop strong{display:block;font-size:24px;letter-spacing:-.02em}
+.paKicker{font-size:9px;letter-spacing:.16em;font-weight:700;color:var(--aqua-ink)}
+.paFilters{display:flex;flex-wrap:wrap;gap:6px}
+.paFilters span{border:1px solid #dde3ea;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700}
+.paMetrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.paMetrics>div{border:1px solid #dde3ea;border-radius:10px;padding:14px}
+.paMetrics span{display:block;font-size:11px;color:#4a5568}
+.paMetrics strong{font-size:22px;letter-spacing:-.02em;margin-right:6px}
+.paMetrics em{font-style:normal;font-size:12px;font-weight:700;color:var(--aqua-ink)}
+.paMetrics>div.paAlert{background:var(--mint);border-color:#cfe9e1}
+.paAlert button{margin-top:8px;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;background:var(--navy);color:white;font:inherit;font-size:11px;font-weight:700;padding:6px 11px;cursor:pointer}
+.paAlert button:disabled{background:var(--aqua-ink);cursor:default}
+.paBody{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:start}
+.paChartWrap{min-width:0}
+.paTabs{display:flex;gap:6px;margin-bottom:10px}
+.paTabs button{border:1px solid #dde3ea;background:white;border-radius:7px;padding:5px 11px;font:inherit;font-size:11px;font-weight:700;color:#4a5568;cursor:pointer}
+.paTabs button[aria-selected=true]{border-color:var(--aqua);color:var(--aqua-ink);background:var(--mint)}
+.paChart{display:block;width:100%;height:auto}
+.paLegend{display:flex;align-items:center;gap:8px;font-size:11px;color:#4a5568;margin:6px 0 0}
+.paCur,.paPrev{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--aqua)}
+.paPrev{background:#93a0b4;margin-left:10px}
+.paTable{width:100%;border-collapse:collapse;font-size:12px}
+.paTable th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#6b7588;font-weight:700;padding:0 6px 8px;border-bottom:1px solid #dde3ea}
+.paTable td{padding:10px 6px;border-bottom:1px solid #eef1f4}
+.paTable td:not(:first-child),.paTable th:not(:first-child){text-align:right}
+.paTable td.paOwing{color:#c0392b;font-weight:700}
+.paFigure figcaption{padding:2px 22px 20px;font-size:12px;line-height:1.7;color:#c9d2df}
+.paFigure figcaption small{display:block;margin-top:4px;font-size:10px;color:#93a0b4}
+@media(max-width:1000px){.paMetrics{grid-template-columns:1fr 1fr}.paBody{grid-template-columns:1fr}}
+@media(max-width:760px){.paPanel{margin:10px;padding:14px}.paMetrics strong{font-size:18px}}
+
+/* Platform showcase: website and app at the same height. Column ratio matches
+   the two images' aspect ratios (1600×790 vs 1050×1348 ≈ 2.6 : 1), and both
+   images fill a fixed-ratio box so the tops, bottoms and captions line up. */
+.platformShowcase{grid-template-columns:2.6fr 1fr;align-items:stretch;gap:28px}
+.platformShowcase>figure{display:flex;flex-direction:column;margin:0;width:100%;max-width:none;border-radius:14px;overflow:hidden;background:#121f38;box-shadow:0 20px 45px #0003}
+.platformShowcase>figure img{display:block;width:100%;height:auto;margin:0;aspect-ratio:2.03/1;object-fit:cover}
+.platformShowcase>figure.appPhoto img{aspect-ratio:0.78/1;object-position:top}
+.platformShowcase>figure figcaption{flex:1}
+@media(max-width:1000px){.platformShowcase{grid-template-columns:1fr;max-width:560px;margin-left:auto;margin-right:auto}.platformShowcase>figure.appPhoto{max-width:320px;justify-self:center}}

@@ -3,6 +3,7 @@ import { ArrowUpRight, ArrowRight, Check, ClipboardList, Clock, Flag, MessagesSq
 import { ContactForm } from "@/components/contact-form"
 import styles from "./home.module.css"
 import { GradingStory } from "./components/GradingStory"
+import { PaymentAnalytics } from "./components/PaymentAnalytics"
 import { SiteFooter, SiteHeader } from "./components/SiteChrome"
 
 // Order follows a club president's questions: what is it → what does my club
@@ -95,6 +96,7 @@ export default function Home() {
             <ol aria-label="How a registration is reconciled">{[["Program","Term 4 registrations open"],["Register & pay","Card payment through Stripe"],["Reconciled","Webhook marks the player paid"],["Your books","Xero & MYOB sync · coming soon"]].map(([t,d],i)=><li key={t} className={i===3?styles.flowSoon:undefined}><span>0{i+1}</span><strong>{t}</strong><small>{d}</small></li>)}</ol>
             <figcaption>A program on the club’s own website, through to a reconciled player record.<small>Baseline Basketball Academy · fictional design concept, not a live customer website</small></figcaption>
           </figure>
+          <PaymentAnalytics/>
         </article>
       </section>
 
