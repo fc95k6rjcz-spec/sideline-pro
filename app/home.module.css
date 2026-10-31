@@ -1044,3 +1044,19 @@
 .proofSide{display:grid;gap:22px;min-width:0}
 .proofSide .platformSite{box-shadow:0 20px 45px #0006}
 .proof{align-items:start}
+
+/* Feature visuals: a navy-into-aqua glow behind each dark render that fades
+   out into the white page, so the panels sit in light rather than on it. */
+.platform{overflow:clip}
+.feature{position:relative;isolation:isolate}
+.feature::before{content:"";position:absolute;z-index:-1;pointer-events:none;top:-90px;bottom:-90px;left:22%;right:-18vw;
+  background:
+    radial-gradient(55% 60% at 70% 50%, rgba(10,18,32,.30) 0%, rgba(10,18,32,.12) 45%, transparent 72%),
+    radial-gradient(75% 80% at 60% 55%, rgba(0,191,174,.24) 0%, rgba(0,191,174,.10) 40%, transparent 70%),
+    radial-gradient(90% 90% at 50% 50%, rgba(234,247,243,.9) 0%, transparent 75%);
+  filter:blur(14px)}
+.umpireRender,.chatRender,.programFlow,.gradingStory,.phoneFigure,.paFigure{
+  box-shadow:0 0 0 1px rgba(0,191,174,.18),0 30px 70px -18px rgba(10,18,32,.45),0 0 140px 0 rgba(0,191,174,.38),-60px 0 160px -20px rgba(10,18,32,.28)}
+/* Captions blend from the image instead of a hard navy bar. */
+.umpireRender figcaption,.chatRender figcaption{background:linear-gradient(180deg,#121f38 0%,#0a1220 100%)}
+@media(max-width:1000px){.feature::before{left:-10vw;right:-10vw;top:40%}}
