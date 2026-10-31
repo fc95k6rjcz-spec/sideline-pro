@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Poppins, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import { VisitorAnalytics } from './components/VisitorAnalytics'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -42,6 +43,7 @@ export default function RootLayout({
     <html lang="en-AU" className={`scroll-smooth bg-white ${poppins.variable}`}>
       <body className={`${poppins.className} font-sans antialiased bg-white text-[#1d1d1f]`}>
         {children}
+        {process.env.NODE_ENV === 'production' && <VisitorAnalytics />}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

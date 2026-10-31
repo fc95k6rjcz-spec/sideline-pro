@@ -17,11 +17,10 @@ export default async function AdminDashboardPage() {
         Welcome back{firstName ? `, ${firstName}` : ""}.
       </h1>
       <p className="mt-2.5 max-w-[520px] text-[17px] leading-[1.5] text-[#6e6e73]">
-        This is the private side of Sideline Pro. Generate invoices and upload
-        receipts from here.
+        This is the private side of Sideline Pro. Review website traffic, generate invoices and manage expenses.
       </p>
 
-      <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"><a href="/admin/analytics" className="rounded-[20px] border border-black/10 bg-[#EAF7F3] p-[26px]"><h2 className="text-xl font-bold">Site analytics</h2><p className="mt-2 text-sm">Page views, visitor sources and approximate locations.</p><p className="mt-4 font-bold text-[#00796E]">View traffic →</p></a>
         <a
           href="/admin/invoice"
           className="group rounded-[20px] border border-black/10 bg-white p-[26px] transition duration-300 hover:-translate-y-[3px] hover:border-gold/60 hover:shadow-[0_14px_38px_rgba(0,0,0,0.09)]"

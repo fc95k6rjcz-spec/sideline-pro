@@ -1255,3 +1255,25 @@
 .paymentDetails p{font-size:12px;color:#61736f;line-height:1.85;margin:14px 0 0}
 .paymentDetails summary:focus-visible{outline:2px solid var(--aqua-ink);outline-offset:5px}
 @media(max-width:760px){.platformPair{grid-template-columns:1fr;gap:24px;margin-top:35px}.platformPair>.appPhoto{max-width:290px;justify-self:center}.platformPair>.bespokeDetail{display:block;margin-top:8px}.platformPair>.bespokeDetail h3{margin-top:18px}.platformPair>.bespokeDetail>p:not(.eyebrow){margin-top:0}.platformPair>.bespokeDetail ul{margin-top:24px}.sportCards{grid-template-columns:1fr}}
+
+/* Continuous navy studio lighting connects the product images and copy. */
+.productStage{background:radial-gradient(ellipse 70% 23% at 100% 38%,#12435780,transparent 75%),radial-gradient(ellipse 85% 25% at 95% 75%,#006c6840,transparent 75%),linear-gradient(125deg,#0A1220 15%,#102638 55%,#0A1220 90%);color:#fff}
+.productStage .sectionHead>p:last-child,.productStage .featureCopy>p:not(.eyebrow){color:#bacbd5}
+.productStage .eyebrow,.productStage .sectionHead h2 span{color:var(--aqua)}
+.productStage .feature{border-color:#ffffff18}
+.productStage .featureCopy h3{color:#fff}
+.productStage .featureCopy li{color:#c5d5dd}
+.productStage .featureCopy li svg{color:var(--aqua)}
+.productStage .featureCopy>p.featurePull{color:#71d8ca}
+.productStage .darkLink{color:#e5faf5;border-color:#00bfae80}
+.productStage .paymentDetails{border-color:#ffffff20}
+.productStage .paymentDetails summary{color:#71d8ca}
+.productStage .paymentDetails p{color:#bacbd5}
+.productStage .umpireRender,.productStage .chatRender{border:0;border-radius:0;background:transparent;overflow:visible}
+.productStage .umpireRender img,.productStage .chatRender img{border-radius:0;mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent),linear-gradient(to bottom,transparent,#000 5%,#000 92%,transparent);mask-composite:intersect}
+.productStage .umpireRender figcaption,.productStage .chatRender figcaption{background:transparent;padding:20px 24px 0;color:#e4eef3}
+.productStage .umpireRender small,.productStage .chatRender small{color:#9db6c5}
+.productStage .umpireRender figcaption a{display:flex;align-items:center;gap:10px;margin-top:12px;color:#71d8ca}
+.productStage a:focus-visible{outline:2px solid var(--aqua);outline-offset:6px}
+.productStage .paPanel{color:var(--navy)}
+@media(max-width:760px){.productStage .umpireRender figcaption,.productStage .chatRender figcaption{padding:16px 0 0}}

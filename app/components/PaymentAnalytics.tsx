@@ -45,7 +45,7 @@ export function PaymentAnalytics() {
         <div className={styles.paFilters}><span>Term 4</span><span>Weekly</span><span>vs last term</span></div>
       </div>
       <div className={styles.paMetrics}>
-        <div><span>Payment success rate</span><strong>98.4%</strong><em>+1.2%</em></div>
+        <div><span>Registrations tracked</span><strong>{paid + outstanding}</strong><em>Across {programs.length} programs</em></div>
         <div><span>Collected</span><strong>{money(total)}</strong><em>+18.6%</em></div>
         <div><span>Players paid</span><strong>{paid}</strong><em>+64</em></div>
         <div className={styles.paAlert}><span>Yet to pay</span><strong>{outstanding} players</strong><button type="button" onClick={() => setReminded(true)} disabled={reminded}>{reminded ? <><Check size={13} /> Reminders queued</> : <><BellRing size={13} /> Send reminders</>}</button></div>

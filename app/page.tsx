@@ -78,7 +78,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className={`${styles.section} ${styles.platform}`} aria-labelledby="features-title">
+      <section id="features" className={`${styles.section} ${styles.platform} ${styles.productStage}`} aria-labelledby="features-title">
         <div className={styles.sectionHead}><p className={styles.eyebrow}>WHAT’S INSIDE</p><h2 id="features-title">The tools behind<br/><span>a better-run club.</span></h2><p>Each one saves volunteers time. Try them yourself in the interactive demos, with a fictional club and no sign-up.</p></div>
 
         <article id="payments" className={styles.feature}>
