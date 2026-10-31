@@ -2,7 +2,6 @@ import Image from "next/image"
 import { ArrowUpRight, ArrowRight, Check, ClipboardList, Clock, Flag, MessagesSquare, Sparkles, Users, Wallet } from "lucide-react"
 import { ContactForm } from "@/components/contact-form"
 import styles from "./home.module.css"
-import { GradingStory } from "./components/GradingStory"
 import { PaymentAnalytics } from "./components/PaymentAnalytics"
 import { SiteFooter, SiteHeader } from "./components/SiteChrome"
 
@@ -94,7 +93,7 @@ export default function Home() {
 
         <article id="grading" className={`${styles.feature} ${styles.featureLead}`}>
           <div className={styles.featureCopy}><p className={styles.eyebrow}><ClipboardList size={18}/>PLAYER GRADING & DEVELOPMENT</p><h3>Better coaching. Better team decisions.</h3><p>Give coaches and grading committees a clearer picture of every player’s development.</p><p>SidelinePro brings together player assessments, coach feedback, preferred positions and game performance to support more consistent grading and team selection. And because that information stays connected from season to season, coaches spend less time starting from scratch and more time helping players improve.</p><a className={styles.darkLink} href="/grading">Explore player grading and development <ArrowUpRight size={16}/></a></div>
-          <GradingStory/>
+          <figure className={styles.umpireRender}><a href="/grading#development" aria-label="Watch the coach report walkthrough"><Image src="/coach-report-phone-render.jpg" alt="Coach report interface on a graphite iPhone, showing Alex Demo’s skill ratings and expanded competency guidance" width={1536} height={1024} sizes="(max-width:760px) 100vw, 50vw"/></a><figcaption>Coach feedback, right there on your phone.<small>Product render based on the coach-report interface · fictional player details</small><a className={styles.textLink} href="/grading#development">Watch coach reports in action <ArrowUpRight size={16}/></a></figcaption></figure>
         </article>
 
         <article id="umpires" className={styles.feature}>
