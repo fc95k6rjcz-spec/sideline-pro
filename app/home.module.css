@@ -1039,3 +1039,8 @@
 .platformShowcase>figure.appPhoto img{aspect-ratio:0.78/1;object-position:top}
 .platformShowcase>figure figcaption{flex:1}
 @media(max-width:1000px){.platformShowcase{grid-template-columns:1fr;max-width:560px;margin-left:auto;margin-right:auto}.platformShowcase>figure.appPhoto{max-width:320px;justify-self:center}}
+
+/* Seaforth website sits with the Seaforth story; the platform section leads with the app. */
+.proofSide{display:grid;gap:22px;min-width:0}
+.proofSide .platformSite{box-shadow:0 20px 45px #0006}
+.proof{align-items:start}

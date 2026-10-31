@@ -41,9 +41,14 @@ export default function Home() {
         <p className={styles.eyebrow}>THE SIDELINEPRO PLATFORM</p>
         <h2 id="platform-title">One platform.<br/>Your whole club.</h2>
         <p className={styles.bespokeIntro}>Your website, mobile app and club management tools working together, all carrying your club’s name, badge and colours.</p>
-        <div className={styles.platformShowcase}>
-          <figure className={styles.platformSite}><Image src="/seaforth-home-render.jpg" alt="Seaforth Netball Club’s website with a Go Seaforth hero and club navigation" width={1600} height={790} sizes="(max-width:760px) 100vw, 60vw"/><figcaption><strong>Your club website</strong><span>Seaforth Netball Club · visual render</span></figcaption></figure>
+        <div className={styles.bespokeShowcase}>
           <figure className={styles.appPhoto}><Image src="/seaforth-app-notification.png" alt="Seaforth Netball’s own app and a court-change notification on an iPhone" width={1050} height={1348} sizes="(max-width:760px) 85vw, 300px"/><figcaption><strong>Your club’s own app</strong> Seaforth’s app, with a court-change notification.</figcaption></figure>
+          <div className={styles.bespokeDetail}>
+            <p className={styles.eyebrow}>A REAL CLUB. ITS OWN APP.</p>
+            <h3>Your badge.<br/>Their home screen.</h3>
+            <p>Seaforth Netball’s app carries its own club name and identity, alongside its own club website. Members get an experience they recognise: your badge, your colours and your club’s people.</p>
+            <ul><li><Check size={17}/> Your club’s name and app icon</li><li><Check size={17}/> Your own website, built to match</li><li><Check size={17}/> Push notifications for court changes, rosters and news</li></ul>
+          </div>
         </div>
         <p className={styles.platformConnected}>Behind the scenes, everything is connected:</p>
         <ul className={styles.connectedChips}>{connected.map(c=><li key={c}><Check size={14}/>{c}</li>)}</ul>
@@ -63,12 +68,15 @@ export default function Home() {
           <p>And that’s before the paperwork. Account reconciliation and matching player payments for club events are where Seaforth’s treasurer and organisers see the biggest savings of all.</p>
           <small>Based on time savings reported by Seaforth Netball Club’s umpire rostering team.</small>
         </div>
+        <div className={styles.proofSide}>
+          <figure className={styles.platformSite}><Image src="/seaforth-home-render.jpg" alt="Seaforth Netball Club’s website with a Go Seaforth hero and club navigation" width={1600} height={790} sizes="(max-width:760px) 100vw, 60vw"/><figcaption><strong>Seaforth’s own club website</strong><span>Seaforth Netball Club’s website · visual render</span></figcaption></figure>
         <dl className={styles.proofList}>
           <div><dt>Umpire rostering</dt><dd>Assignments, confirmations and junior mentor feedback in one place.</dd></div>
           <div><dt>Payments & reconciliation</dt><dd>Player payments matched to registrations and events, without the spreadsheet chase.</dd></div>
           <div><dt>Grading with context</dt><dd>Coach assessments inform the grading committee’s view of each player.</dd></div>
           <div><dt>A connected weekly draw</dt><dd>PlayHQ fixtures and ladders alongside the club’s own app.</dd></div>
         </dl>
+        </div>
       </section>
 
       <section id="features" className={`${styles.section} ${styles.platform}`} aria-labelledby="features-title">
