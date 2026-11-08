@@ -124,3 +124,19 @@
     font-size: 16px;
   }
 }
+
+/* /admin/ad1 interview notes — readable on a phone. */
+.ad1{max-width:680px;margin:0 auto;font-size:17px;line-height:1.6;color:#0a1220}
+.ad1 h1{font-size:26px;font-weight:700;line-height:1.2;margin:0 0 6px}
+.ad1 h1+p{color:#6b7588;font-size:14px;margin:0 0 24px}
+.ad1 h2{font-size:22px;font-weight:700;margin:36px 0 10px;padding-top:18px;border-top:3px solid #00bfae;scroll-margin-top:80px}
+.ad1 h3{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#00796e;margin:22px 0 6px}
+.ad1 p{margin:0 0 12px}
+.ad1 ol,.ad1 ul{margin:0 0 12px;padding-left:24px}
+.ad1 ol{list-style:decimal}.ad1 ul{list-style:disc}
+.ad1 li{margin:0 0 8px}.ad1 li p{margin:0}
+.ad1 strong{font-weight:700}
+.ad1 em{font-style:italic;color:#00796e}
+.ad1 table{width:100%;border-collapse:collapse;font-size:14px;margin:0 0 14px;display:block;overflow-x:auto}
+.ad1 th,.ad1 td{border:1px solid #dde3ea;padding:8px;text-align:left;vertical-align:top}
+.ad1 th{background:#eaf7f3}

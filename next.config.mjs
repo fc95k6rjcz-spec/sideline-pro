@@ -32,8 +32,12 @@ const nextConfig = {
     ]
   },
   // /book-a-demo → the homepage's demo request form.
+  // /ad1 → the admin-only shoot notes (the /admin gate does the sign-in).
   async redirects() {
-    return [{ source: "/book-a-demo", destination: "/#contact", permanent: false }]
+    return [
+      { source: "/book-a-demo", destination: "/#contact", permanent: false },
+      { source: "/ad1", destination: "/admin/ad1", permanent: false },
+    ]
   },
 }
 
