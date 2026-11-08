@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { initialSections } from "./interview-data";
+import { answerNotes } from "./answer-notes";
 import styles from "./interviews.module.css";
 
 const KEY = "sidelinepro-interviews-v2";
@@ -39,7 +41,7 @@ export default function InterviewChecklist() {
     persist(sections.map(s => s.id !== sectionId ? s : {...s, groups: s.groups.map(g => ({...g, items: g.items.map(q => q.id === itemId ? {...q, ...patch} : q)}))}));
   }
   function download() {
-    const text = [`Seaforth testimonial interviews · ${date}`, ...sections.flatMap(s => ["", s.name, s.focus, ...s.groups.flatMap(g => ["", g.title, ...g.items.map(q => `${q.done ? "[x]" : "[ ]"} ${q.text}`)]), "", "Filming notes / takes", s.notes])].join("\n");
+    const text = [`Seaforth testimonial interviews · ${date}`, ...sections.flatMap(s => ["", s.name, s.focus, ...s.groups.flatMap(g => ["", g.title, ...g.items.map(q => `${q.done ? "[x]" : "[ ]"} ${q.text}${answerNotes[q.id] ? `\nInterviewer reference: ${answerNotes[q.id]}` : ""}`)]), "", "Filming notes / takes", s.notes])].join("\n");
     const url = URL.createObjectURL(new Blob([text], {type:"text/plain;charset=utf-8"}));
     const a = document.createElement("a"); a.href=url; a.download=`seaforth-interviews-${date}.txt`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -54,6 +56,7 @@ export default function InterviewChecklist() {
         <button disabled={!ready} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? "Done editing" : "Edit questions"}</button>
         <button disabled={!ready} onClick={download}>Download notes</button>
         <button onClick={() => window.print()}>Print all</button>
+        <Link href="/admin/ad1/releases" className={styles.releaseLink}>Participant consent &amp; releases →</Link>
       </div>
       <p role="status" className={styles.status}>{status}. Edits and ticks do not sync to another device.</p>
     </header>
@@ -70,7 +73,8 @@ export default function InterviewChecklist() {
         <h3>{g.title}</h3>
         <ul>{g.items.map(q => <li key={q.id} className={q.done ? styles.checked : ""}>
           <input type="checkbox" id={`tick-${q.id}`} checked={q.done} disabled={!ready} aria-label={`Completed: ${q.text}`} onChange={e=>updateItem(s.id,q.id,{done:e.target.checked})}/>
-          {editing ? <textarea aria-label="Edit prompt" rows={3} value={q.text} onChange={e=>updateItem(s.id,q.id,{text:e.target.value})}/> : <label htmlFor={`tick-${q.id}`}>{q.text}</label>}
+          <div className={styles.promptBody}>{editing ? <textarea aria-label="Edit prompt" rows={3} value={q.text} onChange={e=>updateItem(s.id,q.id,{text:e.target.value})}/> : <label htmlFor={`tick-${q.id}`}>{q.text}</label>}
+          {answerNotes[q.id] && <p className={styles.answer}><strong>Interviewer reference · checked 9 Nov 2026</strong><br/>{answerNotes[q.id]}</p>}</div>
         </li>)}</ul>
         {editing && <button onClick={()=>persist(sections.map(section=>section.id!==s.id?section:{...section,groups:section.groups.map((group,index)=>index!==gi?group:{...group,items:[...group.items,{id:crypto.randomUUID(),text:"New question — edit here",done:false}]})}))}>+ Add prompt</button>}
       </div>)}
