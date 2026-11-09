@@ -11,7 +11,7 @@ type Section = (typeof initialSections)[number];
 
 // Text-only emphasis works with edited questions without changing their saved wording.
 const cuePhrases = [
-  "Before SidelinePro", "With SidelinePro", "SidelinePro", "What first got you into it", "enjoy so much", "confidence and skills",
+  "bank reference", "which player", "registration period", "who carried the workload", "before and after", "what moving across involved", "why you coach", "confidence or skill", "season’s coaching knowledge", "three and a four", "preferred position", "what you saw on court", "time or effort", "repeated work", "feel supported", "stay involved", "finding and training", "Before SidelinePro", "With SidelinePro", "SidelinePro", "What first got you into it", "enjoy so much", "confidence and skills",
   "five children", "foster children", "typical evening", "typical night", "typical day", "94 umpires", "winter fixtures", "family life",
   "didn’t respond", "cancelled", "find someone else", "what you do", "on their phone", "they have accepted", "chasing and changes",
   "a real occasion", "could not make a game", "what happened", "how you handled it", "different from the old way", "do yourself",
@@ -89,7 +89,7 @@ export default function InterviewChecklist() {
         <h3>Listen for · key themes</h3><div className={styles.keywords}>{interviewBriefs[s.id].keywords.map(word => <mark key={word}>{word}</mark>)}</div>
         <p>{interviewBriefs[s.id].message}</p><p><strong>Filming tip:</strong> Include the question’s context in the answer. After the full story, ask: “Can you give me a short version that makes sense without hearing my question?”</p>
       </aside>}
-      {s.groups.map((g,gi) => <details open={s.id !== "amanda" || (!g.title.startsWith("Reference only") && !g.title.startsWith("Saved earlier"))} className={styles.group} key={g.title}>
+      {s.groups.map((g,gi) => <details open={!g.title.startsWith("Reference only") && !g.title.startsWith("Saved earlier")} className={styles.group} key={g.title}>
         <summary className={styles.groupSummary}>{g.title}</summary>
         <ul>{g.items.map(q => <li key={q.id} className={q.done ? styles.checked : ""}>
           <input type="checkbox" id={`tick-${q.id}`} checked={q.done} disabled={!ready} aria-label={`Completed: ${q.text}`} onChange={e=>updateItem(s.id,q.id,{done:e.target.checked})}/>
