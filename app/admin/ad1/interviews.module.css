@@ -7,3 +7,5 @@
 .brief{padding:22px;border:1px solid #b4ddd3;border-radius:15px;background:#eff9f5;margin-bottom:24px}.brief h3{font-weight:700;margin-bottom:12px}.brief p{font-size:14px;line-height:1.7;margin-top:14px}.keywords{display:flex;flex-wrap:wrap;gap:8px}.keywords mark{background:#fff0af;color:#173d43;border-radius:5px;padding:5px 9px;font-size:12px;font-weight:800;letter-spacing:.04em}@media print{.brief{padding:10px;break-inside:avoid}.brief p{font-size:10px}.keywords mark{font-size:10px}}
 
 .groupSummary{font-size:14px;font-weight:700;background:#eaf6f1;padding:15px 20px;cursor:pointer}.groupSummary:focus-visible{outline:3px solid #00b8a9;outline-offset:-3px}
+
+.cue{font-weight:800;text-decoration:underline;text-decoration-color:#008879;text-decoration-thickness:2px;text-underline-offset:4px}.promptBody>label{font-size:17px;line-height:1.85}@media print{.cue{text-decoration-color:black}.promptBody>label{font-size:11px;line-height:1.65}}

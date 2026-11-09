@@ -9,6 +9,22 @@ import styles from "./interviews.module.css";
 const KEY = "sidelinepro-interviews-v2";
 type Section = (typeof initialSections)[number];
 
+// Text-only emphasis works with edited questions without changing their saved wording.
+const cuePhrases = [
+  "Before SidelinePro", "With SidelinePro", "SidelinePro", "What first got you into it", "enjoy so much", "confidence and skills",
+  "five children", "foster children", "typical evening", "typical night", "typical day", "94 umpires", "winter fixtures", "family life",
+  "didn’t respond", "cancelled", "find someone else", "what you do", "on their phone", "they have accepted", "chasing and changes",
+  "a real occasion", "could not make a game", "what happened", "how you handled it", "different from the old way", "do yourself",
+  "before and after", "changed most", "estimate the time", "what you are comparing", "evenings or weekends", "real-life example",
+  "no longer have to interrupt", "you actually enjoy", "younger umpires", "time or attention", "next season", "manageable or difficult",
+  "making life easier", "what would you tell her", "what has it changed", "getting started", "still like improved", "shorter version",
+  "why that matters", "retain", "volunteers", "payment", "paid", "matching", "player feedback", "rating descriptions", "Team Builder", "grading"
+].sort((a,b) => b.length - a.length);
+const cuePattern = new RegExp(`(${cuePhrases.join("|")})`, "gi");
+function emphasiseCues(text: string) {
+  return text.split(cuePattern).map((part, index) => index % 2 ? <strong className={styles.cue} key={index}>{part}</strong> : part);
+}
+
 export default function InterviewChecklist() {
   const [sections, setSections] = useState(initialSections);
   const [active, setActive] = useState("setup");
@@ -77,7 +93,7 @@ export default function InterviewChecklist() {
         <summary className={styles.groupSummary}>{g.title}</summary>
         <ul>{g.items.map(q => <li key={q.id} className={q.done ? styles.checked : ""}>
           <input type="checkbox" id={`tick-${q.id}`} checked={q.done} disabled={!ready} aria-label={`Completed: ${q.text}`} onChange={e=>updateItem(s.id,q.id,{done:e.target.checked})}/>
-          <div className={styles.promptBody}>{editing ? <textarea aria-label="Edit prompt" rows={3} value={q.text} onChange={e=>updateItem(s.id,q.id,{text:e.target.value})}/> : <label htmlFor={`tick-${q.id}`}>{q.text}</label>}
+          <div className={styles.promptBody}>{editing ? <textarea aria-label="Edit prompt" rows={3} value={q.text} onChange={e=>updateItem(s.id,q.id,{text:e.target.value})}/> : <label htmlFor={`tick-${q.id}`}>{emphasiseCues(q.text)}</label>}
           {answerNotes[q.id] && <p className={styles.answer}><strong>Interviewer reference · checked 9 Nov 2026</strong><br/>{answerNotes[q.id]}</p>}</div>
         </li>)}</ul>
         {editing && <button onClick={()=>persist(sections.map(section=>section.id!==s.id?section:{...section,groups:section.groups.map((group,index)=>index!==gi?group:{...group,items:[...group.items,{id:crypto.randomUUID(),text:"New question — edit here",done:false}]})}))}>+ Add prompt</button>}
