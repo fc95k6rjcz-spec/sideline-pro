@@ -3,3 +3,5 @@
 .promptBody{flex:1;min-width:0}.answer{margin-top:12px;padding:14px 16px;border-left:3px solid #008879;background:#eaf6f1;color:#234e55;font-size:14px;line-height:1.65}.answer strong{font-size:12px}.promptBody>label{display:block}@media print{.answer{font-size:10px;padding:8px}}
 
 .releaseLink{display:inline-flex;align-items:center;border-radius:10px;padding:12px 16px;min-height:46px;background:#dff6ef;color:#123c46;font-size:14px;font-weight:700}.releaseLink:focus-visible{outline:3px solid #00b8a9;outline-offset:3px}
+
+.brief{padding:22px;border:1px solid #b4ddd3;border-radius:15px;background:#eff9f5;margin-bottom:24px}.brief h3{font-weight:700;margin-bottom:12px}.brief p{font-size:14px;line-height:1.7;margin-top:14px}.keywords{display:flex;flex-wrap:wrap;gap:8px}.keywords mark{background:#fff0af;color:#173d43;border-radius:5px;padding:5px 9px;font-size:12px;font-weight:800;letter-spacing:.04em}@media print{.brief{padding:10px;break-inside:avoid}.brief p{font-size:10px}.keywords mark{font-size:10px}}

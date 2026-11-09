@@ -1,4 +1,4 @@
-export const initialSections = [
+const originalSections = [
   {
     "id": "setup",
     "name": "On the day",
@@ -512,3 +512,94 @@ export const initialSections = [
     "notes": ""
   }
 ];
+
+
+const additions: Record<string, {title: string; prompts: string[]}[]> = {
+  setup: [{title: "New briefing · life first, technology second", prompts: [
+    "Establish a typical day before discussing the app: school drop-offs, pickups, lunches, dinners, work and club logistics. Let each person describe what applies to their life.",
+    "Private background supplied: one subject fosters seven children and volunteers in umpiring and events. Confirm who this is off camera; ask whether she wants to mention fostering at all. Do not ask for children’s names, circumstances or identifying details. A general busy-family-life answer is enough.",
+    "Brief Tai / Ty: the club chooses the technology, while volunteers use it. Explore whether making life easier helps retain good volunteers and reduces the burden of recruiting and training replacements. Confirm preferred spelling of his name.",
+    "Use convenience, speed and cost as questions, not promised results: is it more convenient, faster or cheaper in their experience? Separate volunteer time from actual cash savings; only use figures they can explain.",
+    "Ask for the question’s context within the answer: ‘Being a club volunteer means…’ rather than ‘Yes, it does.’ Use their own words, not a supplied testimonial.",
+    "After a long answer: ‘Can you give me a short version that makes sense without hearing my question?’ Keep the fuller answer and leave a clean pause."
+  ]}],
+  tai: [{title: "Life around the club · establish the stakes", prompts: [
+    "What does a typical day look like for you outside the club, and where does being president fit in?",
+    "Which work, family or club logistics compete for your time? School runs, meals and weekend commitments, if relevant.",
+    "What do your volunteers juggle before they even arrive at the club?"
+  ]}, {title: "Volunteer retention · the president’s perspective", prompts: [
+    "What does keeping experienced, reliable volunteers mean for the club?",
+    "When a good volunteer steps away, what does finding and training someone new involve?",
+    "The committee chooses the system, but volunteers live with it. How did you judge whether it would make their lives easier?",
+    "Has reducing admin made a difference to people’s willingness to keep volunteering? Give a real example if you have one; otherwise describe the goal.",
+    "What is more convenient now? Which job is faster? Has any actual cost changed, separately from the time volunteers give?",
+    "If payment matching takes less effort, what can the committee spend that time on instead?",
+    "For a short standalone answer: what would you tell another president about making volunteering easier and retaining good people? Start with the club context, in your own words."
+  ]}, {title: "Short take · after the full answer", prompts: [
+    "Can you give me a short version that makes sense without hearing my question? Include the subject in your answer — for example, ‘Keeping good volunteers…’ — then describe your own experience."
+  ]}],
+  amanda: [{title: "Life around the club · establish the stakes", prompts: [
+    "What does a typical day look like for you before you start the club work?",
+    "How do school drop-offs, pickups, lunches, dinners or other family commitments fit around volunteering, where relevant?",
+    "Alongside umpiring, what other organising or event jobs do you do for the club?",
+    "If the family-care background applies to Amanda and she has agreed off camera: would you like to describe those responsibilities in general terms? Skip this if she prefers to keep it private.",
+    "Take a standard winter round, rather than the quieter spring competition: when did the roster, messages and last-minute changes fit into that day?"
+  ]}, {title: "Time back · connect the workload to real life", prompts: [
+    "Compare that same winter-round job before and now. What still takes your time, and what has become easier?",
+    "If there is less chasing, what does that give you back at home or at the club? Can you describe a particular evening or weekend?",
+    "What is more convenient about handling the job in the app? Which part is faster, if any?",
+    "Does making the admin easier affect whether the role feels manageable next season? Why?",
+    "Has it freed you to spend more time supporting junior umpires or organising club activities? Give an example if it has."
+  ]}, {title: "Short take · after the full answer", prompts: [
+    "Can you give me a short version that makes sense without hearing my question? Include the context — ‘Preparing a winter round…’ or ‘Volunteering at Seaforth…’ — and explain the change in your own words."
+  ]}],
+  rhian: [{title: "Life around the club · establish the stakes", prompts: [
+    "What does a typical day look like for you, and where do training, games and player reports fit?",
+    "What work, family, school-run or meal-time commitments are you balancing alongside coaching, if relevant?",
+    "When did coaching paperwork used to happen — at the court, after dinner or later in the week?"
+  ]}, {title: "More time coaching · a sustainable volunteer role", prompts: [
+    "What is more convenient about recording feedback now? Which part is faster, and what still takes thought?",
+    "Does keeping the player’s season context together reduce repeated work? Describe an example you have actually experienced.",
+    "If you spend less time on admin, where does that time go — player development, preparation or life outside the club?",
+    "What helps a good coach keep volunteering year after year? Has the way the club supports you changed that experience?",
+    "How do coach reports, grading and Team Builder connect in the work you have used? Keep future plans separate from things already experienced."
+  ]}, {title: "Short take · after the full answer", prompts: [
+    "Can you give me a short version that makes sense without hearing my question? Include the coaching context — ‘Recording player feedback…’ — and describe the impact in your own words."
+  ]}]
+};
+
+export const initialSections = originalSections.map(section => {
+  const extra = (additions[section.id] ?? []).map((group, gi) => ({title: group.title, items: group.prompts.map((text, qi) => ({id: `${section.id}-nov09-${gi}-${qi}`, text, done: false}))}));
+  // Place life context before the existing before/now story; keep the closing prompts later.
+  return {...section, groups: section.id === "setup" ? [...section.groups, ...extra] : [section.groups[0], extra[0], ...section.groups.slice(1, -1), ...extra.slice(1), section.groups[section.groups.length - 1]]};
+});
+
+export const interviewBriefs: Record<string, {message: string; keywords: string[]}> = {
+  setup: {message: "Life first → the old workload → what changed → what that gives back. Listen for these themes; do not require anyone to say them.", keywords: ["TIME BACK", "EASIER VOLUNTEERING", "CONVENIENCE", "FASTER", "COST — IF VERIFIED", "RETENTION"]},
+  tai: {message: "The club’s decision is about supporting people: make volunteering easier, retain experience and reduce the burden of recruiting and training replacements. Payment matching remains a concrete example.", keywords: ["RETAIN GOOD VOLUNTEERS", "MAKE LIFE EASIER", "LESS ADMIN", "PAYMENT MATCHING", "EXPERIENCE STAYS"]},
+  amanda: {message: "Start with the person and a busy winter week. Then connect the roster and less chasing to time at home, manageable volunteering and junior umpire support. Family details are optional.", keywords: ["BUSY LIVES", "WINTER ROUNDS", "LESS CHASING", "TIME BACK", "JUNIOR UMPIRES", "MANAGEABLE ROLE"]},
+  rhian: {message: "Connect a busy coach’s week to useful feedback, consistent assessment and player development. Explore whether easier administration helps coaches stay involved.", keywords: ["MORE TIME COACHING", "PLAYER DEVELOPMENT", "SEASON CONTEXT", "CONSISTENT CRITERIA", "LESS REPEATED WORK"]}
+};
+
+/** Add new published prompts without overwriting local edits, notes or completed ticks. */
+export function mergeInterviewUpdates(saved: typeof initialSections): typeof initialSections {
+  return initialSections.map(template => {
+    const previous = saved.find(s => s.id === template.id);
+    if (!previous) return template;
+    const known = new Set(previous.groups.flatMap(g => g.items.map(q => q.id)));
+    const groups = previous.groups.map(g => ({...g, items: [...g.items]}));
+    for (const group of template.groups) {
+      const missing = group.items.filter(q => !known.has(q.id));
+      if (!missing.length) continue;
+      const existing = groups.find(g => g.title === group.title);
+      if (existing) existing.items.push(...missing);
+      else {
+        const index = template.groups.indexOf(group);
+        const nextTitles = template.groups.slice(index + 1).map(g => g.title);
+        const before = groups.findIndex(g => nextTitles.includes(g.title));
+        groups.splice(before < 0 ? groups.length : before, 0, {...group, items: missing});
+      }
+    }
+    return {...previous, groups};
+  });
+}

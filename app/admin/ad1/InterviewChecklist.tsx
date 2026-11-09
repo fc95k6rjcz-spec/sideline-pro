@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { initialSections } from "./interview-data";
+import { initialSections, interviewBriefs, mergeInterviewUpdates } from "./interview-data";
 import { answerNotes } from "./answer-notes";
 import styles from "./interviews.module.css";
 
@@ -23,7 +23,7 @@ export default function InterviewChecklist() {
         const saved = JSON.parse(raw);
         // Validate before restoring; a damaged backup must not break filming notes.
         if (Array.isArray(saved.sections) && saved.sections.length === initialSections.length && saved.sections.every((s: Section, i: number) => s.id === initialSections[i].id && typeof s.notes === "string" && Array.isArray(s.groups) && s.groups.every(g => typeof g.title === "string" && Array.isArray(g.items) && g.items.every(q => typeof q.id === "string" && typeof q.text === "string" && typeof q.done === "boolean")))) {
-          setSections(saved.sections);
+          setSections(mergeInterviewUpdates(saved.sections));
           if (typeof saved.date === "string") setDate(saved.date);
         } else { setStatus("Saved checklist could not be restored. Original questions loaded."); setReady(true); return; }
       }
@@ -41,7 +41,7 @@ export default function InterviewChecklist() {
     persist(sections.map(s => s.id !== sectionId ? s : {...s, groups: s.groups.map(g => ({...g, items: g.items.map(q => q.id === itemId ? {...q, ...patch} : q)}))}));
   }
   function download() {
-    const text = [`Seaforth testimonial interviews · ${date}`, ...sections.flatMap(s => ["", s.name, s.focus, ...s.groups.flatMap(g => ["", g.title, ...g.items.map(q => `${q.done ? "[x]" : "[ ]"} ${q.text}${answerNotes[q.id] ? `\nInterviewer reference: ${answerNotes[q.id]}` : ""}`)]), "", "Filming notes / takes", s.notes])].join("\n");
+    const text = [`Seaforth testimonial interviews · ${date}`, ...sections.flatMap(s => ["", s.name, s.focus, interviewBriefs[s.id]?.message ?? "", `KEY WORDS: ${interviewBriefs[s.id]?.keywords.join(" · ") ?? ""}`, ...s.groups.flatMap(g => ["", g.title, ...g.items.map(q => `${q.done ? "[x]" : "[ ]"} ${q.text}${answerNotes[q.id] ? `\nInterviewer reference: ${answerNotes[q.id]}` : ""}`)]), "", "Filming notes / takes", s.notes])].join("\n");
     const url = URL.createObjectURL(new Blob([text], {type:"text/plain;charset=utf-8"}));
     const a = document.createElement("a"); a.href=url; a.download=`seaforth-interviews-${date}.txt`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -69,6 +69,10 @@ export default function InterviewChecklist() {
     <p className={styles.progress}>{total.filter(q=>q.done).length} of {total.length} prompts ticked · Questions are a guide, not a script you must finish.</p>
     {sections.map(s => <section key={s.id} className={`${styles.section} ${active !== s.id ? styles.hidden : ""}`}>
       <h2>{s.name}</h2><p className={styles.focus}>{s.focus}</p>
+      {interviewBriefs[s.id] && <aside className={styles.brief} aria-label="Interview themes">
+        <h3>Listen for · key themes</h3><div className={styles.keywords}>{interviewBriefs[s.id].keywords.map(word => <mark key={word}>{word}</mark>)}</div>
+        <p>{interviewBriefs[s.id].message}</p><p><strong>Filming tip:</strong> Include the question’s context in the answer. After the full story, ask: “Can you give me a short version that makes sense without hearing my question?”</p>
+      </aside>}
       {s.groups.map((g,gi) => <div className={styles.group} key={g.title}>
         <h3>{g.title}</h3>
         <ul>{g.items.map(q => <li key={q.id} className={q.done ? styles.checked : ""}>
