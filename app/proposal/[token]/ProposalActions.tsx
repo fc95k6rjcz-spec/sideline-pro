@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatProposalDate, type PublicProposal } from "@/lib/proposals";
+import { ONBOARDING_ACKNOWLEDGEMENT, requiresOnboardingAcknowledgement } from "@/lib/contracts/onboarding";
 
 /**
  * "Accept this proposal" — the bottom of the public proposal page.
@@ -25,6 +26,8 @@ export function ProposalActions({ proposal: initial, expired }: { proposal: Publ
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [agree, setAgree] = useState(false);
+  const [onboardingAgree, setOnboardingAgree] = useState(false);
+  const needsOnboarding = requiresOnboardingAcknowledgement(proposal.terms);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [declining, setDeclining] = useState(false);
@@ -44,7 +47,7 @@ export function ProposalActions({ proposal: initial, expired }: { proposal: Publ
       const res = await fetch(`/api/proposals/public/${encodeURIComponent(proposal.token)}/accept`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, role, email, note, agree }),
+        body: JSON.stringify({ name, role, email, note, agree, onboardingAgree, reviewedTerms: proposal.terms }),
       });
       const j = (await res.json()) as { proposal?: PublicProposal; error?: string };
       if (!res.ok || !j.proposal) throw new Error(j.error || `Could not record your acceptance (${res.status})`);
@@ -237,6 +240,10 @@ export function ProposalActions({ proposal: initial, expired }: { proposal: Publ
               the pricing and terms shown on this page.
             </span>
           </label>
+          {needsOnboarding ? <label className="flex items-start gap-3 rounded-xl bg-[#eaf7f3] p-4 text-sm">
+            <input type="checkbox" required checked={onboardingAgree} onChange={e => setOnboardingAgree(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#10b3a3]" />
+            <span>{ONBOARDING_ACKNOWLEDGEMENT}</span>
+          </label> : null}
           {error ? (
             <div role="alert" className="rounded-lg border border-[#dc2626]/30 bg-[#fef2f2] px-4 py-3 text-sm text-[#991b1b]">
               {error}
@@ -245,7 +252,7 @@ export function ProposalActions({ proposal: initial, expired }: { proposal: Publ
           <div className="mt-1 flex flex-wrap items-center gap-3">
             <button
               type="submit"
-              disabled={busy || !agree}
+              disabled={busy || !agree || (needsOnboarding && !onboardingAgree)}
               className="inline-flex items-center justify-center rounded-lg bg-[#10b3a3] px-6 py-3 text-[15px] font-semibold text-white transition hover:bg-[#0d9a8c] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy ? "Recording…" : "Accept this proposal"}

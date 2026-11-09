@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyFounders } from "@/lib/notify-founders";
+import { onboardingAcceptanceNote, requiresOnboardingAcknowledgement } from "@/lib/contracts/onboarding";
 import { formatAud, normaliseProposalRow, periodLabel, proposalExpired, toPublicProposal } from "@/lib/proposals";
 
 export const runtime = "nodejs";
@@ -64,6 +65,15 @@ export async function POST(request: NextRequest, ctx: Params) {
     );
   }
 
+  let acceptanceNote: string | null = note || null;
+  if (requiresOnboardingAcknowledgement(row.terms)) {
+    if (body.reviewedTerms !== row.terms) {
+      return NextResponse.json({ error: "The proposal requirements have changed. Refresh the page and review them before accepting." }, { status: 409 });
+    }
+    try { acceptanceNote = onboardingAcceptanceNote(row.terms, body.onboardingAgree, note); }
+    catch { return NextResponse.json({ error: "Please acknowledge the club onboarding requirements." }, { status: 400 }); }
+  }
+
   const now = new Date();
   const nowIso = now.toISOString();
   const updates = {
@@ -72,7 +82,7 @@ export async function POST(request: NextRequest, ctx: Params) {
     accepted_name: name,
     accepted_role: role,
     accepted_email: email,
-    accepted_note: note || null,
+    accepted_note: acceptanceNote,
     accepted_ip: clientIp(request),
     accepted_user_agent: request.headers.get("user-agent")?.slice(0, 400) ?? null,
     declined_at: null,
@@ -80,16 +90,18 @@ export async function POST(request: NextRequest, ctx: Params) {
     updated_at: nowIso,
   };
   // The status guard makes a double-submit a no-op rather than a second record.
-  const { data: saved, error: updErr } = await admin
+  let saveQuery = admin
     .from("proposals")
     .update(updates)
     .eq("id", row.id)
-    .neq("status", "accepted")
-    .select()
-    .maybeSingle();
+    .neq("status", "accepted");
+  // Do not accept a checklist edited between the read and the write.
+  if (requiresOnboardingAcknowledgement(row.terms)) saveQuery = saveQuery.eq("terms", row.terms);
+  const { data: saved, error: updErr } = await saveQuery.select().maybeSingle();
   if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
   if (!saved) {
     const { data: again } = await admin.from("proposals").select("*").eq("id", row.id).single();
+    if (!again || again.status !== "accepted") return NextResponse.json({ error: "The proposal changed. Refresh and review it before accepting." }, { status: 409 });
     return NextResponse.json({ proposal: toPublicProposal(normaliseProposalRow(again as Record<string, unknown>)), alreadyAccepted: true });
   }
   const accepted = normaliseProposalRow(saved as Record<string, unknown>);

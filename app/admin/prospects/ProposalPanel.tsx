@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ONBOARDING_TEXT, requiresOnboardingAcknowledgement } from "@/lib/contracts/onboarding";
 import {
   formatAud,
   includesToText,
@@ -233,6 +234,11 @@ export function ProposalPanel({ prospectId, clubName }: { prospectId: string; cl
           Terms
           <textarea rows={4} className={inputClass} value={draft.terms} onChange={(e) => setDraft({ ...draft, terms: e.target.value })} placeholder="Start date, billing, cancellation, who owns the data." />
         </label>
+        <div className="rounded-lg bg-[#eaf7f3] p-3 text-sm">
+          <button type="button" disabled={requiresOnboardingAcknowledgement(draft.terms)} onClick={() => setDraft(d => ({ ...d, terms: [d.terms.trim(), ONBOARDING_TEXT].filter(Boolean).join("\n\n") }))} className="font-semibold text-[#00796e] underline disabled:no-underline disabled:opacity-60">{requiresOnboardingAcknowledgement(draft.terms) ? "Onboarding requirements added" : "Add club onboarding requirements"}</button>
+          <p className="mt-1 text-xs">Review the requirements before sending. Customers acknowledge this list separately; it does not mean all items are supplied.</p>
+          <a href="/admin/contracts" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-xs underline">Review agreement drafts ↗</a>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-[11px] font-semibold uppercase tracking-wider text-[#6e6e73]">
             Valid until
