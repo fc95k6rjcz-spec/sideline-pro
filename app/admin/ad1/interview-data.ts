@@ -578,8 +578,8 @@ const amandaStory = [
   {title: "Off camera · settle in", prompts: [
     "Before we start, is there anything about family life you would prefer to keep private? We can simply say you have a busy home life. When we film, include a little of my question in your answer so it makes sense on its own. When you talk about the app, call it SidelinePro rather than ‘it’ — only describe what you have actually experienced."
   ]},
-  {title: "1 · Meet Amanda — life before the laptop opens", prompts: [
-    "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?",
+  {title: "1 · Before SidelinePro — a typical rostering night", prompts: [
+    "Before SidelinePro, what did a typical night look like when you were trying to organise 94 umpires across so many winter fixtures? Take us through what you were doing and how that fitted around everything happening at home. Then, when people didn’t respond or cancelled, what happened — and what did you have to do to get the games covered?",
     "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back — what do you enjoy about the people, the umpiring and being part of the community?"
   ]},
   {title: "2 · The old winter week — show the pressure", prompts: [
@@ -627,7 +627,7 @@ export function mergeInterviewUpdates(saved: typeof initialSections): typeof ini
       const legacy = legacySections.find(s => s.id === "amanda")!.groups.flatMap(g => g.items);
       const preserved = oldItems.filter(q => !templateIds.has(q.id) && (q.done || q.text !== legacy.find(item => item.id === q.id)?.text));
       return {...template, notes: previous.notes, groups: [
-        ...template.groups.map(g => ({...g, items: g.items.map(q => oldItems.find(item => item.id === q.id) ?? q)})),
+        ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
         ...(preserved.length ? [{title: "Saved earlier prompts · your edits and completed items", items: preserved}] : [])
       ]};
     }
