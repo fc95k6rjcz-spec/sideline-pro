@@ -23,6 +23,6 @@ it('replaces Amanda’s old script but retains custom questions and completed pr
  expect(updated.notes).toBe('Keep take 2');
  expect(updated.groups.flatMap(g=>g.items).some(q=>q.id==='amanda-1-0')).toBe(false);
  expect(updated.groups.at(-1)?.items[0]).toMatchObject({text:'My revised question',done:true});
- expect(updated.groups[1].items[0].text).toContain('typical night');
+ expect(updated.groups[1].items[0].text).toContain('What first got you into it');
  expect(mergeInterviewUpdates(mergeInterviewUpdates(saved))).toEqual(mergeInterviewUpdates(saved));
 });

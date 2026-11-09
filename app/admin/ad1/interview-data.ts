@@ -580,7 +580,7 @@ const amandaStory = [
   ]},
   {title: "1 · Before SidelinePro — a typical rostering night", prompts: [
     "Before SidelinePro, what did a typical night look like when you were trying to organise 94 umpires across so many winter fixtures? Take us through what you were doing and how that fitted around everything happening at home. Then, when people didn’t respond or cancelled, what happened — and what did you have to do to get the games covered?",
-    "You have five children and you also foster children. What does a typical day at home look like for you, and how do you fit your volunteering at Seaforth around those responsibilities? Thinking back to those evenings organising umpires before SidelinePro, what did that extra work mean for your time with the family?"
+    "You have five children and you also foster children. What does a typical day at home look like for you, and how do you fit your volunteering at Seaforth around those responsibilities? Before SidelinePro, where did the extra work of organising umpires fit into that busy family life?"
   ]},
   {title: "2 · The old winter week — show the pressure", prompts: [
     "Now put us in a normal winter week before Seaforth started using SidelinePro. You have a round of games to cover and umpires to organise. Could you talk us through how you built that roster, from finding out who was available to being confident everyone knew where they needed to be?",
@@ -602,10 +602,25 @@ const amandaStory = [
   ]}
 ];
 
+// Stable IDs retain existing edits and ticks while the opening story is reordered.
+const amandaGroups = amandaStory.map((g, gi) => ({title: g.title, items: g.prompts.map((text, qi) => ({id: `amanda-story-v1-${gi}-${qi}`, text, done: false}))}));
+const amandaOpening = {
+  title: "1 · Start with the love of umpiring",
+  items: [{id: "amanda-opening-umpiring", text: "Amanda, before we talk about the organising side, I’d love to hear how umpiring became part of your life. What first got you into it, and what is it about being out on court that you enjoy so much? Looking back, what has helped you develop your confidence and skills as an umpire?", done: false}]
+};
+const orderedAmandaGroups = [
+  amandaGroups[0], amandaOpening,
+  {title: "2 · Her family life and volunteering", items: [amandaGroups[1].items[1]]},
+  {title: "3 · Before SidelinePro — a typical rostering night", items: [amandaGroups[1].items[0], ...amandaGroups[2].items]},
+  {...amandaGroups[3], title: "4 · The same job with SidelinePro"},
+  {...amandaGroups[4], title: "5 · What the change means for her"},
+  {...amandaGroups[5], title: "6 · Her recommendation and a short take"}
+];
+
 export const initialSections = legacySections.map(section => section.id !== "amanda" ? section : {
   ...section,
-  focus: "One conversation: her life → the old winter week → the same job with SidelinePro → personal impact. Ask one main question, listen, then follow her answer. Skip anything she has already covered.",
-  groups: [...amandaStory.map((g, gi) => ({title: g.title, items: g.prompts.map((text, qi) => ({id: `amanda-story-v1-${gi}-${qi}`, text, done: false}))})),
+  focus: "One conversation: why she loves umpiring → family life → the old winter week → the same job with SidelinePro → personal impact. Ask one main question, listen, then follow her answer. Skip anything she has already covered.",
+  groups: [...orderedAmandaGroups,
     {title: "Reference only · numbers and checks, not the interview script", items: section.groups.flatMap(g => g.items).filter(q => /^amanda-(0|4)-/.test(q.id))}]
 });
 
@@ -627,7 +642,7 @@ export function mergeInterviewUpdates(saved: typeof initialSections): typeof ini
       const legacy = legacySections.find(s => s.id === "amanda")!.groups.flatMap(g => g.items);
       const preserved = oldItems.filter(q => !templateIds.has(q.id) && (q.done || q.text !== legacy.find(item => item.id === q.id)?.text));
       return {...template, notes: previous.notes, groups: [
-        ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" && saved.text !== "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back \u2014 what do you enjoy about the people, the umpiring and being part of the community?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
+        ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" && saved.text !== "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back \u2014 what do you enjoy about the people, the umpiring and being part of the community?" && saved.text !== "You have five children and you also foster children. What does a typical day at home look like for you, and how do you fit your volunteering at Seaforth around those responsibilities? Thinking back to those evenings organising umpires before SidelinePro, what did that extra work mean for your time with the family?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
         ...(preserved.length ? [{title: "Saved earlier prompts · your edits and completed items", items: preserved}] : [])
       ]};
     }
