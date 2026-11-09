@@ -73,15 +73,15 @@ export default function InterviewChecklist() {
         <h3>Listen for · key themes</h3><div className={styles.keywords}>{interviewBriefs[s.id].keywords.map(word => <mark key={word}>{word}</mark>)}</div>
         <p>{interviewBriefs[s.id].message}</p><p><strong>Filming tip:</strong> Include the question’s context in the answer. After the full story, ask: “Can you give me a short version that makes sense without hearing my question?”</p>
       </aside>}
-      {s.groups.map((g,gi) => <div className={styles.group} key={g.title}>
-        <h3>{g.title}</h3>
+      {s.groups.map((g,gi) => <details open={s.id !== "amanda" || (!g.title.startsWith("Reference only") && !g.title.startsWith("Saved earlier"))} className={styles.group} key={g.title}>
+        <summary className={styles.groupSummary}>{g.title}</summary>
         <ul>{g.items.map(q => <li key={q.id} className={q.done ? styles.checked : ""}>
           <input type="checkbox" id={`tick-${q.id}`} checked={q.done} disabled={!ready} aria-label={`Completed: ${q.text}`} onChange={e=>updateItem(s.id,q.id,{done:e.target.checked})}/>
           <div className={styles.promptBody}>{editing ? <textarea aria-label="Edit prompt" rows={3} value={q.text} onChange={e=>updateItem(s.id,q.id,{text:e.target.value})}/> : <label htmlFor={`tick-${q.id}`}>{q.text}</label>}
           {answerNotes[q.id] && <p className={styles.answer}><strong>Interviewer reference · checked 9 Nov 2026</strong><br/>{answerNotes[q.id]}</p>}</div>
         </li>)}</ul>
         {editing && <button onClick={()=>persist(sections.map(section=>section.id!==s.id?section:{...section,groups:section.groups.map((group,index)=>index!==gi?group:{...group,items:[...group.items,{id:crypto.randomUUID(),text:"New question — edit here",done:false}]})}))}>+ Add prompt</button>}
-      </div>)}
+      </details>)}
       <div className={styles.notes}><label htmlFor={`notes-${s.id}`}>Filming notes · good quotes, take numbers, verified figures</label><textarea id={`notes-${s.id}`} rows={6} disabled={!ready} value={s.notes} onChange={e=>persist(sections.map(section=>section.id===s.id?{...section,notes:e.target.value}:section))} placeholder="Capture the useful details here…"/><div className={styles.printNotes}>{s.notes}</div></div>
       <button className={styles.reset} disabled={!ready} onClick={()=>{if(window.confirm(`Clear ticks for ${s.name}? Your edited questions and notes will stay.`)) persist(sections.map(section=>section.id!==s.id?section:{...section,groups:section.groups.map(g=>({...g,items:g.items.map(q=>({...q,done:false}))}))}));}}>Clear this section’s ticks</button>
     </section>)}

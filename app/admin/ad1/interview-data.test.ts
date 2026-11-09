@@ -14,3 +14,15 @@ describe('interview guide updates',()=>{
  });
  it('keeps unique stable IDs',()=>{const ids=initialSections.flatMap(s=>s.groups.flatMap(g=>g.items.map(q=>q.id)));expect(new Set(ids).size).toBe(ids.length);});
 });
+it('replaces Amanda’s old script but retains custom questions and completed prompts',()=>{
+ const saved=structuredClone(initialSections);
+ const a=saved.find(s=>s.id==='amanda')!;
+ a.notes='Keep take 2';
+ a.groups=[{title:'Before',items:[{id:'amanda-1-0',text:'Take me to an evening preparing a round. What were you doing?',done:false},{id:'amanda-1-1',text:'My revised question',done:true}]}];
+ const updated=mergeInterviewUpdates(saved).find(s=>s.id==='amanda')!;
+ expect(updated.notes).toBe('Keep take 2');
+ expect(updated.groups.flatMap(g=>g.items).some(q=>q.id==='amanda-1-0')).toBe(false);
+ expect(updated.groups.at(-1)?.items[0]).toMatchObject({text:'My revised question',done:true});
+ expect(updated.groups[1].items[0].text).toContain('typical day');
+ expect(mergeInterviewUpdates(mergeInterviewUpdates(saved))).toEqual(mergeInterviewUpdates(saved));
+});

@@ -568,16 +568,51 @@ const additions: Record<string, {title: string; prompts: string[]}[]> = {
   ]}]
 };
 
-export const initialSections = originalSections.map(section => {
+const legacySections = originalSections.map(section => {
   const extra = (additions[section.id] ?? []).map((group, gi) => ({title: group.title, items: group.prompts.map((text, qi) => ({id: `${section.id}-nov09-${gi}-${qi}`, text, done: false}))}));
   // Place life context before the existing before/now story; keep the closing prompts later.
   return {...section, groups: section.id === "setup" ? [...section.groups, ...extra] : [section.groups[0], extra[0], ...section.groups.slice(1, -1), ...extra.slice(1), section.groups[section.groups.length - 1]]};
 });
 
+const amandaStory = [
+  {title: "Off camera · settle in", prompts: [
+    "Before we start, is there anything about family life you would prefer to keep private? We can simply say you have a busy home life. When we film, include a little of my question in your answer so it makes sense on its own. When you talk about the app, call it SidelinePro rather than ‘it’ — only describe what you have actually experienced."
+  ]},
+  {title: "1 · Meet Amanda — life before the laptop opens", prompts: [
+    "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?",
+    "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back — what do you enjoy about the people, the umpiring and being part of the community?"
+  ]},
+  {title: "2 · The old winter week — show the pressure", prompts: [
+    "Now put us in a normal winter week before Seaforth started using SidelinePro. You have a round of games to cover and umpires to organise. Could you talk us through how you built that roster, from finding out who was available to being confident everyone knew where they needed to be?",
+    "Once that roster went out, what happened next? Think of a particular winter round when you were waiting for replies or someone could no longer make their game. Tell us how you found out, what you had to do, and where that extra work fitted into the rest of your day."
+  ]},
+  {title: "3 · The same job with SidelinePro — make the change concrete", prompts: [
+    "Let’s take that same job now that you use SidelinePro. Imagine you are getting the next winter round ready: could you walk us through what you do in SidelinePro, what an umpire sees on their phone, and how you find out whether they have accepted? Start with ‘With SidelinePro…’ if that helps put us in the picture.",
+    "You mentioned the chasing and changes you used to deal with. Can you think of a real occasion using SidelinePro when an umpire could not make a game? Walk us through what happened and how you handled it, then tell us what was different from the old way — including anything you still had to do yourself.",
+    "When you compare preparing a similar winter round before and after SidelinePro, which part of the job has changed most for you? Describe the difference in the work itself, and if you can genuinely estimate the time involved, explain what you are comparing rather than guessing a number."
+  ]},
+  {title: "4 · What the change means — bring it back to her life", prompts: [
+    "At the start you described everything happening in your day outside netball. Thinking about the changes you have just described with SidelinePro, what difference, if any, do they make to your evenings or weekends? Give us a small real-life example of what you can do now, or what you no longer have to interrupt.",
+    "There is also the part of volunteering that you actually enjoy — helping people and supporting the younger umpires. Has using SidelinePro changed the time or attention you can give them? Tell us about something you have been able to do, or explain honestly if that part has stayed the same.",
+    "When you think about taking on the convenor role again next season, what makes it feel manageable or difficult? Where does SidelinePro fit into that, and what would you want a club president to understand about making life easier for the volunteers they rely on?"
+  ]},
+  {title: "5 · A natural recommendation — then the short take", prompts: [
+    "Imagine another volunteer is sitting beside you, juggling family life and a winter roster the way you were. Based on your own experience, what would you tell her about SidelinePro — what has it changed for you, what should she expect when getting started, and is there anything you would still like improved?",
+    "That was useful. Could you give me a shorter version that makes sense without hearing my question? In your own words, name SidelinePro, tell us the main thing it changed for you, and why that matters in your life. You could begin ‘Before SidelinePro…’ or ‘SidelinePro has helped me…’ if that is true for you."
+  ]}
+];
+
+export const initialSections = legacySections.map(section => section.id !== "amanda" ? section : {
+  ...section,
+  focus: "One conversation: her life → the old winter week → the same job with SidelinePro → personal impact. Ask one main question, listen, then follow her answer. Skip anything she has already covered.",
+  groups: [...amandaStory.map((g, gi) => ({title: g.title, items: g.prompts.map((text, qi) => ({id: `amanda-story-v1-${gi}-${qi}`, text, done: false}))})),
+    {title: "Reference only · numbers and checks, not the interview script", items: section.groups.flatMap(g => g.items).filter(q => /^amanda-(0|4)-/.test(q.id))}]
+});
+
 export const interviewBriefs: Record<string, {message: string; keywords: string[]}> = {
   setup: {message: "Life first → the old workload → what changed → what that gives back. Listen for these themes; do not require anyone to say them.", keywords: ["TIME BACK", "EASIER VOLUNTEERING", "CONVENIENCE", "FASTER", "COST — IF VERIFIED", "RETENTION"]},
   tai: {message: "The club’s decision is about supporting people: make volunteering easier, retain experience and reduce the burden of recruiting and training replacements. Payment matching remains a concrete example.", keywords: ["RETAIN GOOD VOLUNTEERS", "MAKE LIFE EASIER", "LESS ADMIN", "PAYMENT MATCHING", "EXPERIENCE STAYS"]},
-  amanda: {message: "Start with the person and a busy winter week. Then connect the roster and less chasing to time at home, manageable volunteering and junior umpire support. Family details are optional.", keywords: ["BUSY LIVES", "WINTER ROUNDS", "LESS CHASING", "TIME BACK", "JUNIOR UMPIRES", "MANAGEABLE ROLE"]},
+  amanda: {message: "Follow the numbered story in order. Say SidelinePro in the question; invite her to name SidelinePro in her answer. Use her last answer as the bridge to the next question. The reference figures sit separately at the bottom.", keywords: ["BUSY LIVES", "WINTER ROUNDS", "LESS CHASING", "TIME BACK", "JUNIOR UMPIRES", "MANAGEABLE ROLE"]},
   rhian: {message: "Connect a busy coach’s week to useful feedback, consistent assessment and player development. Explore whether easier administration helps coaches stay involved.", keywords: ["MORE TIME COACHING", "PLAYER DEVELOPMENT", "SEASON CONTEXT", "CONSISTENT CRITERIA", "LESS REPEATED WORK"]}
 };
 
@@ -586,6 +621,16 @@ export function mergeInterviewUpdates(saved: typeof initialSections): typeof ini
   return initialSections.map(template => {
     const previous = saved.find(s => s.id === template.id);
     if (!previous) return template;
+    if (template.id === "amanda") {
+      const oldItems = previous.groups.flatMap(g => g.items);
+      const templateIds = new Set(template.groups.flatMap(g => g.items.map(q => q.id)));
+      const legacy = legacySections.find(s => s.id === "amanda")!.groups.flatMap(g => g.items);
+      const preserved = oldItems.filter(q => !templateIds.has(q.id) && (q.done || q.text !== legacy.find(item => item.id === q.id)?.text));
+      return {...template, notes: previous.notes, groups: [
+        ...template.groups.map(g => ({...g, items: g.items.map(q => oldItems.find(item => item.id === q.id) ?? q)})),
+        ...(preserved.length ? [{title: "Saved earlier prompts · your edits and completed items", items: preserved}] : [])
+      ]};
+    }
     const known = new Set(previous.groups.flatMap(g => g.items.map(q => q.id)));
     const groups = previous.groups.map(g => ({...g, items: [...g.items]}));
     for (const group of template.groups) {
