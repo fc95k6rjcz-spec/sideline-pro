@@ -517,7 +517,7 @@ const originalSections = [
 const additions: Record<string, {title: string; prompts: string[]}[]> = {
   setup: [{title: "New briefing · life first, technology second", prompts: [
     "Establish a typical day before discussing the app: school drop-offs, pickups, lunches, dinners, work and club logistics. Let each person describe what applies to their life.",
-    "Private background supplied: Amanda has five children and also fosters children, according to the latest briefing; she volunteers in umpiring and events. Confirm the family wording with her off camera; ask whether she wants to mention fostering at all. Do not ask for children’s names, circumstances or identifying details. A general busy-family-life answer is enough.",
+    "Private background supplied: Amanda has five children and also fosters children, according to the latest briefing; she volunteers as an umpire and umpire convenor. Confirm the family wording with her off camera; ask whether she wants to mention fostering at all. Do not ask for children’s names, circumstances or identifying details. A general busy-family-life answer is enough.",
     "Brief Tai / Ty: the club chooses the technology, while volunteers use it. Explore whether making life easier helps retain good volunteers and reduces the burden of recruiting and training replacements. Confirm preferred spelling of his name.",
     "Use convenience, speed and cost as questions, not promised results: is it more convenient, faster or cheaper in their experience? Separate volunteer time from actual cash savings; only use figures they can explain.",
     "Ask for the question’s context within the answer: ‘Being a club volunteer means…’ rather than ‘Yes, it does.’ Use their own words, not a supplied testimonial.",
@@ -541,7 +541,6 @@ const additions: Record<string, {title: string; prompts: string[]}[]> = {
   amanda: [{title: "Life around the club · establish the stakes", prompts: [
     "What does a typical day look like for you before you start the club work?",
     "How do school drop-offs, pickups, lunches, dinners or other family commitments fit around volunteering, where relevant?",
-    "Alongside umpiring, what other organising or event jobs do you do for the club?",
     "If the family-care background applies to Amanda and she has agreed off camera: would you like to describe those responsibilities in general terms? Skip this if she prefers to keep it private.",
     "Take a standard winter round, rather than the quieter spring competition: when did the roster, messages and last-minute changes fit into that day?"
   ]}, {title: "Time back · connect the workload to real life", prompts: [
@@ -606,7 +605,7 @@ const amandaStory = [
 const amandaGroups = amandaStory.map((g, gi) => ({title: g.title, items: g.prompts.map((text, qi) => ({id: `amanda-story-v1-${gi}-${qi}`, text, done: false}))}));
 const amandaOpening = {
   title: "1 · Start with the love of umpiring",
-  items: [{id: "amanda-opening-umpiring", text: "Amanda, before we talk about the organising side, I’d love to hear how umpiring became part of your life. What first got you into it, and what is it about being out on court that you enjoy so much? Looking back, what has helped you develop your confidence and skills as an umpire?", done: false}]
+  items: [{id: "amanda-opening-umpiring", text: "Amanda, I’d love to hear how umpiring became part of your life. What first got you into it, and what is it about being out on court that you enjoy so much? Looking back, what has helped you develop your confidence and skills as an umpire?", done: false}]
 };
 const orderedAmandaGroups = [
   amandaGroups[0], amandaOpening,
@@ -640,9 +639,9 @@ export function mergeInterviewUpdates(saved: typeof initialSections): typeof ini
       const oldItems = previous.groups.flatMap(g => g.items);
       const templateIds = new Set(template.groups.flatMap(g => g.items.map(q => q.id)));
       const legacy = legacySections.find(s => s.id === "amanda")!.groups.flatMap(g => g.items);
-      const preserved = oldItems.filter(q => !templateIds.has(q.id) && (q.done || q.text !== legacy.find(item => item.id === q.id)?.text));
+      const preserved = oldItems.filter(q => q.id !== "amanda-nov09-0-2" && !/organising or event jobs/i.test(q.text) && !templateIds.has(q.id) && (q.done || q.text !== legacy.find(item => item.id === q.id)?.text));
       return {...template, notes: previous.notes, groups: [
-        ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" && saved.text !== "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back \u2014 what do you enjoy about the people, the umpiring and being part of the community?" && saved.text !== "You have five children and you also foster children. What does a typical day at home look like for you, and how do you fit your volunteering at Seaforth around those responsibilities? Thinking back to those evenings organising umpires before SidelinePro, what did that extra work mean for your time with the family?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
+        ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" && saved.text !== "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back \u2014 what do you enjoy about the people, the umpiring and being part of the community?" && saved.text !== "You have five children and you also foster children. What does a typical day at home look like for you, and how do you fit your volunteering at Seaforth around those responsibilities? Thinking back to those evenings organising umpires before SidelinePro, what did that extra work mean for your time with the family?" && saved.text !== "Amanda, before we talk about the organising side, I\u2019d love to hear how umpiring became part of your life. What first got you into it, and what is it about being out on court that you enjoy so much? Looking back, what has helped you develop your confidence and skills as an umpire?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
         ...(preserved.length ? [{title: "Saved earlier prompts · your edits and completed items", items: preserved}] : [])
       ]};
     }
