@@ -609,11 +609,10 @@ const amandaOpening = {
 };
 const orderedAmandaGroups = [
   amandaGroups[0], amandaOpening,
-  {title: "2 · Her family life and volunteering", items: [amandaGroups[1].items[1]]},
-  {title: "3 · Before SidelinePro — a typical rostering night", items: [amandaGroups[1].items[0], ...amandaGroups[2].items]},
-  {...amandaGroups[3], title: "4 · The same job with SidelinePro"},
-  {...amandaGroups[4], title: "5 · What the change means for her"},
-  {...amandaGroups[5], title: "6 · Her recommendation and a short take"}
+  {title: "2 · Family life and the old rostering nights", items: [{id: "amanda-family-roster-joined", text: "You have five children and you also foster children, so there’s a lot happening at home alongside your love of umpiring. Before SidelinePro, what did a typical evening look like when you were trying to organise 94 umpires across all those winter fixtures as well? Take us through how you fitted that around family life, and what happened to your evening when people didn’t respond or cancelled and you had to find someone else.", done: false}]},
+  {...amandaGroups[3], title: "3 · The same job with SidelinePro"},
+  {...amandaGroups[4], title: "4 · What the change means for her"},
+  {...amandaGroups[5], title: "5 · Her recommendation and a short take"}
 ];
 
 export const initialSections = legacySections.map(section => section.id !== "amanda" ? section : {
@@ -638,7 +637,7 @@ export function mergeInterviewUpdates(saved: typeof initialSections): typeof ini
     if (template.id === "amanda") {
       const oldItems = previous.groups.flatMap(g => g.items);
       const templateIds = new Set(template.groups.flatMap(g => g.items.map(q => q.id)));
-      const legacy = legacySections.find(s => s.id === "amanda")!.groups.flatMap(g => g.items);
+      const legacy = [...legacySections.find(s => s.id === "amanda")!.groups.flatMap(g => g.items), ...amandaGroups.flatMap(g => g.items)];
       const preserved = oldItems.filter(q => q.id !== "amanda-nov09-0-2" && !/organising or event jobs/i.test(q.text) && !templateIds.has(q.id) && (q.done || q.text !== legacy.find(item => item.id === q.id)?.text));
       return {...template, notes: previous.notes, groups: [
         ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" && saved.text !== "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back \u2014 what do you enjoy about the people, the umpiring and being part of the community?" && saved.text !== "You have five children and you also foster children. What does a typical day at home look like for you, and how do you fit your volunteering at Seaforth around those responsibilities? Thinking back to those evenings organising umpires before SidelinePro, what did that extra work mean for your time with the family?" && saved.text !== "Amanda, before we talk about the organising side, I\u2019d love to hear how umpiring became part of your life. What first got you into it, and what is it about being out on court that you enjoy so much? Looking back, what has helped you develop your confidence and skills as an umpire?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
