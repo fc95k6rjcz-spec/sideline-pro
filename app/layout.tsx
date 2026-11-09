@@ -13,6 +13,8 @@ const poppins = Poppins({
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.sidelinepro.com.au'),
+  verification: { other: { 'msvalidate.01': '98A05D367CCA42AA2DA642B82D92F0A7' } },
   title: 'SidelinePro | The operating system for Australian community sport',
   description: 'Connect grading, team formation, umpire rostering, coaching and player development with PlayHQ workflows. Built around Australian community sport.',
   icons: {
