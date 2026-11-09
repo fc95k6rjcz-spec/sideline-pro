@@ -517,7 +517,7 @@ const originalSections = [
 const additions: Record<string, {title: string; prompts: string[]}[]> = {
   setup: [{title: "New briefing · life first, technology second", prompts: [
     "Establish a typical day before discussing the app: school drop-offs, pickups, lunches, dinners, work and club logistics. Let each person describe what applies to their life.",
-    "Private background supplied: one subject fosters seven children and volunteers in umpiring and events. Confirm who this is off camera; ask whether she wants to mention fostering at all. Do not ask for children’s names, circumstances or identifying details. A general busy-family-life answer is enough.",
+    "Private background supplied: Amanda has five children and also fosters children, according to the latest briefing; she volunteers in umpiring and events. Confirm the family wording with her off camera; ask whether she wants to mention fostering at all. Do not ask for children’s names, circumstances or identifying details. A general busy-family-life answer is enough.",
     "Brief Tai / Ty: the club chooses the technology, while volunteers use it. Explore whether making life easier helps retain good volunteers and reduces the burden of recruiting and training replacements. Confirm preferred spelling of his name.",
     "Use convenience, speed and cost as questions, not promised results: is it more convenient, faster or cheaper in their experience? Separate volunteer time from actual cash savings; only use figures they can explain.",
     "Ask for the question’s context within the answer: ‘Being a club volunteer means…’ rather than ‘Yes, it does.’ Use their own words, not a supplied testimonial.",
@@ -580,7 +580,7 @@ const amandaStory = [
   ]},
   {title: "1 · Before SidelinePro — a typical rostering night", prompts: [
     "Before SidelinePro, what did a typical night look like when you were trying to organise 94 umpires across so many winter fixtures? Take us through what you were doing and how that fitted around everything happening at home. Then, when people didn’t respond or cancelled, what happened — and what did you have to do to get the games covered?",
-    "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back — what do you enjoy about the people, the umpiring and being part of the community?"
+    "You have five children and you also foster children. What does a typical day at home look like for you, and how do you fit your volunteering at Seaforth around those responsibilities? Thinking back to those evenings organising umpires before SidelinePro, what did that extra work mean for your time with the family?"
   ]},
   {title: "2 · The old winter week — show the pressure", prompts: [
     "Now put us in a normal winter week before Seaforth started using SidelinePro. You have a round of games to cover and umpires to organise. Could you talk us through how you built that roster, from finding out who was available to being confident everyone knew where they needed to be?",
@@ -627,7 +627,7 @@ export function mergeInterviewUpdates(saved: typeof initialSections): typeof ini
       const legacy = legacySections.find(s => s.id === "amanda")!.groups.flatMap(g => g.items);
       const preserved = oldItems.filter(q => !templateIds.has(q.id) && (q.done || q.text !== legacy.find(item => item.id === q.id)?.text));
       return {...template, notes: previous.notes, groups: [
-        ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
+        ...template.groups.map(g => ({...g, items: g.items.map(q => { const saved = oldItems.find(item => item.id === q.id); return saved && saved.text !== "Amanda, before we talk about netball or technology, help us understand your everyday life. Could you take us through a typical day at home, from getting everyone organised in the morning to the end of the evening, and tell us where your volunteering at Seaforth fits into that?" && saved.text !== "With all of that happening at home, you still give your time to the club. Tell me what you do at Seaforth and what keeps you coming back \u2014 what do you enjoy about the people, the umpiring and being part of the community?" ? saved : {...q, done: saved?.done ?? q.done}; })})),
         ...(preserved.length ? [{title: "Saved earlier prompts · your edits and completed items", items: preserved}] : [])
       ]};
     }
