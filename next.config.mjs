@@ -11,6 +11,10 @@ const nextConfig = {
   // the Edge middleware), so /login and /admin/* don't 500 when Turbopack
   // skips them. Required for Next 16 + Turbopack on Vercel.
   env: {
+    // Only this approved, protected preview enables measurement testing.
+    NEXT_PUBLIC_MARKETING_MEASUREMENT_ENABLED: process.env.NEXT_PUBLIC_MARKETING_MEASUREMENT_ENABLED || (process.env.VERCEL_ENV === "preview" && process.env.VERCEL_GIT_COMMIT_REF === "preview/measurement-20261110" ? "true" : "false"),
+    NEXT_PUBLIC_MARKETING_PREVIEW_HOST: process.env.VERCEL_ENV === "preview" && process.env.VERCEL_GIT_COMMIT_REF === "preview/measurement-20261110" ? process.env.VERCEL_URL || "" : "",
+
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },

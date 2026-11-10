@@ -103,6 +103,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 })
   }
   lead.email = email
+  // The approved protected preview must never send email or write real leads.
+  if (process.env.VERCEL_ENV === "preview" && process.env.VERCEL_GIT_COMMIT_REF === "preview/measurement-20261110") {
+    return NextResponse.json({ success: true, simulated: true })
+  }
+
 
   // Try both; the request only fails if NOTHING captured the lead.
   let saved = false

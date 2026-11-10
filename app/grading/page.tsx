@@ -7,6 +7,7 @@ import { PhoneScreenshot } from "../components/PhoneScreenshot"
 import { SiteFooter, SiteHeader } from "../components/SiteChrome"
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/grading" },
   title: "Player grading & development · SidelinePro",
   description: "Coach reports, courtside grading and Team Builder, connected season to season. Built for netball and basketball clubs.",
 }

@@ -1,0 +1,68 @@
+const { chromium } = require('playwright')
+const assert = require('node:assert/strict')
+const base = 'http://127.0.0.1:3210'
+;(async () => {
+ const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']})
+ let passed=0
+ async function scenario(name,fn) {
+  const context=await browser.newContext()
+  let tags=0, submits=0, fail=false
+  await context.route('**/gtm.js?**',async r=>{tags++;await r.fulfill({contentType:'application/javascript',body:'/* isolated vendor stub: no external collection */'})})
+  await context.route('**/api/site-analytics', r=>r.fulfill({status:204}))
+  await context.route('**/api/contact',async r=>{submits++;await new Promise(r=>setTimeout(r,150));await r.fulfill({status:fail?500:200,contentType:'application/json',body:JSON.stringify(fail?{error:'test failure'}:{success:true})})})
+  await context.route(/google-analytics\.com|analytics\.google\.com|clarity\.ms/,r=>r.abort())
+  const page=await context.newPage()
+  try {await fn({context,page,tags:()=>tags,submits:()=>submits,setFailure:v=>fail=v});console.log('PASS',name);passed++}
+  finally{await context.close()}
+ }
+ await scenario('unknown and legacy private consent do not load Google',async({context,page,tags})=>{
+  await context.addCookies([{name:'sp_analytics_consent',value:'yes',url:base}])
+  await page.goto(base); await page.getByRole('button',{name:'Save choices',exact:true}).waitFor()
+  assert.equal(tags(),0)
+  assert.equal(await page.getByRole('checkbox').nth(1).isChecked(),false)
+  await page.getByRole('button',{name:'Decline analytics',exact:true}).click();await page.waitForTimeout(300)
+  assert.equal(tags(),0)
+ })
+ await scenario('Google-only consent: one container, safe pageview, success-only lead, withdrawal',async({page,context,tags,submits,setFailure})=>{
+  await page.goto(base+'/?email=secret@example.com#private')
+  await page.getByRole('checkbox').nth(1).check()
+  await page.getByRole('button',{name:'Save choices',exact:true}).click()
+  await page.waitForFunction(()=>window.dataLayer?.some(x=>x.event==='sp_page_view'))
+  assert.equal(tags(),1)
+  let events=await page.evaluate(()=>window.dataLayer.filter(x=>x.event))
+  assert.equal(events.filter(x=>x.event==='sp_page_view').length,1)
+  assert.equal(events.find(x=>x.event==='sp_page_view').page_location,'https://www.sidelinepro.com.au/')
+  assert.equal(JSON.stringify(events).includes('secret@example.com'),false)
+  await page.getByLabel('Name',{exact:true}).fill('TEST PERSON')
+  await page.getByLabel('Club name',{exact:true}).fill('TEST CLUB')
+  await page.getByLabel('Email',{exact:true}).fill('private@example.com')
+  setFailure(true)
+  await page.locator('form button[type="submit"]').click()
+  await page.getByText('Your request could not be sent.',{exact:false}).waitFor()
+  assert.equal(await page.evaluate(()=>window.dataLayer.filter(x=>x.event==='generate_lead').length),0)
+  setFailure(false)
+  await page.locator('form button[type="submit"]').dblclick()
+  await page.getByText('Demo request received',{exact:true}).waitFor()
+  assert.equal(submits(),2)
+  events=await page.evaluate(()=>window.dataLayer.filter(x=>x.event==='generate_lead'))
+  assert.equal(events.length,1);assert.equal(JSON.stringify(events).includes('private@example.com'),false)
+  await context.addCookies([{name:'_ga',value:'test-only',url:base}])
+  await page.getByRole('button',{name:'Privacy choices',exact:true}).click()
+  await Promise.all([page.waitForNavigation(),page.getByRole('button',{name:'Decline analytics',exact:true}).click()])
+  await page.getByRole('button',{name:'Privacy choices',exact:true}).waitFor()
+  assert.equal(tags(),1)
+  assert.equal((await context.cookies()).some(c=>c.name==='_ga'),false)
+ })
+ await scenario('DNT overrides saved Google consent',async({context,page,tags})=>{
+  await context.addInitScript(()=>Object.defineProperty(navigator,'doNotTrack',{get:()=> '1'}))
+  await context.addCookies([{name:'sp_analytics_consent',value:'yes',url:base},{name:'sp_measurement_consent',value:'v1',url:base}])
+  await page.goto(base);await page.getByRole('button',{name:'Privacy choices',exact:true}).waitFor()
+  await page.getByRole('button',{name:'Privacy choices',exact:true}).click()
+  assert.equal(await page.getByRole('checkbox').nth(1).isDisabled(),true);assert.equal(tags(),0)
+ })
+ await scenario('private routes never load marketing tags',async({context,page,tags})=>{
+  await context.addCookies([{name:'sp_measurement_consent',value:'v1',url:base}])
+  await page.goto(base+'/update'); await page.waitForTimeout(400);assert.equal(tags(),0)
+ })
+ await browser.close();console.log(`${passed} browser scenarios passed; vendor network mocked, no live GA receipt assertion.`)
+})().catch(e=>{console.error(e);process.exit(1)})

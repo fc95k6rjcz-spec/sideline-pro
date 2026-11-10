@@ -44,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en-AU" className={`scroll-smooth bg-white ${poppins.variable}`}>
       <body className={`${poppins.className} font-sans antialiased bg-white text-[#1d1d1f]`}>
+        {process.env.NEXT_PUBLIC_MARKETING_PREVIEW_HOST && <div role="status" className="bg-amber-100 px-4 py-3 text-center text-sm text-black">Protected analytics preview: demo requests are simulated. No enquiry emails or database records are created.</div>}
         {children}
         {process.env.NODE_ENV === 'production' && <VisitorAnalytics />}
         {process.env.NODE_ENV === 'production' && <Analytics />}

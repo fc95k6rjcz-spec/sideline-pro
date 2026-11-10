@@ -1,3 +1,4 @@
+export const metadata = { alternates: { canonical: "/" } }
 import Image from "next/image"
 import { ArrowUpRight, ArrowRight, Check, ClipboardList, Clock, Flag, MessagesSquare, Sparkles, Users, Wallet } from "lucide-react"
 import { ContactForm } from "@/components/contact-form"

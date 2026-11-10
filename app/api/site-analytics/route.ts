@@ -5,6 +5,7 @@ import { analyticsStorage, publicPaths, type Visit } from '@/lib/site-analytics'
 
 export const runtime = 'nodejs'
 export async function POST(req: NextRequest) {
+  if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_GIT_COMMIT_REF === 'preview/measurement-20261110') return new NextResponse(null, { status: 204 })
   if (req.headers.get('origin') !== req.nextUrl.origin || req.headers.get('sec-fetch-site') === 'cross-site') return new NextResponse(null, { status: 403 })
   if (req.cookies.get('sp_analytics_consent')?.value !== 'yes' || req.headers.get('sec-gpc') === '1' || req.headers.get('dnt') === '1') return new NextResponse(null, { status: 204 })
   if (Number(req.headers.get('content-length') ?? 0) > 2048) return new NextResponse(null, { status: 413 })

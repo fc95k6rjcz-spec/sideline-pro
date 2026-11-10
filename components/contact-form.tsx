@@ -1,14 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
+import { trackMarketingEvent } from "@/lib/marketing-events"
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const submitting = useRef(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState("")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (submitting.current) return
+    submitting.current = true
     setIsSubmitting(true)
     setError("")
 
@@ -31,12 +35,14 @@ export function ContactForm() {
 
       if (response.ok) {
         setIsSubmitted(true)
+        trackMarketingEvent("generate_lead")
       } else {
         setError("Your request could not be sent. Please try again or email rowan@sidelinepro.com.au.")
       }
     } catch {
       setError("We couldn’t connect. Please try again or email rowan@sidelinepro.com.au.")
     } finally {
+      submitting.current = false
       setIsSubmitting(false)
     }
   }
