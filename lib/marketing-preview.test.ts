@@ -21,3 +21,14 @@ describe('protected measurement preview', () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 })
+
+describe('production release safety', () => {
+  it('uses the real delivery path in production, never preview simulation', async () => {
+    vi.stubEnv('VERCEL_ENV','production');vi.stubEnv('VERCEL_GIT_COMMIT_REF','preview/measurement-20261110')
+    vi.stubEnv('SUPABASE_URL','https://synthetic.invalid');vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY','unit-test-only');vi.stubEnv('RESEND_API_KEY','')
+    const fetch=vi.fn().mockResolvedValue({ok:true});vi.stubGlobal('fetch',fetch)
+    const response=await POST(new Request('https://www.sidelinepro.com.au/api/contact',{method:'POST',body:JSON.stringify({email:'test@example.com'})}))
+    expect(await response.json()).toEqual({success:true})
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+})
