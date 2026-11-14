@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server"
+import nodemailer from "nodemailer"
+import { z } from "zod"
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-type Lead = {
-  name?: string
-  club?: string
-  email?: string
-  phone?: string
-  players?: string
-  message?: string
-}
+const singleLine = (max: number) => z.string().trim().max(max).refine(value => !/[\r\n\0]/.test(value))
+const leadSchema = z.object({
+  name: singleLine(200).optional(),
+  club: singleLine(200).optional(),
+  email: z.string().trim().max(254).email().transform(value => value.toLowerCase()),
+  phone: singleLine(100).optional(),
+  players: singleLine(100).optional(),
+  message: z.string().trim().max(10000).refine(value => !value.includes("\0")).optional(),
+})
+type Lead = z.infer<typeof leadSchema>
 
 // Save the lead to Supabase (demo_requests table) using the service-role key.
 // Best-effort: never blocks the email path.
@@ -23,6 +25,7 @@ async function storeLead(lead: Lead) {
   const base = url.replace(/\/$/, "")
   const res = await fetch(`${base}/rest/v1/demo_requests`, {
     method: "POST",
+    signal: AbortSignal.timeout(10000),
     headers: {
       apikey: key,
       Authorization: `Bearer ${key}`,
@@ -40,20 +43,19 @@ async function storeLead(lead: Lead) {
     }),
   })
   if (!res.ok) {
-    const detail = await res.text().catch(() => "")
-    throw new Error(`Supabase insert failed: ${res.status} ${detail}`)
+    throw new Error(`Supabase insert failed: ${res.status}`)
   }
   return true
 }
 
 // Email the team so the lead lands in an inbox immediately.
 async function notifyTeam(lead: Lead) {
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
-    console.warn("[contact] RESEND_API_KEY not set — no email sent")
+  const user = process.env.GMAIL_USER
+  const pass = process.env.GMAIL_APP_PASS
+  if (!user || !pass) {
+    console.warn("[contact] Gmail not configured — notification unavailable")
     return false
   }
-  const from = process.env.RESEND_FROM_EMAIL ?? "Sideline Pro <onboarding@resend.dev>"
   // CONTACT_NOTIFY_EMAIL can be a single address or a comma-separated list.
   // Default goes to both founders so demo requests aren't a single-point-of-failure.
   const to = (process.env.CONTACT_NOTIFY_EMAIL ?? "justin@sidelinepro.com.au,rowan@sidelinepro.com.au")
@@ -71,38 +73,53 @@ async function notifyTeam(lead: Lead) {
     lead.message ?? "—",
   ].join("\n")
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from,
-      to,
-      reply_to: lead.email,
-      subject: `New demo request: ${lead.club ?? lead.name ?? "Sideline Pro"}`,
-      text: lines,
-    }),
-  })
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "")
-    console.error("[contact] Resend error:", res.status, detail)
+  if (!to.length || to.some(address => !z.string().email().safeParse(address).success)) {
+    console.error("[contact] Invalid notification recipient configuration")
     return false
   }
-  return true
+  // Match the approved invoice mailer; keep the configured sender identity.
+  const transport = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  })
+  try {
+    const result = await transport.sendMail({
+      from: { name: process.env.GMAIL_FROM_NAME ?? "Sideline Pro", address: user },
+      to,
+      replyTo: lead.email,
+      subject: `New demo request: ${lead.club || lead.name || "Sideline Pro"}`,
+      text: lines,
+      disableFileAccess: true,
+      disableUrlAccess: true,
+    })
+    const delivered = to.every(address => result.accepted?.some(accepted =>
+      (typeof accepted === "string" ? accepted : accepted.address).toLowerCase() === address.toLowerCase()))
+    if (!delivered) console.error("[contact] Notification not accepted for every recipient")
+    return delivered
+  } finally {
+    transport.close()
+  }
 }
 
 export async function POST(request: Request) {
-  let lead: Lead
+  let body: unknown
   try {
-    lead = (await request.json()) as Lead
+    const raw = await request.text()
+    if (new TextEncoder().encode(raw).length > 16384) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 })
+    }
+    body = JSON.parse(raw)
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
   }
-
-  const email = (lead.email ?? "").trim().toLowerCase()
-  if (!email || !EMAIL_RE.test(email)) {
-    return NextResponse.json({ error: "Invalid email" }, { status: 400 })
+  const parsed = leadSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid contact details" }, { status: 400 })
   }
-  lead.email = email
+  const lead = parsed.data
   // The approved protected preview must never send email or write real leads.
   if (process.env.VERCEL_ENV === "preview" && process.env.VERCEL_GIT_COMMIT_REF === "preview/measurement-20261110") {
     return NextResponse.json({ success: true, simulated: true })
@@ -112,11 +129,11 @@ export async function POST(request: Request) {
   // Try both; the request only fails if NOTHING captured the lead.
   let saved = false
   let emailed = false
-  try { saved = await storeLead(lead) } catch (e) { console.error("[contact] save error:", e) }
-  try { emailed = await notifyTeam(lead) } catch (e) { console.error("[contact] email error:", e) }
+  try { saved = await storeLead(lead) } catch { console.error("[contact] Database capture failed") }
+  try { emailed = await notifyTeam(lead) } catch { console.error("[contact] Gmail notification failed") }
 
   if (!saved && !emailed) {
-    console.error("[contact] LEAD LOST — no DB and no email configured:", lead)
+    console.error("[contact] Capture and notification both failed")
     return NextResponse.json({ error: "Could not deliver request" }, { status: 500 })
   }
 
