@@ -9,7 +9,7 @@ const labelText = "text-[13px] font-semibold text-[#4c5b6d]"
 
 /**
  * "Book my demo" card from the Live redesign. Posts to the existing
- * /api/contact route (Supabase demo_requests + Resend email). `teams`
+ * /api/contact route (Supabase demo_requests + Gmail notification). `teams`
  * is sent as `players`, which is what the route and table already use.
  */
 export function DemoForm({ displayFont }: { displayFont: React.CSSProperties }) {
