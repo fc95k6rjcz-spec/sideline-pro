@@ -75,7 +75,7 @@ function Navbar() {
             ))}
           </div>
           <a href="#demo" className={`${tealPill} px-5 py-2.5 text-[14px] sm:px-6 sm:py-3 sm:text-[15px]`}>
-            Book a demo
+            See how it works
           </a>
         </div>
       </div>
@@ -124,7 +124,7 @@ function Hero() {
           </p>
           <div className="mt-[34px] flex flex-wrap items-center gap-3.5">
             <a href="#demo" className={`${tealPill} px-8 py-4 text-[17px]`}>
-              Book a 20-min demo
+              See how it works
             </a>
             <a
               href="#dimes"
@@ -373,15 +373,12 @@ function Demo() {
       <div className={`${container} grid items-center gap-12 lg:gap-16 [grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))]`}>
         <div>
           <h2 className="font-extrabold uppercase leading-[0.92] text-white" style={{ ...display, fontSize: "clamp(52px,7vw,110px)" }}>
-            Show us
+            See how SidelinePro could
             <br />
-            your club.
-            <br />
-            <span className="text-[#00BFAE]">We&rsquo;ll show you Saturday.</span>
+            <span className="text-[#00BFAE]">work for your club.</span>
           </h2>
           <p className="mt-6 max-w-[460px] text-[17px] leading-[1.55] text-[#a5b3c7]">
-            A 20-minute walkthrough built around your teams, your codes and your admin. Rowan replies
-            within one business day. A real person, not an auto-responder.
+            A relaxed 20-minute walkthrough, tailored to your club. Ask questions, see the features that matter to you, and decide if it’s a good fit. No pressure or obligation.
           </p>
           <p className="mt-7 text-[15px] text-[#e6edf7]">
             Rather just email?{" "}
@@ -397,7 +394,7 @@ function Demo() {
 }
 
 /* ── Footer ─────────────────────────────────────────────── */
-const footLinks: [string, string][] = [...navLinks, ["Book a demo", "#demo"]]
+const footLinks: [string, string][] = [...navLinks, ["See how it works", "#demo"]]
 
 function Footer() {
   return (

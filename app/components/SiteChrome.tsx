@@ -17,11 +17,11 @@ export function SiteHeader({ base = "" }: { base?: string }) {
   return <header className={styles.header}><div className={styles.nav}>
     <a href={base ? "/" : "#top"} aria-label="SidelinePro home"><Image src="/logo-horizontal-dark.svg" alt="SidelinePro" width={174} height={48} priority className={styles.logo}/></a>
     <nav aria-label="Main navigation" className={styles.desktopNav}>{links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
-    <a className={styles.button} href={`${base}#contact`}>Book a demo <ArrowUpRight size={16}/></a>
+    <a className={styles.button} href={`${base}#contact`}>See how it works <ArrowUpRight size={16}/></a>
     <MobileNav className={styles.mobileNav} links={links}/>
   </div></header>
 }
 
 export function SiteFooter({ base = "" }: { base?: string }) {
-  return <footer className={styles.footer}><div><Image src="/logo-horizontal-dark.svg" alt="SidelinePro" width={174} height={48}/><p>Powered by SidelinePro. Built around your sport.<br/>100% Australian owned and operated.</p></div><div>{navLinks(base).map(([label,href])=><a key={href} href={href}>{label}</a>)}<a href={`${base}#contact`}>Book a demo</a></div><small>© {new Date().getFullYear()} Sideline Pro Pty Ltd · ACN 697 721 627</small></footer>
+  return <footer className={styles.footer}><div><Image src="/logo-horizontal-dark.svg" alt="SidelinePro" width={174} height={48}/><p>Powered by SidelinePro. Built around your sport.<br/>100% Australian owned and operated.</p></div><div>{navLinks(base).map(([label,href])=><a key={href} href={href}>{label}</a>)}<a href={`${base}#contact`}>See how it works</a></div><small>© {new Date().getFullYear()} Sideline Pro Pty Ltd · ACN 697 721 627</small></footer>
 }

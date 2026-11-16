@@ -1,6 +1,6 @@
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
-const base = 'http://127.0.0.1:3210'
+const base = process.env.BASE_URL || 'http://127.0.0.1:3210'
 ;(async () => {
  const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']})
  let passed=0
@@ -15,9 +15,20 @@ const base = 'http://127.0.0.1:3210'
   try {await fn({context,page,tags:()=>tags,submits:()=>submits,setFailure:v=>fail=v});console.log('PASS',name);passed++}
   finally{await context.close()}
  }
+ await scenario('fresh visitors see no popup and are not opted in',async({page,context,tags})=>{
+  await page.goto(base)
+  await page.getByRole('button',{name:'Privacy choices',exact:true}).waitFor()
+  assert.equal(await page.getByRole('complementary',{name:'Optional site analytics'}).count(),0)
+  assert.equal(tags(),0)
+  assert.equal((await context.cookies()).some(c=>c.name.startsWith('sp_')),false)
+  await page.getByRole('button',{name:'Privacy choices',exact:true}).click()
+  assert.equal(await page.getByRole('checkbox').first().isChecked(),false)
+  await page.getByRole('button',{name:'Close privacy choices without saving',exact:true}).click()
+  assert.equal((await context.cookies()).some(c=>c.name.startsWith('sp_')),false)
+ })
  await scenario('unknown and legacy private consent do not load Google',async({context,page,tags})=>{
   await context.addCookies([{name:'sp_analytics_consent',value:'yes',url:base}])
-  await page.goto(base); await page.getByRole('button',{name:'Save choices',exact:true}).waitFor()
+  await page.goto(base); await page.getByRole('button',{name:'Privacy choices',exact:true}).click(); await page.getByRole('button',{name:'Save choices',exact:true}).waitFor()
   assert.equal(tags(),0)
   assert.equal(await page.getByRole('checkbox').nth(1).isChecked(),false)
   await page.getByRole('button',{name:'Decline analytics',exact:true}).click();await page.waitForTimeout(300)
@@ -25,6 +36,7 @@ const base = 'http://127.0.0.1:3210'
  })
  await scenario('Google-only consent: one container, safe pageview, success-only lead, withdrawal',async({page,context,tags,submits,setFailure})=>{
   await page.goto(base+'/?email=secret@example.com#private')
+  await page.getByRole('button',{name:'Privacy choices',exact:true}).click()
   await page.getByRole('checkbox').nth(1).check()
   await page.getByRole('button',{name:'Save choices',exact:true}).click()
   await page.waitForFunction(()=>window.dataLayer?.some(x=>x.event==='sp_page_view'))
@@ -42,7 +54,7 @@ const base = 'http://127.0.0.1:3210'
   assert.equal(await page.evaluate(()=>window.dataLayer.filter(x=>x.event==='generate_lead').length),0)
   setFailure(false)
   await page.locator('form button[type="submit"]').dblclick()
-  await page.getByText('Demo request received',{exact:true}).waitFor()
+  await page.getByText('Thanks for getting in touch',{exact:true}).waitFor()
   assert.equal(submits(),2)
   events=await page.evaluate(()=>window.dataLayer.filter(x=>x.event==='generate_lead'))
   assert.equal(events.length,1);assert.equal(JSON.stringify(events).includes('private@example.com'),false)

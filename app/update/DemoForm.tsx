@@ -8,7 +8,7 @@ const label = "flex flex-col gap-1.5"
 const labelText = "text-[13px] font-semibold text-[#4c5b6d]"
 
 /**
- * "Book my demo" card from the Live redesign. Posts to the existing
+ * "Let’s have a chat" card from the Live redesign. Posts to the existing
  * /api/contact route (Supabase demo_requests + Gmail notification). `teams`
  * is sent as `players`, which is what the route and table already use.
  */
@@ -51,7 +51,7 @@ export function DemoForm({ displayFont }: { displayFont: React.CSSProperties }) 
     return (
       <div className="rounded-[22px] bg-white px-9 py-11 text-[#001025]">
         <p className="text-[56px] font-extrabold uppercase leading-none" style={displayFont}>
-          You&rsquo;re in.
+          Thanks for getting in touch.
         </p>
         <p className="mt-3 text-[16px] leading-[1.55] text-[#4c5b6d]">
           Rowan will be in touch within one business day with a time that suits.
@@ -96,7 +96,7 @@ export function DemoForm({ displayFont }: { displayFont: React.CSSProperties }) 
         disabled={submitting}
         className="rounded-full bg-[#00BFAE] p-4 text-[17px] font-bold text-[#001025] transition-transform hover:scale-[1.02] disabled:opacity-60 sm:col-span-2"
       >
-        {submitting ? "Sending…" : "Book my demo"}
+        {submitting ? "Sending…" : "Let’s have a chat"}
       </button>
     </form>
   )

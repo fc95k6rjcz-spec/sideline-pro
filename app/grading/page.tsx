@@ -45,7 +45,7 @@ export default function GradingPage() {
           <CoachReportVideo/>
         </article>
       </section>
-      <section id="contact" className={`${styles.section} ${styles.start}`}><p className={styles.eyebrow}>SEE IT FOR YOUR CLUB</p><h2>Grading day, without the clipboards.</h2><div className={styles.actions} style={{justifyContent:"center"}}><a className={styles.button} href="/#contact">Book a demo <ArrowUpRight size={17}/></a><a className={styles.darkLink} href="/#platform">See the whole platform <ArrowRight size={16}/></a></div></section>
+      <section id="contact" className={`${styles.section} ${styles.start}`}><p className={styles.eyebrow}>SEE IT FOR YOUR CLUB</p><h2>Grading day, without the clipboards.</h2><div className={styles.actions} style={{justifyContent:"center"}}><a className={styles.button} href="/#contact">See how it works <ArrowUpRight size={17}/></a><a className={styles.darkLink} href="/#platform">See the whole platform <ArrowRight size={16}/></a></div></section>
     </main>
     <SiteFooter base="/"/>
   </div>

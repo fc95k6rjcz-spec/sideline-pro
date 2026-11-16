@@ -44,11 +44,11 @@ export function VisitorAnalytics() {
     setFirstPartyDraft(first); setGoogleDraft(measurement); setOpen(false)
     if (enabled && !measurement) withdrawGoogleMeasurement()
   }
-  const answered = choice !== null && (!enabled || google === 'v1' || google === 'no')
+  // Optional tracking is never enabled by dismissing or not opening these controls.
   return <>
     {enabled && <MarketingAnalytics consent={google}/>}
-    {answered && !open ? <button onClick={() => setOpen(true)} className="fixed bottom-3 left-3 z-50 rounded-full border border-white/20 bg-[#0A1220] px-3 py-2 text-xs text-white">Privacy choices</button> : <aside aria-label="Optional site analytics" className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-2xl rounded-2xl border border-[#00BFAE]/30 bg-[#0A1220] p-5 text-sm text-white shadow-xl">
-      <strong>Choose optional website analytics</strong>
+    {!open ? <button onClick={() => setOpen(true)} className="fixed bottom-3 left-3 z-50 rounded-full border border-white/20 bg-[#0A1220] px-3 py-2 text-xs text-white">Privacy choices</button> : <aside aria-label="Optional site analytics" className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-2xl rounded-2xl border border-[#00BFAE]/30 bg-[#0A1220] p-5 text-sm text-white shadow-xl">
+      <div className="flex items-center justify-between gap-4"><strong>Choose optional website analytics</strong><button type="button" className="underline" onClick={() => setOpen(false)} aria-label="Close privacy choices without saving">Close</button></div>
       <p className="my-2 text-xs leading-relaxed text-slate-300">The website works without optional analytics. Change or withdraw your choices at any time. <a className="underline" href="/privacy">Analytics privacy details</a></p>
       {blocked && <p role="status" className="my-2">Your browser’s privacy signal disables optional analytics.</p>}
       <label className="my-3 flex items-start gap-2"><input type="checkbox" checked={firstPartyDraft} disabled={blocked} onChange={e => setFirstPartyDraft(e.target.checked)}/><span>Private website analytics: page visits, referral website, IP address and approximate city, stored in Supabase with a 30-day visitor cookie.</span></label>

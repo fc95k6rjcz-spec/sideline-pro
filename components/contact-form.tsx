@@ -55,7 +55,7 @@ export function ContactForm() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="mb-2 text-xl font-bold text-[#0a1220]">Demo request received</h3>
+        <h3 className="mb-2 text-xl font-bold text-[#0a1220]">Thanks for getting in touch</h3>
         <p className="text-[#4a5568]">{"We'll be in touch within one business day."}</p>
       </div>
     )
@@ -153,7 +153,7 @@ export function ContactForm() {
         disabled={isSubmitting}
         className="mt-2 w-full rounded-full bg-[#00bfae] px-6 py-3 font-bold text-[#0a1220] transition-colors hover:bg-[#33ccbe] disabled:opacity-50"
       >
-        {isSubmitting ? "Sending..." : "Book a demo"}
+        {isSubmitting ? "Sending..." : "Let’s have a chat"}
       </button>
     </form>
   )
