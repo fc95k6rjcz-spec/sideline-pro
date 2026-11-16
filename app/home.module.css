@@ -1277,3 +1277,5 @@
 .productStage a:focus-visible{outline:2px solid var(--aqua);outline-offset:6px}
 .productStage .paPanel{color:var(--navy)}
 @media(max-width:760px){.productStage .umpireRender figcaption,.productStage .chatRender figcaption{padding:16px 0 0}}
+
+.testimonialVideo{margin:2rem auto;max-width:1100px}.testimonialVideo video{display:block;width:100%;aspect-ratio:16/9;background:#101a1f;border-radius:16px}.testimonialVideo figcaption{margin-top:.8rem;font-size:.8rem;color:#59656b}

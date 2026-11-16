@@ -79,6 +79,22 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="seaforth-video" className={styles.section} aria-labelledby="testimonial-title">
+        <div className={styles.sectionHead}>
+          <p className={styles.eyebrow}>THE SEAFORTH STORY</p>
+          <h2 id="testimonial-title">Hear it from the people<br/><span>running the club.</span></h2>
+          <p>Seaforth Netball Club’s people share their experience of using SidelinePro.</p>
+        </div>
+        <figure className={styles.testimonialVideo}>
+          <video controls playsInline preload="none" poster="/video/sidelinepro-testimonial-v8.jpg" aria-label="Seaforth Netball Club testimonial about SidelinePro">
+            <source src="/video/sidelinepro-testimonial-v8.mp4" type="video/mp4"/>
+            Your browser does not support this video. <a href="/video/sidelinepro-testimonial-v8.mp4">Watch the Seaforth testimonial</a>.
+          </video>
+          <figcaption>Seaforth Netball Club · Personal experiences, not guaranteed outcomes.</figcaption>
+        </figure>
+        <div className={styles.actions}><p>Would this help your club? Share this page with a committee member.</p><a className={styles.darkLink} href="#contact">Book a demo <ArrowUpRight size={16}/></a></div>
+      </section>
+
       <section id="features" className={`${styles.section} ${styles.platform} ${styles.productStage}`} aria-labelledby="features-title">
         <div className={styles.sectionHead}><p className={styles.eyebrow}>WHAT’S INSIDE</p><h2 id="features-title">The tools behind<br/><span>a better-run club.</span></h2><p>Each one saves volunteers time. Try them yourself in the interactive demos, with a fictional club and no sign-up.</p></div>
 
