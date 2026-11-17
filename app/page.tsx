@@ -86,7 +86,7 @@ export default function Home() {
           <p>Seaforth Netball Club’s people share their experience of using SidelinePro.</p>
         </div>
         <figure className={styles.testimonialVideo}>
-          <video controls playsInline preload="none" poster="/video/sidelinepro-testimonial-v8.jpg" aria-label="Seaforth Netball Club testimonial about SidelinePro">
+          <video controls playsInline preload="none" poster="/video/sidelinepro-testimonial-v8-at-2s.jpg" aria-label="Seaforth Netball Club testimonial about SidelinePro">
             <source src="/video/sidelinepro-testimonial-v8.mp4" type="video/mp4"/>
             Your browser does not support this video. <a href="/video/sidelinepro-testimonial-v8.mp4">Watch the Seaforth testimonial</a>.
           </video>
