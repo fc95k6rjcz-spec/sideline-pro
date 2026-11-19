@@ -2,8 +2,9 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { GTM_CONTAINER_ID, localMeasurementTest, marketingEnabled } from '@/lib/marketing-config'
-import { measurementAllowed, trackMarketingEvent } from '@/lib/marketing-events'
+import { measurementAllowed, testimonialMeasurementAllowed, trackMarketingEvent } from '@/lib/marketing-events'
 import { loadMarketingContainer } from '@/lib/marketing-loader'
+import { watchTestimonialPlayback, trackTestimonialPlayback } from '@/lib/testimonial-playback'
 
 export function MarketingAnalytics({ consent }: { consent: string | null }) {
   const path = usePathname()
@@ -39,7 +40,10 @@ export function MarketingAnalytics({ consent }: { consent: string | null }) {
       if (!valid) withdrawGoogleMeasurement()
     }, 1000)
     document.addEventListener('click', click)
-    return () => { window.clearInterval(interval); document.removeEventListener('click', click) }
+    const testimonial = testimonialMeasurementAllowed(context)
+      ? document.querySelector<HTMLVideoElement>('video[data-testimonial-playback="seaforth-homepage-16x9"]') : null
+    const unwatch = testimonial ? watchTestimonialPlayback(testimonial, trackTestimonialPlayback) : undefined
+    return () => { window.clearInterval(interval); document.removeEventListener('click', click); unwatch?.() }
   }, [path, consent])
   return null
 }

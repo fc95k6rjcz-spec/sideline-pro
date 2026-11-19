@@ -3,6 +3,7 @@
  */
 export const MEASUREMENT_CONSENT_COOKIE = 'sp_measurement_consent'
 export const MEASUREMENT_CONSENT_VERSION = 'v1'
+export const TESTIMONIAL_MEASUREMENT_CONSENT_VERSION = 'v2'
 export const MARKETING_PATHS = ['/', '/grading', '/privacy'] as const
 export type MarketingEvent = 'generate_lead' | 'contact_click' | 'demo_open'
 export type MeasurementContext = {
@@ -15,11 +16,17 @@ export type MeasurementContext = {
   doNotTrack?: string | null
   globalPrivacyControl?: boolean
 }
+function hasMeasurementVersion(cookies: string, version: string): boolean {
+  return cookies.split(';').some(cookie => cookie.trim() === `${MEASUREMENT_CONSENT_COOKIE}=${version}`)
+}
 export function measurementAllowed(context: MeasurementContext): boolean {
   return context.enabled && (context.hostname === 'www.sidelinepro.com.au' || (Boolean(context.previewHost) && context.hostname === context.previewHost && context.previewHost!.endsWith('.vercel.app')) || (context.localTest === true && ['localhost', '127.0.0.1'].includes(context.hostname)))
     && MARKETING_PATHS.includes(context.pathname as typeof MARKETING_PATHS[number])
     && context.doNotTrack !== '1' && context.globalPrivacyControl !== true
-    && context.cookies.split(';').some(cookie => cookie.trim() === `${MEASUREMENT_CONSENT_COOKIE}=${MEASUREMENT_CONSENT_VERSION}`)
+    && (hasMeasurementVersion(context.cookies, MEASUREMENT_CONSENT_VERSION) || hasMeasurementVersion(context.cookies, TESTIMONIAL_MEASUREMENT_CONSENT_VERSION))
+}
+export function testimonialMeasurementAllowed(context: MeasurementContext): boolean {
+  return context.pathname === '/' && measurementAllowed(context) && hasMeasurementVersion(context.cookies, TESTIMONIAL_MEASUREMENT_CONSENT_VERSION)
 }
 export function buildMarketingEvent(event: MarketingEvent, pathname: string) {
   if (!MARKETING_PATHS.includes(pathname as typeof MARKETING_PATHS[number])) return null
